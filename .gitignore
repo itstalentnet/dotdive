@@ -1,0 +1,27 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+web/.next
+web/out
+web/coverage
+web/.turbo
+.turbo
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Fonts are in web/public/fonts (tracked) - don't ignore
+!web/public/fonts/
+
+# Lock files — keep only one
+web/package-lock.json

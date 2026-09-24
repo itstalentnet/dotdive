@@ -1,0 +1,15 @@
+{
+  "name": "dotdive",
+  "private": true,
+  "description": "دانشنامه و نقطهٔ شیرجه زدن به پروژه‌ها",
+  "scripts": {
+    "dev": "npm --prefix web run dev",
+    "build": "npm --prefix web run build",
+    "build:content": "npm --prefix web run build:content",
+    "content:check": "npm --prefix web run content:check",
+    "start": "npm --prefix web run start",
+    "lint": "npm --prefix web run lint",
+    "typecheck": "npm --prefix web run typecheck",
+    "test": "npm --prefix web run test"
+  }
+}
