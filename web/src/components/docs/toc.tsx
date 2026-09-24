@@ -1,19 +1,22 @@
 "use client";
 import { useEffect, useState } from "react";
-import { ListOrdered } from "lucide-react";
 import type { Heading } from "@/server/content/types";
 
 interface TocProps {
   headings: Heading[];
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export function TableOfContents({ headings }: TocProps) {
+export function TableOfContents({ headings, isOpen, onClose }: TocProps) {
   const [activeId, setActiveId] = useState<string>("");
 
-  useEffect(() => {
-    if (!headings.length) return;
+  // Filter strictly to H2 tags as requested: "ساید انتها تگ های h2 اون مستند"
+  const h2Headings = headings.filter((h) => h.level === 2);
 
-    // Use IntersectionObserver to track visible headings
+  useEffect(() => {
+    if (!h2Headings.length) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
@@ -26,50 +29,63 @@ export function TableOfContents({ headings }: TocProps) {
       { rootMargin: "-70px 0px -60% 0px", threshold: 0.1 }
     );
 
-    for (const h of headings) {
+    for (const h of h2Headings) {
       const el = document.getElementById(h.id);
       if (el) observer.observe(el);
     }
 
     return () => observer.disconnect();
-  }, [headings]);
+  }, [h2Headings]);
 
-  if (!headings || headings.length === 0) return null;
+  if (!h2Headings || h2Headings.length === 0) return null;
 
   return (
-    <nav className="docs-toc" aria-label="فهرست عناوین این صفحه">
-      <div className="toc-title">
-        <ListOrdered size={12} strokeWidth={2} />
-        <span>در این صفحه</span>
-      </div>
+    <>
+      {/* Mobile Drawer Backdrop */}
+      {isOpen && (
+        <div
+          className="toc-mobile-overlay"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+      )}
 
-      <ul className="toc-list" role="list">
-        {headings.map((h) => {
-          const isActive = activeId === h.id;
+      <nav
+        className={`docs-toc ${isOpen ? "open" : ""}`}
+        aria-label="سرفصل‌های سند (H2)"
+      >
+        <div className="toc-header">
+          <span className="toc-title">سرفصل‌های این صفحه</span>
+        </div>
 
-          return (
-            <li key={h.id} className="toc-item">
-              <a
-                href={`#${h.id}`}
-                className={`toc-link ${isActive ? "active" : ""}`}
-                data-level={h.level}
-                aria-current={isActive ? "location" : undefined}
-                onClick={(e) => {
-                  e.preventDefault();
-                  const target = document.getElementById(h.id);
-                  if (target) {
-                    target.scrollIntoView({ behavior: "smooth" });
-                    history.pushState(null, "", `#${h.id}`);
-                    setActiveId(h.id);
-                  }
-                }}
-              >
-                {h.text}
-              </a>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
+        <ul className="toc-list" role="list">
+          {h2Headings.map((h) => {
+            const isActive = activeId === h.id;
+
+            return (
+              <li key={h.id} className="toc-item">
+                <a
+                  href={`#${h.id}`}
+                  className={`toc-link ${isActive ? "active" : ""}`}
+                  aria-current={isActive ? "location" : undefined}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const target = document.getElementById(h.id);
+                    if (target) {
+                      target.scrollIntoView({ behavior: "smooth" });
+                      history.pushState(null, "", `#${h.id}`);
+                      setActiveId(h.id);
+                      onClose?.();
+                    }
+                  }}
+                >
+                  {h.text}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+    </>
   );
 }

@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, ChevronLeft } from "lucide-react";
+import { ChevronDown, ChevronLeft, X } from "lucide-react";
 import type { TreeNode } from "@/server/content/types";
 import { IconResolver } from "@/components/ui/icon-resolver";
 
@@ -18,27 +18,39 @@ export function DocsSidebar({ nodes, isOpen, onClose }: DocsSidebarProps) {
 
   return (
     <>
+      {/* Mobile Drawer Overlay */}
       {isOpen && (
         <div
           className="sidebar-overlay"
           onClick={onClose}
-          aria-hidden
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.6)",
-            zIndex: 25,
-            backdropFilter: "blur(2px)",
-          }}
+          aria-hidden="true"
         />
       )}
 
       <aside
-        className={`docs-sidebar${isOpen ? " open" : ""}`}
-        aria-label="ناوبری مستندات"
+        className={`docs-sidebar ${isOpen ? "open" : ""}`}
+        aria-label="مستندات و فایل‌های پروژه"
       >
+        {/* Mobile Drawer Header */}
+        <div className="sidebar-mobile-header">
+          <span className="sidebar-mobile-title">مستندات پروژه</span>
+          <button
+            type="button"
+            onClick={onClose}
+            className="sidebar-close-btn"
+            aria-label="بستن منو"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
         <div className="sidebar-section">
-          <TreeNodes nodes={sorted} pathname={pathname} depth={0} />
+          <TreeNodes
+            nodes={sorted}
+            pathname={pathname}
+            depth={0}
+            onItemClick={onClose}
+          />
         </div>
       </aside>
     </>
@@ -49,15 +61,23 @@ function TreeNodes({
   nodes,
   pathname,
   depth,
+  onItemClick,
 }: {
   nodes: TreeNode[];
   pathname: string;
   depth: number;
+  onItemClick?: () => void;
 }) {
   return (
     <>
       {nodes.map((node) => (
-        <TreeItem key={node.id} node={node} pathname={pathname} depth={depth} />
+        <TreeItem
+          key={node.id}
+          node={node}
+          pathname={pathname}
+          depth={depth}
+          onItemClick={onItemClick}
+        />
       ))}
     </>
   );
@@ -67,14 +87,16 @@ function TreeItem({
   node,
   pathname,
   depth,
+  onItemClick,
 }: {
   node: TreeNode;
   pathname: string;
   depth: number;
+  onItemClick?: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(true);
   const isActive = pathname === node.urlPath;
-  const paddingRight = `${0.45 + depth * 0.75}rem`;
+  const paddingRight = `${0.5 + depth * 0.75}rem`;
 
   if (node.kind === "folder") {
     return (
@@ -89,11 +111,11 @@ function TreeItem({
             <IconResolver
               name={node.slug}
               fallback="folder"
-              size={13}
+              size={14}
               className={isActive ? "text-blue-400" : "text-neutral-400"}
             />
           </span>
-          <span style={{ flex: 1, textAlign: "right" }}>{node.title}</span>
+          <span className="sidebar-item-label">{node.title}</span>
           <span className="sidebar-folder-toggle">
             {isOpen ? <ChevronDown size={12} /> : <ChevronLeft size={12} />}
           </span>
@@ -104,6 +126,7 @@ function TreeItem({
             nodes={node.children.sort((a, b) => a.order - b.order)}
             pathname={pathname}
             depth={depth + 1}
+            onItemClick={onItemClick}
           />
         )}
       </div>
@@ -114,7 +137,8 @@ function TreeItem({
     <div style={{ marginBottom: "0.1rem" }}>
       <Link
         href={node.urlPath}
-        className={`sidebar-item${isActive ? " active" : ""}`}
+        onClick={onItemClick}
+        className={`sidebar-item ${isActive ? "active" : ""}`}
         style={{ paddingRight }}
         aria-current={isActive ? "page" : undefined}
       >
@@ -122,46 +146,13 @@ function TreeItem({
           <IconResolver
             name={node.slug}
             fallback="file"
-            size={13}
+            size={14}
             className={isActive ? "text-blue-400" : "text-neutral-400"}
           />
         </span>
-        <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
-          {node.title}
-        </span>
-        {node.draft && (
-          <span
-            style={{
-              fontSize: "0.62rem",
-              color: "#f59e0b",
-              marginRight: "auto",
-              padding: "0.05rem 0.25rem",
-              borderRadius: "3px",
-              background: "rgba(245, 158, 11, 0.1)",
-            }}
-          >
-            پیش‌نویس
-          </span>
-        )}
+        <span className="sidebar-item-label">{node.title}</span>
+        {node.draft && <span className="sidebar-draft-badge">پیش‌نویس</span>}
       </Link>
-
-      {/* Heading anchors for active page */}
-      {isActive &&
-        node.headings.map((h) => (
-          <a
-            key={h.id}
-            href={`#${h.id}`}
-            className={`sidebar-item sidebar-section-item`}
-            style={{
-              paddingRight: `${(depth + 1) * 0.75 + (h.level === 3 ? 0.65 : 0)}rem`,
-            }}
-          >
-            <span style={{ opacity: 0.5, fontSize: "0.8em", marginLeft: "0.3rem" }}>
-              #
-            </span>
-            <span>{h.text}</span>
-          </a>
-        ))}
     </div>
   );
 }

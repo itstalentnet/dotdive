@@ -43,7 +43,7 @@ export function DocsHeader({
         <div className="docs-header-inner">
           {/* Mobile menu button */}
           <button
-            className="header-btn md:hidden"
+            className="header-btn mobile-menu-btn"
             onClick={onMenuToggle}
             aria-label="باز کردن منو"
             type="button"
