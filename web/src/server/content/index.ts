@@ -231,10 +231,16 @@ export async function getPage(
   if (node.draft && node.root === "public") return null;
 
   // Try pre-rendered HTML from out/
+  const safeId = node.id.replace(/\//g, "_").replace(/\.md$/, "");
+  const safePrivateId = node.id
+    .replace(`${node.root}/`, "")
+    .replace(/\//g, "_")
+    .replace(/\.md$/, "");
+
   const htmlPath =
     node.root === "public"
-      ? path.join(OUT_PUBLIC, "pages", `${node.id}.html`)
-      : path.join(OUT_PRIVATE, node.root, "pages", `${node.id.replace(`${node.root}/`, "")}.html`);
+      ? path.join(OUT_PUBLIC, "pages", `${safeId}.html`)
+      : path.join(OUT_PRIVATE, node.root, "pages", `${safePrivateId}.html`);
 
   let html = "";
   let headings = node.headings;

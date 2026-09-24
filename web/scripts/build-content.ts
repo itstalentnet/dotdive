@@ -6,6 +6,7 @@
  */
 import path from "node:path";
 import fs from "node:fs";
+import { fileURLToPath } from "node:url";
 import { execSync } from "node:child_process";
 import matter from "gray-matter";
 import { FrontMatterSchema } from "../src/server/content/types";
@@ -16,7 +17,10 @@ import type {
   RootMeta,
   SearchRecord,
 } from "../src/server/content/types";
-import { normalizePersian, tokenize } from "../src/server/search/persian";
+import { normalizePersian } from "../src/server/search/persian";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const DOCS_DIR = path.resolve(__dirname, "../../docs");
 const OUT_PUBLIC = path.resolve(__dirname, "../out/public");

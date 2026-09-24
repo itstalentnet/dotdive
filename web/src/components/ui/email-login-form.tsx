@@ -1,9 +1,6 @@
-/**
- * Email login form — client component
- * Handles email input → OTP code input flow
- */
 "use client";
 import { useState, useRef, useEffect } from "react";
+import { ArrowLeft, RefreshCw, Mail, Check } from "lucide-react";
 
 interface EmailLoginFormProps {
   next: string;
@@ -45,11 +42,9 @@ export function EmailLoginForm({ next }: EmailLoginFormProps) {
     });
 
     setLoading(false);
-    // Always show same message (anti-enumeration)
     setStep("code");
     setResendCountdown(60);
     if (!res.ok && res.status !== 404) {
-      // Only show error if server error (not 404 which is expected for unknown emails)
       setError("خطا در ارسال کد. دوباره امتحان کنید.");
     }
   }
@@ -74,7 +69,7 @@ export function EmailLoginForm({ next }: EmailLoginFormProps) {
 
     setLoading(false);
     const data = await res.json().catch(() => ({}));
-    setError(data.message ?? "کد نادرست یا منقضی شده است.");
+    setError(data.message ?? "کد نامعتبر یا منقضی شده است.");
     setCode("");
     codeRef.current?.focus();
   }
@@ -84,7 +79,7 @@ export function EmailLoginForm({ next }: EmailLoginFormProps) {
       <form onSubmit={handleEmailSubmit} noValidate>
         <div className="form-group">
           <label htmlFor="email" className="form-label">
-            آدرس ایمیل
+            آدرس ایمیل سازمانی
           </label>
           <input
             id="email"
@@ -92,7 +87,7 @@ export function EmailLoginForm({ next }: EmailLoginFormProps) {
             className="form-input"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
+            placeholder="developer@example.com"
             dir="ltr"
             autoComplete="email"
             required
@@ -102,10 +97,11 @@ export function EmailLoginForm({ next }: EmailLoginFormProps) {
         {error && <p className="form-error">{error}</p>}
         <button
           type="submit"
-          className="submit-btn touch-target"
+          className="submit-btn"
           disabled={loading || !email.trim()}
         >
-          {loading ? "در حال ارسال..." : "ارسال کد"}
+          <span>{loading ? "در حال ارسال..." : "دریافت کد ورود"}</span>
+          <ArrowLeft size={13} strokeWidth={2} />
         </button>
         <FormStyles />
       </form>
@@ -115,12 +111,12 @@ export function EmailLoginForm({ next }: EmailLoginFormProps) {
   return (
     <form onSubmit={handleCodeSubmit} noValidate>
       <p className="code-hint">
-        اگر این ایمیل مجاز باشد، کدی به{" "}
-        <strong dir="ltr">{email}</strong> ارسال شده است.
+        اگر ایمیل <strong dir="ltr">{email}</strong> مجاز باشد، کد ۶ رقمی ارسال
+        شد.
       </p>
       <div className="form-group">
         <label htmlFor="code" className="form-label">
-          کد ۶ رقمی
+          کد تأیید ۶ رقمی
         </label>
         <input
           id="code"
@@ -133,7 +129,7 @@ export function EmailLoginForm({ next }: EmailLoginFormProps) {
           className="form-input code-input"
           value={code}
           onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-          placeholder="123456"
+          placeholder="••••••"
           dir="ltr"
           disabled={loading}
         />
@@ -141,10 +137,11 @@ export function EmailLoginForm({ next }: EmailLoginFormProps) {
       {error && <p className="form-error">{error}</p>}
       <button
         type="submit"
-        className="submit-btn touch-target"
+        className="submit-btn"
         disabled={loading || code.length !== 6}
       >
-        {loading ? "در حال بررسی..." : "تأیید"}
+        <span>{loading ? "در حال تأیید..." : "ورود به سیستم"}</span>
+        <Check size={13} strokeWidth={2.5} />
       </button>
 
       <div className="resend-row">
@@ -159,8 +156,8 @@ export function EmailLoginForm({ next }: EmailLoginFormProps) {
           }}
         >
           {resendCountdown > 0
-            ? `ارسال مجدد (${resendCountdown})`
-            : "ارسال مجدد"}
+            ? `ارسال مجدد (${resendCountdown}s)`
+            : "ارسال مجدد کد"}
         </button>
         <button
           type="button"
@@ -182,79 +179,97 @@ export function EmailLoginForm({ next }: EmailLoginFormProps) {
 function FormStyles() {
   return (
     <style>{`
-      .form-group { margin-bottom: 1rem; }
+      .form-group { margin-bottom: 0.85rem; }
       .form-label {
         display: block;
-        font-size: 0.82rem;
+        font-size: 0.75rem;
         color: var(--dd-text-secondary);
-        margin-bottom: 0.4rem;
-        font-family: var(--font-heading);
+        margin-bottom: 0.35rem;
+        font-family: var(--font-body);
       }
       .form-input {
         width: 100%;
-        padding: 0.65rem 0.875rem;
+        height: 34px;
+        padding-inline: 0.75rem;
         background: var(--dd-surface-0);
         border: 1px solid var(--dd-border);
-        border-radius: 8px;
+        border-radius: 6px;
         color: var(--dd-text-primary);
-        font-size: 0.9rem;
+        font-size: 0.825rem;
         font-family: var(--font-body);
         outline: none;
-        transition: border-color 0.15s;
+        transition: border-color 0.12s;
       }
-      .form-input:focus { border-color: var(--dd-accent); }
-      .form-input::placeholder { color: var(--dd-text-muted); }
+      .form-input:focus {
+        border-color: var(--dd-accent);
+      }
+      .form-input::placeholder {
+        color: var(--dd-text-muted);
+      }
       .code-input {
-        font-size: 1.5rem;
-        letter-spacing: 0.25em;
+        height: 40px;
+        font-size: 1.25rem;
+        letter-spacing: 0.35em;
         text-align: center;
-        font-family: monospace;
+        font-family: var(--font-mono);
       }
       .form-error {
-        font-size: 0.82rem;
-        color: #ef4444;
-        margin-bottom: 0.75rem;
+        font-size: 0.75rem;
+        color: #f87171;
+        margin-bottom: 0.65rem;
       }
       .submit-btn {
         width: 100%;
-        padding: 0.7rem;
-        background: var(--lemmo-interactive-primary-background);
-        color: var(--lemmo-interactive-primary-foreground);
-        border: none;
-        border-radius: 8px;
-        font-family: var(--font-heading);
-        font-size: 0.9rem;
+        height: 34px;
+        background: #ededef;
+        color: #0c0d0f;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        font-family: var(--font-body);
+        font-size: 0.825rem;
         font-weight: 600;
         cursor: pointer;
-        transition: opacity 0.15s;
+        transition: all 0.12s;
         display: flex;
         align-items: center;
         justify-content: center;
+        gap: 0.35rem;
       }
-      .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+      .submit-btn:hover {
+        background: #ffffff;
+      }
+      .submit-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
       .code-hint {
-        font-size: 0.82rem;
+        font-size: 0.75rem;
         color: var(--dd-text-secondary);
-        margin-bottom: 1.25rem;
-        line-height: 1.7;
+        margin-bottom: 1rem;
+        line-height: 1.65;
       }
       .resend-row {
         display: flex;
         justify-content: space-between;
-        margin-top: 1rem;
+        margin-top: 0.85rem;
       }
       .resend-btn, .change-email-btn {
         background: none;
         border: none;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         color: var(--dd-accent);
         cursor: pointer;
-        padding: 0.25rem;
+        padding: 0.15rem;
         font-family: var(--font-body);
-        transition: color 0.15s;
+        transition: color 0.12s;
       }
-      .resend-btn:disabled { color: var(--dd-text-muted); cursor: not-allowed; }
-      .change-email-btn:hover, .resend-btn:not(:disabled):hover { color: var(--dd-accent-hover); }
+      .resend-btn:disabled {
+        color: var(--dd-text-muted);
+        cursor: not-allowed;
+      }
+      .change-email-btn:hover, .resend-btn:not(:disabled):hover {
+        color: var(--dd-accent-hover);
+      }
     `}</style>
   );
 }

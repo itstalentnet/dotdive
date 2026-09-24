@@ -8,6 +8,7 @@ web/out
 web/coverage
 web/.turbo
 .turbo
+*.tsbuildinfo
 
 # Logs
 *.log
