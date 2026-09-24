@@ -1,0 +1,68 @@
+# Lemmo Documentation
+
+> Lemmo is an integrated AI creative suite bridging generative AI models with an infinite interactive canvas. This index provides structured references to the system architecture, design tokens, frontend, backend, branding, and DevOps standards.
+
+## Architecture & Core System Rules
+
+- [ADR template](architecture/decisions/_template.md): Documentation file for ADR template.
+- [ADR-001 — Phase-3 code architecture (grouped)](architecture/decisions/ADR-001-phase3-code-architecture.md): ⚠️ **این تصمیم معماری منسوخ شده است (SUPERSEDED):**
+- [ADR-002 — Form & test stack](architecture/decisions/ADR-002-form-test-stack.md): Documentation file for ADR-002 — Form & test stack.
+- [ADR-003 — Single source of truth: audit & resolution](architecture/decisions/ADR-003-single-source-of-truth-audit.md): Documentation file for ADR-003 — Single source of truth: audit & resolution.
+- [Documentation Agent Rules & Operational Guide](AGENTS.md): Operational guide, zero-contradiction governance, STOP protocol, and repository standards for agents in lemmo-lab/docs.
+- [Documentation Agent Rules & Zero-Contradiction Governance](RULE.md): Binding operational rules, strict zero-contradiction policy, and STOP protocol for AI agents modifying the Lemmo documentation repo.
+- [Lemmo Documentation Guidelines & Single Source of Truth (SSOT)](README.md): Central index, folder governance, authoring standards, metadata guidelines, and llms.txt integration for Lemmo.
+- [Lemmo Frontend Rules & Agent Constraints](architecture/AGENTS.md): Mandatory engineering constraints, import boundaries, token rules, and coding standards for developers and AI agents.
+- [سند پیشنهادی معماری: استخراج دیزاین سیستم به پکیج `ui` و مصرف در `frontend`](architecture/decisions/proposal-design-system-extraction.md): **تاریخ:** ۱۴ سپتامبر ۲۰۲۶
+
+## Design System & Tokens
+
+- [AI Design Decision Principles & Judgment Framework](design-system/design-decision-principles.md): Functional decision-making rules, relational spacing, typography scales, animation budgets, and UX patterns guiding AI models beyond raw tokens.
+- [Agent-Operable Interfaces & Accessibility Tree Architecture](design-system/agent-operable-interfaces.md): Designing interfaces operable by AI agents via the accessibility tree, Name/Role/Value triad, stable Playwright locators, WebMCP standard, and race-condition prevention.
+- [Assistive Technology, Micro-States & Error Handling Principles](design-system/assistive-technology-and-microstates.md): WCAG 1.4.13 hover/focus standards, accessible alt text and labels, skeleton vs spinner loading guidelines, ARIA live regions, and structured error/empty states.
+- [Color Tokens, Semantic Palette & Contrast Audit](design-system/color.md): Color tokens, dark theme specification, brand accents, status colors, and WCAG AA contrast compliance.
+- [Container Relationship Styling & Inheritance Architecture](design-system/container-relationship-and-inheritance.md): Concentric border-radius mathematical formula, container padding custom properties, three-tier token inheritance, and density synchronization to eliminate hardcoded child styles.
+- [Design System Style Guide & Implementation Standards](design-system/STYLEGUIDE.md): Executive summary and mandatory rules for token consumption, colors, typography, spacing, and accessibility.
+- [Iconography Standards & Synthline Rules](design-system/iconography.md): Synthline icon set specification, sizing ladder (12-28px), stroke-width rules, and accessibility guidelines.
+- [Responsive Decision Principles & Algorithmic Layout Framework](design-system/responsive-decision-principles.md): Algorithmic and composable layout design principles, puzzle grid column scaling, responsive image rules, carousel constraints, Priority+ navigation, and back-button behaviors across viewport sizes.
+- [Typography, Font Stacks & Type Scale Rules](design-system/typography.md): Typography specifications, font loading (Satoshi, Oddval), type scale ladder, and language switching rules.
+- [UI/UX Design System Guidelines: Direction, Layout, Responsive & Interaction Principles](design-system/interaction-and-layout.md): Comprehensive framework for logical layout, Start/End directionality, directional vs non-directional icons, action hierarchy, dropdown behaviors, progressive reduction, and decision rules.
+- [design-system/primitives/ — pure primitives (decision 2026-09-12 — ADR-001)](design-system/primitives.md): **Implemented (Phase 3, 2026-09-12):** `Button.tsx` + `Button.module.css` +
+
+## Brand Identity & Visual Guidelines
+
+- [Brand Identity & Visual Assets Guide](branding/README.md): Guidelines for brand logo mark, 3-dot triad, typography, color philosophy, and asset files.
+- [Brand Logo Mark, Icon Assets & Usage Rules](design-system/logo.md): Geometry, 3-dot triad mark, color variations, sizes, SVG assets, and prohibited usages of Lemmo logo.
+
+## Frontend Engineering
+
+- [Frontend Architecture & Engineering Guidelines](frontend/README.md): Central index for frontend architecture, state management, routing, and coding conventions.
+- [Workspace Architectural Decisions: Plugin System, SDK Gateway & Job Manager](frontend/workspace-decisions.md): Detailed architectural decisions for the Lemmo Workspace covering schema-driven tool plugins, central SDK gateway, and global AI job management.
+- [Workspace Frontend Architecture — Next.js](frontend/workspace-architecture.md): Finalized dependency rules, directory structure, and modular boundaries for the Lemmo Next.js workspace.
+- [Workspace Satellite Projects, Shared Resources & Dependencies](frontend/workspace-dependencies.md): Guide and reference for peripheral monorepo projects, font assets, token engines, documentation, and the Synthline icon package used in the Lemmo Workspace app.
+
+## Backend & API Specifications
+
+- [Backend Architecture & API Specifications](backend/README.md): Central index for backend services, REST/gRPC API contracts, database schemas, and auth.
+
+## DevOps, CI/CD & Infrastructure
+
+- [DevOps, CI/CD Pipelines & Infrastructure Guide](devops/README.md): Documentation for deployment pipelines, Docker environments, monitoring, and infrastructure.
+
+## Feature Modules & Components
+
+- [Workspace Feature Modules & Domain Logic Overview](modules/README.md): Overview of domain modules in the Lemmo workspace including tool-engine, chat, canvas, gallery, assets, and billing.
+
+## Project Roadmap & Milestone Audits
+
+- [Frontend Development Roadmap](roadmap/roadmap.md): Documentation file for Frontend Development Roadmap.
+- [Phase 0 — Tooling & Governance](roadmap/phase-0-tooling-and-governance-en.md): **⛔ SUPERSEDED — historical phase deliverable.** Folder-structure and timeline claims inside may
+- [Phase 1 — Design System Documentation](roadmap/phase1- design-system-documentation.md): **⛔ SUPERSEDED — historical phase deliverable.** Baseline values inside are old and do NOT match
+- [Phase 2 — Frontend Architecture](roadmap/phase2-frontend-architecture.md): **⛔ SUPERSEDED — historical phase deliverable.** Architecture references inside use the old
+- [Phase 3 Task — Showcase + Layout Wireframe](roadmap/phase-3-showcase+layout-wireframe.md): **Rule of this document:** No value, number, color, size, sample filename, or hypothetical example has been written in this task and none should be used during execution either. The only source of truth for the project is the existing documents (Phase 0, Phase 1, Phase 2, Auth/Workspace Decision Document, and Component Architecture Decision Document). Any value that is required must be read directly from those documents — not from this task, memory, or the developer’s assumptions.
+- [Phase 3 — Step 0 Review: Document Consistency (STOP REPORT)](roadmap/phase-3-step-0-review.md): Documentation file for Phase 3 — Step 0 Review: Document Consistency (STOP REPORT).
+- [QA-1 — Phase 1 Review & Approval (Design System Documentation)](roadmap/qa1-phase-1-review-approval.md): **Amendment (2026-09-12):** Originally REJECTED for critical ❌ #7 (IRANSansX weight range `100 900` under-declaring the vendor's 100–1000). Developer applied the one-line fix (`font-weight: 100 1000` in `src/design-system/fonts/fonts.css`). Re-verified live: `document.fonts.check()` matches at weights 100, 400, 700, 900, 950, 1000. Lint, typecheck, and production build all pass. **Decision upgraded to Fully Approved.**
+
+## Optional Files & External Resources
+
+- [Documentation Guidelines](README.md): Comprehensive guide on contributing and documenting in the Lemmo ecosystem.
+- [Standard Document Template](templates/DOCUMENT_TEMPLATE.md): Template with mandatory bilingual metadata table header.
