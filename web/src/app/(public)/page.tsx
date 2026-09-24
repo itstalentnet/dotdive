@@ -15,12 +15,12 @@ import {
   Compass,
   Code2,
 } from "lucide-react";
-import { LogoIcon } from "@/components/ui/logo";
+import { SiteHeader } from "@/components/layout/site-header";
 
 export default function LandingPage() {
   return (
     <div className="landing">
-      <Header />
+      <SiteHeader />
       <main>
         <HeroSection />
         <WorkspacePreview />
@@ -28,33 +28,6 @@ export default function LandingPage() {
       </main>
       <Footer />
     </div>
-  );
-}
-
-/* ── Minimal Header ─────────────────────────────────────────── */
-function Header() {
-  return (
-    <header className="landing-header">
-      <nav className="container">
-        <Link href="/" className="logo-link" aria-label="صفحهٔ اصلی dotdive">
-          <LogoIcon size={20} />
-          <span>dotdive</span>
-          <span className="logo-badge">v1.1</span>
-        </Link>
-        <div className="header-actions">
-          <Link href="/docs" className="nav-link">
-            مستندات عمومی
-          </Link>
-          <Link href="/blog" className="nav-link">
-            وبلاگ
-          </Link>
-          <Link href="/login" className="btn-primary">
-            <span>ورود</span>
-            <ArrowLeft size={13} strokeWidth={2} />
-          </Link>
-        </div>
-      </nav>
-    </header>
   );
 }
 
@@ -236,8 +209,8 @@ function Footer() {
           <Link href="/docs" className="footer-link">
             مستندات
           </Link>
-          <Link href="/blog" className="footer-link">
-            وبلاگ
+          <Link href="/projects" className="footer-link">
+            پروژه‌ها
           </Link>
           <Link href="/login" className="footer-link">
             ورود

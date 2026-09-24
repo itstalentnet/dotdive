@@ -1,8 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════
    dotdive Docs Layout — Minimalist, Clean & Mobile-Optimized
-   Start side: Project Tree Navigation
+   Start side (Right in RTL): Project Tree Navigation
    Center: Pure Document
-   End side: Document H2 Outline
+   End side (Left in RTL): Document H2 Outline
    ═══════════════════════════════════════════════════════════════ */
 
 .docs-layout {
@@ -12,141 +12,11 @@
   direction: rtl;
 }
 
-/* ── Top Header ─────────────────────────────────────────────── */
-.docs-header {
-  position: fixed;
-  top: 0;
-  inset-inline: 0;
-  z-index: 40;
-  height: var(--dd-header-height, 48px);
-  background-color: rgba(9, 10, 12, 0.88);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--dd-border-subtle);
-  display: flex;
-  align-items: center;
-}
-
-.docs-header-inner {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  padding-inline: 1rem;
-}
-
-.header-sep {
-  color: var(--dd-border);
-  font-size: 0.85rem;
-  user-select: none;
-}
-
-.root-switcher {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.2rem 0.45rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--dd-text-primary);
-  white-space: nowrap;
-}
-
-.search-trigger {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  height: 30px;
-  padding-inline: 0.65rem;
-  background: var(--dd-surface-1);
-  border: 1px solid var(--dd-border);
-  border-radius: 6px;
-  font-size: 0.78rem;
-  color: var(--dd-text-muted);
-  cursor: pointer;
-  text-align: right;
-  width: 220px;
-  transition: all 0.12s;
-}
-.search-trigger:hover {
-  border-color: var(--dd-border-focus);
-  color: var(--dd-text-secondary);
-}
-.search-shortcut {
-  margin-right: auto;
-  padding: 0.05rem 0.3rem;
-  background: var(--dd-surface-2);
-  border: 1px solid var(--dd-border);
-  border-radius: 3px;
-  font-size: 0.65rem;
-  font-family: var(--font-mono);
-  color: var(--dd-text-muted);
-}
-
-.header-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 5px;
-  color: var(--dd-text-secondary);
-  transition: all 0.12s;
-}
-.header-btn:hover {
-  background: var(--dd-surface-2);
-  color: var(--dd-text-primary);
-}
-
-.mobile-menu-btn {
-  display: none;
-}
-@media (max-width: 768px) {
-  .mobile-menu-btn {
-    display: flex;
-  }
-}
-
-/* ── Mobile Navigation Subbar ───────────────────────────────── */
-.docs-mobile-subbar {
-  display: none;
-  position: fixed;
-  top: var(--dd-header-height, 48px);
-  inset-inline: 0;
-  height: 40px;
-  background-color: var(--dd-surface-1);
-  border-bottom: 1px solid var(--dd-border-subtle);
-  z-index: 35;
-  padding-inline: 0.75rem;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.mobile-subbar-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  height: 30px;
-  padding-inline: 0.65rem;
-  background: var(--dd-surface-2);
-  border: 1px solid var(--dd-border);
-  border-radius: 5px;
-  font-size: 0.75rem;
-  color: var(--dd-text-secondary);
-  cursor: pointer;
-  touch-action: manipulation;
-}
-.mobile-subbar-btn:active {
-  background: var(--dd-surface-3);
-  color: var(--dd-text-primary);
-}
-
 /* ── Three-Column Layout (RTL: Right = Start, Left = End) ───── */
 .docs-body {
   display: grid;
   grid-template-columns: var(--dd-sidebar-width, 240px) 1fr var(--dd-toc-width, 220px);
-  padding-top: var(--dd-header-height, 48px);
+  padding-top: 52px;
   min-height: 100vh;
   max-width: 1400px;
   margin-inline: auto;
@@ -155,34 +25,12 @@
 /* ── Start Sidebar (Documentation Tree on Right) ────────────── */
 .docs-sidebar {
   position: sticky;
-  top: var(--dd-header-height, 48px);
-  height: calc(100vh - var(--dd-header-height, 48px));
+  top: 52px;
+  height: calc(100vh - 52px);
   overflow-y: auto;
-  padding: 1rem 0;
+  padding: 1.25rem 0;
   border-left: 1px solid var(--dd-border-subtle);
   scrollbar-width: thin;
-}
-
-.sidebar-mobile-header {
-  display: none;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--dd-border-subtle);
-  align-items: center;
-  justify-content: space-between;
-}
-.sidebar-mobile-title {
-  font-family: var(--font-heading);
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-.sidebar-close-btn {
-  background: none;
-  border: none;
-  color: var(--dd-text-muted);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  padding: 0.25rem;
 }
 
 .sidebar-section {
@@ -324,6 +172,15 @@
   margin-top: 0.5rem;
 }
 
+.badge-draft {
+  font-size: 0.65rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  color: #f59e0b;
+}
+
 .article-content {
   margin-bottom: 3rem;
 }
@@ -376,8 +233,8 @@
 /* ── End Sidebar (H2 Document Outline on Left) ──────────────── */
 .docs-end-toc {
   position: sticky;
-  top: var(--dd-header-height, 48px);
-  height: calc(100vh - var(--dd-header-height, 48px));
+  top: 52px;
+  height: calc(100vh - 52px);
   overflow-y: auto;
   scrollbar-width: thin;
 }
@@ -431,7 +288,7 @@
   font-weight: 500;
 }
 
-/* ── Responsive & Mobile Overhauls (< 1040px and < 768px) ────── */
+/* ── Responsive (< 1040px and < 768px) ───────────────────────── */
 @media (max-width: 1040px) {
   .docs-body {
     grid-template-columns: var(--dd-sidebar-width, 240px) 1fr;
@@ -442,88 +299,21 @@
 }
 
 @media (max-width: 768px) {
-  .docs-mobile-subbar {
-    display: flex;
-  }
-
   .docs-body {
     grid-template-columns: 1fr;
-    padding-top: calc(var(--dd-header-height, 48px) + 40px);
+    padding-top: 52px;
+  }
+
+  .docs-sidebar, .docs-end-toc {
+    display: none;
   }
 
   .docs-main {
-    padding: 1.25rem 1rem;
+    padding: 1.5rem 1rem;
     max-width: 100%;
-  }
-
-  /* Right Drawer: Project Documents Tree */
-  .docs-sidebar {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 280px;
-    height: 100vh;
-    z-index: 70;
-    background-color: #0d0e11;
-    border-left: 1px solid var(--dd-border);
-    transform: translateX(100%);
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.8);
-    display: flex;
-    flex-direction: column;
-  }
-  .docs-sidebar.open {
-    transform: translateX(0);
-  }
-  .sidebar-mobile-header {
-    display: flex;
-  }
-
-  /* Left Drawer: Document H2 Outline */
-  .docs-end-toc {
-    display: block;
-    position: static;
-    height: auto;
-  }
-  .docs-toc {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 280px;
-    height: 100vh;
-    z-index: 70;
-    background-color: #0d0e11;
-    border-right: 1px solid var(--dd-border);
-    border-left: none;
-    transform: translateX(-100%);
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.8);
-  }
-  .docs-toc.open {
-    transform: translateX(0);
-  }
-
-  /* Overlays */
-  .sidebar-overlay, .toc-mobile-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(3px);
-    z-index: 65;
-    animation: fadeIn 0.15s ease-out;
   }
 
   .doc-navigation-grid {
     grid-template-columns: 1fr;
-  }
-
-  .search-trigger {
-    width: auto;
-    max-width: 140px;
-  }
-  .search-shortcut {
-    display: none;
   }
 }

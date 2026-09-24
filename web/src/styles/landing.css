@@ -15,69 +15,6 @@
   padding-inline: 1.25rem;
 }
 
-/* ── Minimal Header ─────────────────────────────────────────── */
-.landing-header {
-  position: fixed;
-  top: 0;
-  inset-inline: 0;
-  z-index: 50;
-  height: var(--dd-header-height, 48px);
-  background-color: rgba(9, 10, 12, 0.82);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--dd-border-subtle);
-}
-
-.landing-header nav {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.logo-link {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  color: var(--dd-text-primary);
-  font-family: var(--font-heading);
-  font-weight: 600;
-  font-size: 0.95rem;
-  letter-spacing: -0.01em;
-  transition: opacity 0.12s;
-}
-.logo-link:hover {
-  opacity: 0.8;
-}
-
-.logo-badge {
-  font-size: 0.65rem;
-  padding: 0.1rem 0.35rem;
-  background: var(--dd-surface-2);
-  border: 1px solid var(--dd-border);
-  border-radius: 4px;
-  color: var(--dd-text-muted);
-  font-family: var(--font-mono);
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.nav-link {
-  padding: 0.3rem 0.6rem;
-  color: var(--dd-text-secondary);
-  font-size: 0.825rem;
-  border-radius: 5px;
-  transition: all 0.12s;
-}
-.nav-link:hover {
-  color: var(--dd-text-primary);
-  background-color: var(--dd-surface-2);
-}
-
 /* ── Buttons ────────────────────────────────────────────────── */
 .btn-primary {
   display: inline-flex;
@@ -138,8 +75,8 @@
 
 /* ── Hero Section ───────────────────────────────────────────── */
 .hero {
-  padding-top: calc(var(--dd-header-height, 48px) + 3.5rem);
-  padding-bottom: 3.5rem;
+  padding-top: calc(52px + 2.5rem);
+  padding-bottom: 3rem;
   text-align: center;
   position: relative;
 }

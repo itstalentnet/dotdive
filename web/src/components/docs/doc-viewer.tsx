@@ -5,13 +5,11 @@ import {
   ChevronLeft,
   ArrowRight,
   ArrowLeft,
-  Menu,
-  ListOrdered,
   Share2,
   Check,
 } from "lucide-react";
 import type { Page, TreeNode } from "@/server/content/types";
-import { DocsHeader } from "@/components/layout/docs-header";
+import { SiteHeader } from "@/components/layout/site-header";
 import { DocsSidebar } from "@/components/layout/docs-sidebar";
 import { TableOfContents } from "@/components/docs/toc";
 import { PageContent } from "@/components/docs/page-content";
@@ -23,12 +21,7 @@ interface DocViewerProps {
 }
 
 export function DocViewer({ page, tree, rootTitle }: DocViewerProps) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isTocOpen, setIsTocOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
-
-  // Filter H2 headings for checking if document has H2s
-  const h2Headings = page.headings.filter((h) => h.level === 2);
 
   async function handleCopyPageLink() {
     if (typeof window !== "undefined") {
@@ -40,45 +33,16 @@ export function DocViewer({ page, tree, rootTitle }: DocViewerProps) {
 
   return (
     <div className="docs-layout">
-      {/* Top Header */}
-      <DocsHeader
-        rootName={page.root}
-        rootTitle={rootTitle}
-        onMenuToggle={() => setIsSidebarOpen(true)}
+      {/* Unified Header with Global Search and Mobile Drawer */}
+      <SiteHeader
+        currentRoot={page.root}
+        docTree={tree}
+        docHeadings={page.headings}
       />
-
-      {/* Mobile Action Bar — quick access on phone */}
-      <div className="docs-mobile-subbar">
-        <button
-          type="button"
-          onClick={() => setIsSidebarOpen(true)}
-          className="mobile-subbar-btn"
-          aria-label="باز کردن سایدبار مستندات"
-        >
-          <Menu size={15} />
-          <span>مستندات پروژه</span>
-        </button>
-
-        {h2Headings.length > 0 && (
-          <button
-            type="button"
-            onClick={() => setIsTocOpen(true)}
-            className="mobile-subbar-btn"
-            aria-label="باز کردن سرفصل‌های صفحه"
-          >
-            <ListOrdered size={15} />
-            <span>سرفصل‌های صفحه (H2)</span>
-          </button>
-        )}
-      </div>
 
       <div className="docs-body">
         {/* Start Sidebar (Right side in RTL): Documentation Tree */}
-        <DocsSidebar
-          nodes={tree}
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-        />
+        <DocsSidebar nodes={tree} />
 
         {/* Center Main Content Area: Pure Document */}
         <main className="docs-main">
@@ -174,11 +138,7 @@ export function DocViewer({ page, tree, rootTitle }: DocViewerProps) {
 
         {/* End Sidebar (Left side in RTL): Document H2 Outline */}
         <aside className="docs-end-toc">
-          <TableOfContents
-            headings={page.headings}
-            isOpen={isTocOpen}
-            onClose={() => setIsTocOpen(false)}
-          />
+          <TableOfContents headings={page.headings} />
         </aside>
       </div>
     </div>
