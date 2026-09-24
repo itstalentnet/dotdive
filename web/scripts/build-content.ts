@@ -1,8 +1,8 @@
 /**
  * scripts/build-content.ts
- * Content build pipeline — M1
- * Scans docs/, validates, renders Markdown,
- * outputs to out/public and out/private/<root>
+ * Content build pipeline — Hierarchical Tree & Markdown Compiler
+ * Scans docs/, builds tree hierarchy per folder (using README.md or index.md as folder index),
+ * validates, renders Markdown, outputs to out/public and out/private/<root>
  */
 import path from "node:path";
 import fs from "node:fs";
@@ -16,6 +16,8 @@ import type {
   TreeNode,
   RootMeta,
   SearchRecord,
+  Heading,
+  FrontMatter,
 } from "../src/server/content/types";
 import { normalizePersian } from "../src/server/search/persian";
 
@@ -41,9 +43,41 @@ function info(msg: string) {
   console.log(`\x1b[36m•\x1b[0m ${msg}`);
 }
 
+const FOLDER_TITLE_FALLBACKS: Record<string, string> = {
+  team: "تیم‌ها",
+  backend: "بک‌اند",
+  frontend: "فرانت‌اند",
+  platform: "پلتفرم",
+  devops: "دواپس",
+  branding: "برندینگ",
+  seo: "سئو",
+  support: "پشتیبانی",
+  adr: "تصمیمات معماری (ADR)",
+  ADR: "تصمیمات معماری (ADR)",
+  diagram: "دیاگرام‌ها",
+  diagrams: "دیاگرام‌ها",
+  services: "سرویس‌ها",
+  standard: "استانداردها",
+  standards: "استانداردها",
+  package: "پکیج‌ها",
+  packages: "پکیج‌ها",
+  api: "رابط‌های برنامه‌نویسی (API)",
+  core: "هسته (Core)",
+  gateway: "گیت‌وی (Gateway)",
+  "get-started": "شروع به کار",
+  architecture: "معماری",
+  "design-system": "سیستم دیزاین",
+  docs: "مستندات عمومی",
+  blog: "وبلاگ",
+  modules: "ماژول‌ها",
+  roadmap: "نقشه راه",
+  templates: "قالب‌ها",
+  decisions: "تصمیمات",
+};
+
 /* ── Main ────────────────────────────────────────────────────── */
 async function main() {
-  console.log("\n\x1b[1m🏗  dotdive content build\x1b[0m\n");
+  console.log("\n\x1b[1m🏗  dotdive hierarchical content build\x1b[0m\n");
 
   if (!fs.existsSync(DOCS_DIR)) {
     error(`docs/ directory not found: ${DOCS_DIR}`);
@@ -65,6 +99,7 @@ async function main() {
     buildTime: new Date().toISOString(),
     roots: [],
     nodes: {},
+    tree: {},
   };
 
   const publicSearchRecords: SearchRecord[] = [];
@@ -76,7 +111,12 @@ async function main() {
     const isPublic = rootName === "public";
 
     // Read root index
-    const indexPath = path.join(rootDir, "index.md");
+    let indexPath = path.join(rootDir, "index.md");
+    if (!fs.existsSync(indexPath)) {
+      const readmePath = path.join(rootDir, "README.md");
+      if (fs.existsSync(readmePath)) indexPath = readmePath;
+    }
+
     let rootMeta: RootMeta = {
       name: rootName,
       title: rootName,
@@ -84,20 +124,16 @@ async function main() {
     };
 
     if (fs.existsSync(indexPath)) {
-      const { data } = matter(fs.readFileSync(indexPath, "utf8"));
+      const { data, content: body } = matter(fs.readFileSync(indexPath, "utf8"));
       const fm = FrontMatterSchema.safeParse(data);
       if (fm.success) {
         rootMeta = {
           ...rootMeta,
-          title: fm.data.title ?? rootName,
+          title: fm.data.title ?? extractDocTitle(body, undefined, rootName),
           description: fm.data.description,
           icon: fm.data.icon,
         };
-      } else {
-        warn(`Invalid front matter in ${indexPath}`);
       }
-    } else {
-      warn(`No index.md in root: ${rootName}`);
     }
 
     manifest.roots.push(rootMeta);
@@ -107,18 +143,22 @@ async function main() {
       fs.mkdirSync(path.join(OUT_PRIVATE, rootName, "pages"), { recursive: true });
     }
 
-    // Scan all Markdown files
-    const mdFiles = findMarkdownFiles(rootDir);
-    for (const mdPath of mdFiles) {
-      await processFile(
-        mdPath,
-        rootName,
-        rootDir,
-        isPublic,
-        manifest,
-        isPublic ? publicSearchRecords : privateSearchRecords[rootName],
-      );
-    }
+    const currentSearch = isPublic ? publicSearchRecords : privateSearchRecords[rootName];
+
+    // Scan directory hierarchically
+    const rootTreeResult = await scanDirectoryHierarchical(
+      rootDir,
+      "",
+      rootName,
+      rootDir,
+      isPublic,
+      manifest,
+      currentSearch
+    );
+
+    manifest.tree![rootName] = Array.isArray(rootTreeResult)
+      ? rootTreeResult
+      : [rootTreeResult];
   }
 
   // Write manifest
@@ -142,7 +182,7 @@ async function main() {
   }
 
   console.log(
-    `\n✅ Build complete — ${Object.keys(manifest.nodes).length} pages, ` +
+    `\n✅ Build complete — ${Object.keys(manifest.nodes).length} nodes, ` +
     `${errorCount} errors, ${warnCount} warnings\n`
   );
 
@@ -151,36 +191,281 @@ async function main() {
   }
 }
 
+/* ── Hierarchical Directory Scanner ───────────────────────────── */
+async function scanDirectoryHierarchical(
+  dirPath: string,
+  relDirPath: string,
+  rootName: string,
+  rootDir: string,
+  isPublic: boolean,
+  manifest: ContentManifest,
+  searchRecords: SearchRecord[]
+): Promise<TreeNode | TreeNode[]> {
+  const entries = fs
+    .readdirSync(dirPath, { withFileTypes: true })
+    .filter((e) => !e.name.startsWith("."));
+
+  const subdirs = entries.filter((e) => e.isDirectory());
+  const mdFileEntries = entries.filter(
+    (e) => e.isFile() && e.name.endsWith(".md") && !e.name.startsWith("_")
+  );
+
+  // Check for index file: index.md takes precedence, then README.md, then readme.md
+  let indexFileEntry = mdFileEntries.find((e) => e.name === "index.md");
+  if (!indexFileEntry) {
+    indexFileEntry = mdFileEntries.find((e) => e.name === "README.md");
+  }
+  if (!indexFileEntry) {
+    indexFileEntry = mdFileEntries.find((e) => e.name.toLowerCase() === "readme.md");
+  }
+
+  const childNodes: TreeNode[] = [];
+
+  // 1. Process child markdown files (excluding the index file and redundant readme)
+  for (const file of mdFileEntries) {
+    if (indexFileEntry && file.name === indexFileEntry.name) {
+      continue; // Handled as the folder document or root index
+    }
+    if (
+      indexFileEntry &&
+      indexFileEntry.name === "index.md" &&
+      file.name.toLowerCase() === "readme.md"
+    ) {
+      continue; // Skip redundant readme when index.md is present
+    }
+
+    const filePath = path.join(dirPath, file.name);
+    const fileRelPath = relDirPath ? `${relDirPath}/${file.name}` : file.name;
+    const fileNode = await processFile(
+      filePath,
+      fileRelPath,
+      rootName,
+      rootDir,
+      isPublic,
+      manifest,
+      searchRecords
+    );
+    if (fileNode) {
+      childNodes.push(fileNode);
+    }
+  }
+
+  // 2. Process child subdirectories recursively
+  for (const dir of subdirs) {
+    const subDirPath = path.join(dirPath, dir.name);
+    const subRelDirPath = relDirPath ? `${relDirPath}/${dir.name}` : dir.name;
+    const subFolderResult = await scanDirectoryHierarchical(
+      subDirPath,
+      subRelDirPath,
+      rootName,
+      rootDir,
+      isPublic,
+      manifest,
+      searchRecords
+    );
+    if (Array.isArray(subFolderResult)) {
+      childNodes.push(...subFolderResult);
+    } else if (subFolderResult) {
+      childNodes.push(subFolderResult);
+    }
+  }
+
+  // Sort child nodes by order then Persian title
+  childNodes.sort((a, b) => {
+    if (a.order !== b.order) return a.order - b.order;
+    return a.title.localeCompare(b.title, "fa");
+  });
+
+  // 3. If relDirPath === "" (Root directory of the project)
+  if (relDirPath === "") {
+    const rootTree: TreeNode[] = [];
+
+    if (indexFileEntry) {
+      const rootIndexFile = path.join(dirPath, indexFileEntry.name);
+      const rootIndexNode = await processFile(
+        rootIndexFile,
+        indexFileEntry.name,
+        rootName,
+        rootDir,
+        isPublic,
+        manifest,
+        searchRecords,
+        true // isRootIndex
+      );
+      if (rootIndexNode) {
+        // Add root overview page at the top for private roots
+        if (!isPublic) {
+          rootIndexNode.order = -1;
+          rootTree.push(rootIndexNode);
+        }
+      }
+    }
+
+    rootTree.push(...childNodes);
+    return rootTree;
+  }
+
+  // 4. If relDirPath !== "" (Subfolder)
+  if (!indexFileEntry && childNodes.length === 0) {
+    return [];
+  }
+
+  const dirBaseName = path.basename(relDirPath);
+  let folderTitle =
+    FOLDER_TITLE_FALLBACKS[dirBaseName] ??
+    FOLDER_TITLE_FALLBACKS[dirBaseName.toLowerCase()] ??
+    dirBaseName.replace(/^\d+-/, "");
+  let folderDesc: string | undefined;
+  let folderIcon: string | undefined;
+  let folderOrder = extractNumericPrefix(dirBaseName);
+  let folderHidden = false;
+  let folderDraft = false;
+  let folderTags: string[] = [];
+  let folderHeadings: Heading[] = [];
+  let folderUrlPath = "";
+  let folderPath = relDirPath;
+  let folderUpdatedAt: Date | undefined;
+
+  if (indexFileEntry) {
+    const indexFilePath = path.join(dirPath, indexFileEntry.name);
+    const indexFileRelPath = `${relDirPath}/${indexFileEntry.name}`;
+    const rawContent = fs.readFileSync(indexFilePath, "utf8");
+    const { data, content: body } = matter(rawContent);
+    const fm = FrontMatterSchema.safeParse(data);
+    const fmData: Partial<FrontMatter> = fm.success ? fm.data : {};
+
+    folderTitle = extractDocTitle(body, fmData.title, dirBaseName);
+    folderDesc = extractDocDescription(body, fmData.description);
+    folderIcon = fmData.icon;
+    if (fmData.order !== undefined) folderOrder = fmData.order;
+    folderHidden = fmData.hidden ?? false;
+    folderDraft = fmData.draft ?? false;
+    folderTags = fmData.tags ?? [];
+    folderPath = `${rootName}/${indexFileRelPath}`;
+    folderUrlPath = buildUrlPath(rootName, relDirPath);
+
+    try {
+      const gitDate = execSync(
+        `git log -1 --format=%ci -- "${indexFilePath}"`,
+        { cwd: DOCS_DIR, stdio: ["pipe", "pipe", "pipe"] }
+      ).toString().trim();
+      if (gitDate) folderUpdatedAt = new Date(gitDate);
+    } catch {}
+
+    // Render markdown for this folder page
+    const { html, headings } = await renderMarkdown(body);
+    folderHeadings = headings;
+
+    // Save HTML for folder document with both folder id and index file id
+    const folderSafeId = `${rootName}/${relDirPath}`.replace(/\//g, "_");
+    const indexSafeId = `${rootName}/${indexFileRelPath}`.replace(/\//g, "_").replace(/\.md$/, "");
+
+    if (isPublic) {
+      fs.writeFileSync(path.join(OUT_PUBLIC, "pages", `${folderSafeId}.html`), html);
+      fs.writeFileSync(path.join(OUT_PUBLIC, "pages", `${indexSafeId}.html`), html);
+      const rawMdPath = path.join(OUT_PUBLIC, folderUrlPath.replace(/^\//, "") + ".md");
+      fs.mkdirSync(path.dirname(rawMdPath), { recursive: true });
+      fs.writeFileSync(rawMdPath, rawContent);
+    } else {
+      const privateFolderId = relDirPath.replace(/\//g, "_");
+      const privateIndexId = indexFileRelPath.replace(/\//g, "_").replace(/\.md$/, "");
+      fs.writeFileSync(
+        path.join(OUT_PRIVATE, rootName, "pages", `${privateFolderId}.html`),
+        html
+      );
+      fs.writeFileSync(
+        path.join(OUT_PRIVATE, rootName, "pages", `${privateIndexId}.html`),
+        html
+      );
+    }
+
+    // Add search record for the folder's index page
+    const nodeId = `${rootName}/${indexFileRelPath}`;
+    if (!folderHidden && !(folderDraft && isPublic)) {
+      searchRecords.push({
+        id: `${nodeId}#`,
+        pageId: nodeId,
+        root: rootName,
+        title: folderTitle,
+        heading: folderTitle,
+        anchor: "",
+        content: normalizePersian(body.slice(0, 500)),
+        tags: folderTags,
+        urlPath: folderUrlPath,
+        boost: 6,
+      });
+
+      for (const h of headings) {
+        searchRecords.push({
+          id: `${nodeId}#${h.id}`,
+          pageId: nodeId,
+          root: rootName,
+          title: folderTitle,
+          heading: h.text,
+          anchor: h.id,
+          content: normalizePersian(extractSectionContent(body, h.text)),
+          tags: folderTags,
+          urlPath: `${folderUrlPath}#${h.id}`,
+          boost: h.level === 2 ? 3 : 2,
+        });
+      }
+    }
+  }
+
+  const folderNodeId = `${rootName}/${relDirPath}`;
+  const folderNode: TreeNode = {
+    id: folderNodeId,
+    kind: "folder",
+    title: folderTitle,
+    slug: dirBaseName,
+    path: folderPath,
+    urlPath: folderUrlPath,
+    root: rootName,
+    icon: folderIcon,
+    order: folderOrder,
+    hidden: folderHidden,
+    draft: folderDraft,
+    description: folderDesc,
+    tags: folderTags,
+    headings: folderHeadings,
+    children: childNodes,
+    updatedAt: folderUpdatedAt,
+  };
+
+  manifest.nodes[folderNodeId] = folderNode;
+  if (indexFileEntry) {
+    const indexNodeId = `${rootName}/${relDirPath}/${indexFileEntry.name}`;
+    manifest.nodes[indexNodeId] = folderNode;
+  }
+
+  return folderNode;
+}
+
 /* ── Process a single Markdown file ─────────────────────────── */
 async function processFile(
   mdPath: string,
+  relPath: string,
   rootName: string,
   rootDir: string,
   isPublic: boolean,
   manifest: ContentManifest,
   searchRecords: SearchRecord[],
-) {
-  const relPath = path.relative(rootDir, mdPath);
+  isRootIndex = false
+): Promise<TreeNode | null> {
   const content = fs.readFileSync(mdPath, "utf8");
   const { data, content: body } = matter(content);
 
   const fmResult = FrontMatterSchema.safeParse(data);
-  if (!fmResult.success) {
-    error(`Invalid front matter in ${mdPath}: ${fmResult.error.message}`);
-    return;
-  }
-  const fm = fmResult.data;
+  const fm: Partial<FrontMatter> = fmResult.success ? fmResult.data : {};
 
-  // Skip drafts in public
-  if (fm.draft && isPublic) return;
+  if (fm.draft && isPublic) return null;
 
-  // Extract title
-  const titleFromHeading = body.match(/^#\s+(.+)$/m)?.[1] ?? "";
   const rawName = path.basename(mdPath, ".md").replace(/^\d+-/, "");
-  const slug = fm.slug ?? rawName;
-  const title = fm.title ?? titleFromHeading ?? rawName;
+  const title = isRootIndex
+    ? (fm.title ?? "نمای کلی")
+    : extractDocTitle(body, fm.title, rawName);
+  const description = extractDocDescription(body, fm.description);
 
-  // Get git last-modified date
   let updatedAt: Date | undefined = fm.updated;
   if (!updatedAt) {
     try {
@@ -189,24 +474,17 @@ async function processFile(
         { cwd: DOCS_DIR, stdio: ["pipe", "pipe", "pipe"] }
       ).toString().trim();
       if (gitDate) updatedAt = new Date(gitDate);
-    } catch {
-      // Shallow clone — use build time
-    }
+    } catch {}
   }
 
-  // Build URL path
   const urlPath = buildUrlPath(rootName, relPath);
-
-  // Render Markdown
   const { html, headings } = await renderMarkdown(body);
 
-  // Save rendered HTML
   const nodeId = `${rootName}/${relPath}`;
   const safeId = nodeId.replace(/\//g, "_").replace(/\.md$/, "");
 
   if (isPublic) {
     fs.writeFileSync(path.join(OUT_PUBLIC, "pages", `${safeId}.html`), html);
-    // Raw .md version
     const rawMdPath = path.join(OUT_PUBLIC, urlPath.replace(/^\//, "") + ".md");
     fs.mkdirSync(path.dirname(rawMdPath), { recursive: true });
     fs.writeFileSync(rawMdPath, content);
@@ -217,21 +495,20 @@ async function processFile(
     );
   }
 
-  // Build tree node
   const node: TreeNode = {
     id: nodeId,
-    kind: relPath.endsWith("index.md") ? "folder" : "file",
+    kind: "file",
     title,
-    slug,
+    slug: fm.slug ?? rawName,
     path: relPath,
     urlPath,
     root: rootName,
     icon: fm.icon,
-    order: fm.order ?? extractNumericPrefix(path.basename(mdPath)),
-    hidden: fm.hidden,
-    draft: fm.draft,
-    description: fm.description,
-    tags: fm.tags,
+    order: fm.order ?? (isRootIndex ? -1 : extractNumericPrefix(path.basename(mdPath))),
+    hidden: fm.hidden ?? false,
+    draft: fm.draft ?? false,
+    description,
+    tags: fm.tags ?? [],
     headings,
     children: [],
     updatedAt,
@@ -239,9 +516,7 @@ async function processFile(
 
   manifest.nodes[nodeId] = node;
 
-  // Build search records (one per section/heading)
-  if (!fm.hidden) {
-    // Page-level record
+  if (!node.hidden) {
     searchRecords.push({
       id: `${nodeId}#`,
       pageId: nodeId,
@@ -250,12 +525,11 @@ async function processFile(
       heading: title,
       anchor: "",
       content: normalizePersian(body.slice(0, 500)),
-      tags: fm.tags,
+      tags: node.tags,
       urlPath,
-      boost: 5,
+      boost: isRootIndex ? 5 : 4,
     });
 
-    // Section records
     for (const h of headings) {
       searchRecords.push({
         id: `${nodeId}#${h.id}`,
@@ -265,26 +539,17 @@ async function processFile(
         heading: h.text,
         anchor: h.id,
         content: normalizePersian(extractSectionContent(body, h.text)),
-        tags: fm.tags,
+        tags: node.tags,
         urlPath: `${urlPath}#${h.id}`,
         boost: h.level === 2 ? 3 : 2,
       });
     }
   }
+
+  return node;
 }
 
 /* ── Helpers ─────────────────────────────────────────────────── */
-function findMarkdownFiles(dir: string): string[] {
-  const results: string[] = [];
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (entry.name.startsWith(".")) continue;
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) results.push(...findMarkdownFiles(full));
-    else if (entry.name.endsWith(".md")) results.push(full);
-  }
-  return results;
-}
-
 function buildUrlPath(root: string, relPath: string): string {
   const clean = relPath
     .replace(/\.md$/, "")
@@ -292,8 +557,34 @@ function buildUrlPath(root: string, relPath: string): string {
     .replace(/\/?\d+-/g, "/")
     .replace(/^index$/, "");
 
-  if (root === "public") return `/${clean}`;
-  return `/p/${root}/${clean}`;
+  if (root === "public") return clean ? `/${clean}` : "/";
+  return clean ? `/p/${root}/${clean}` : `/p/${root}`;
+}
+
+function extractDocTitle(body: string, fmTitle?: string, fallback = ""): string {
+  if (fmTitle && fmTitle.trim()) return fmTitle.trim();
+  const tableFaMatch = body.match(/\*\*Title\s*\((?:FA|fa)\)\*\*\s*\|\s*([^|\n]+)/);
+  if (tableFaMatch?.[1]?.trim()) return tableFaMatch[1].trim();
+  const headingMatch = body.match(/^#\s+(.+)$/m);
+  if (headingMatch?.[1]?.trim()) {
+    return headingMatch[1].replace(/[*_`\[\]]/g, "").trim();
+  }
+  if (fallback) {
+    const clean = fallback.replace(/^\d+-/, "").replace(/\.md$/, "");
+    return (
+      FOLDER_TITLE_FALLBACKS[clean] ??
+      FOLDER_TITLE_FALLBACKS[clean.toLowerCase()] ??
+      clean
+    );
+  }
+  return "بدون عنوان";
+}
+
+function extractDocDescription(body: string, fmDesc?: string): string | undefined {
+  if (fmDesc && fmDesc.trim()) return fmDesc.trim();
+  const tableFaSummary = body.match(/\*\*Summary\s*\((?:FA|fa)\)\*\*\s*\|\s*([^|\n]+)/);
+  if (tableFaSummary?.[1]?.trim()) return tableFaSummary[1].trim();
+  return undefined;
 }
 
 function extractNumericPrefix(name: string): number {

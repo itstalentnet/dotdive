@@ -79,7 +79,7 @@
 
   /* Layout geometry */
   --dd-header-height:  48px;
-  --dd-sidebar-width:  240px;
+  --dd-sidebar-width:  264px;
   --dd-toc-width:      200px;
   --dd-content-max:    700px;
 }
@@ -352,3 +352,29 @@ code, kbd, samp, pre, .ltr {
   background-color: rgba(79, 141, 245, 0.25);
   color: #ffffff;
 }
+
+/* Hide rogue Mermaid error elements injected directly into DOM or body */
+body > [id^="dmermaid"],
+body > [id*="mermaid"],
+[id^="dmermaid"],
+[id^="mermaid-error"],
+.mermaid-error,
+#dmermaid,
+div[id*="mermaid"][style*="color: red"],
+div[id*="dmermaid"] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Heading scroll margin for sticky header */
+h1, h2, h3, h4, h5, h6, [id] {
+  scroll-margin-top: 72px;
+}
+
+
+

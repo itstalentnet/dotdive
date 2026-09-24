@@ -6,15 +6,14 @@ import { getSessionContext } from "@/server/auth/session";
 import { canAccess } from "@/server/access";
 import type { SearchRecord, SearchHit } from "@/server/content/types";
 
-const OUT_PUBLIC = path.resolve(process.cwd(), "out", "public");
-const OUT_PRIVATE = path.resolve(process.cwd(), "out", "private");
+import { getOutPublic, getOutPrivate } from "@/server/content/paths";
 
 let publicRecordsCache: SearchRecord[] | null = null;
 const privateRecordsCache: Record<string, SearchRecord[]> = {};
 
 function getPublicRecords(): SearchRecord[] {
   if (publicRecordsCache) return publicRecordsCache;
-  const p = path.join(OUT_PUBLIC, "_search.json");
+  const p = path.join(getOutPublic(), "_search.json");
   if (fs.existsSync(p)) {
     try {
       publicRecordsCache = JSON.parse(fs.readFileSync(p, "utf8"));
@@ -28,7 +27,7 @@ function getPublicRecords(): SearchRecord[] {
 
 function getPrivateRecords(root: string): SearchRecord[] {
   if (privateRecordsCache[root]) return privateRecordsCache[root];
-  const p = path.join(OUT_PRIVATE, root, "_search.json");
+  const p = path.join(getOutPrivate(), root, "_search.json");
   if (fs.existsSync(p)) {
     try {
       privateRecordsCache[root] = JSON.parse(fs.readFileSync(p, "utf8"));
@@ -75,8 +74,9 @@ export async function GET(request: NextRequest) {
     // If no specific root requested, query all accessible roots
     if (ctx.roots === "all") {
       try {
-        if (fs.existsSync(OUT_PRIVATE)) {
-          const dirs = fs.readdirSync(OUT_PRIVATE, { withFileTypes: true });
+        const outPrivate = getOutPrivate();
+        if (fs.existsSync(outPrivate)) {
+          const dirs = fs.readdirSync(outPrivate, { withFileTypes: true });
           for (const d of dirs) {
             if (d.isDirectory()) pool.push(...getPrivateRecords(d.name));
           }

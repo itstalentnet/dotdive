@@ -22,6 +22,7 @@ import type { Heading } from "./types";
 /* ── Sanitize schema ─────────────────────────────────────────── */
 const sanitizeSchema = {
   ...defaultSchema,
+  clobberPrefix: "",
   attributes: {
     ...defaultSchema.attributes,
     "*": [...(defaultSchema.attributes?.["*"] ?? []), "className", "id", "dir", "data*"],
@@ -58,6 +59,7 @@ export async function renderMarkdown(
     .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypeRaw)
     .use(rehypeSlug)
+    .use(rehypeStripFirstH1Plugin)
     .use(rehypeAutolinkHeadings, {
       behavior: "wrap",
       properties: {
@@ -117,3 +119,17 @@ function rehypeCodeWrapPlugin() {
     });
   };
 }
+
+/* ── Strip First H1 plugin (rehype) ─────────────────────────── */
+function rehypeStripFirstH1Plugin() {
+  return (tree: HastRoot) => {
+    let stripped = false;
+    visit(tree, "element", (node: Element, index, parent) => {
+      if (!stripped && node.tagName === "h1" && parent && typeof index === "number") {
+        parent.children.splice(index, 1);
+        stripped = true;
+      }
+    });
+  };
+}
+

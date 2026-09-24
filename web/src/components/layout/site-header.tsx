@@ -247,9 +247,19 @@ export function SiteHeader({
                       className="mobile-toc-item"
                       onClick={(e) => {
                         e.preventDefault();
-                        const el = document.getElementById(h.id);
+                        const el =
+                          document.getElementById(h.id) ||
+                          document.getElementById(`user-content-${h.id}`);
                         if (el) {
-                          el.scrollIntoView({ behavior: "smooth" });
+                          const headerOffset = 65;
+                          const pos =
+                            el.getBoundingClientRect().top +
+                            window.pageYOffset -
+                            headerOffset;
+                          window.scrollTo({
+                            top: Math.max(0, pos),
+                            behavior: "smooth",
+                          });
                           history.pushState(null, "", `#${h.id}`);
                         }
                         setIsMobileMenuOpen(false);
@@ -596,40 +606,168 @@ function MobileTreeItem({
   depth: number;
   onClose: () => void;
 }) {
-  const [isOpen, setIsOpen] = useState(true);
-  const isActive = pathname === node.urlPath;
-  const paddingRight = `${0.35 + depth * 0.75}rem`;
+  const isChildActive = (item: TreeNode): boolean => {
+    if (item.urlPath && pathname === item.urlPath) return true;
+    return item.children?.some(isChildActive) ?? false;
+  };
+
+  const isCurrentActive = Boolean(node.urlPath && pathname === node.urlPath);
+  const hasActiveChild = node.children?.some(isChildActive) ?? false;
+
+  const [isOpen, setIsOpen] = useState(
+    () => depth === 0 || isCurrentActive || hasActiveChild
+  );
+
+  useEffect(() => {
+    if (isCurrentActive || hasActiveChild) {
+      setIsOpen(true);
+    }
+  }, [pathname, isCurrentActive, hasActiveChild]);
 
   if (node.kind === "folder") {
+    const hasChildren = node.children && node.children.length > 0;
+
     return (
-      <div>
-        <button
-          type="button"
-          onClick={() => setIsOpen(!isOpen)}
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <div
           style={{
             display: "flex",
             alignItems: "center",
-            width: "100%",
-            gap: "0.4rem",
-            padding: "0.35rem 0.5rem",
-            paddingRight,
-            fontSize: "0.8rem",
-            color: "var(--dd-text-secondary)",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            textAlign: "right",
+            gap: "0.25rem",
+            minHeight: "30px",
+            padding: "0.15rem 0.25rem",
+            borderRadius: "5px",
+            color: isCurrentActive ? "var(--dd-accent)" : "var(--dd-text-secondary)",
+            backgroundColor: isCurrentActive ? "rgba(79, 141, 245, 0.08)" : "transparent",
+            fontWeight: isCurrentActive ? 500 : 400,
           }}
         >
-          <IconResolver name={node.slug} fallback="folder" size={14} />
-          <span style={{ flex: 1 }}>{node.title}</span>
-          <span style={{ color: "var(--dd-text-muted)" }}>
-            {isOpen ? <ChevronDown size={12} /> : <ChevronLeft size={12} />}
-          </span>
-        </button>
+          {/* Chevron at start */}
+          {hasChildren ? (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsOpen(!isOpen);
+              }}
+              style={{
+                width: 20,
+                height: 20,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "none",
+                border: "none",
+                color: "var(--dd-text-muted)",
+                cursor: "pointer",
+                padding: 0,
+                flexShrink: 0,
+              }}
+              aria-label={isOpen ? "بستن شاخه" : "باز کردن شاخه"}
+            >
+              <ChevronDown
+                size={13}
+                strokeWidth={2}
+                style={{
+                  transform: isOpen ? "rotate(0deg)" : "rotate(90deg)",
+                  transition: "transform 0.15s ease",
+                }}
+              />
+            </button>
+          ) : (
+            <span style={{ width: 20, height: 20, flexShrink: 0 }} aria-hidden="true" />
+          )}
 
-        {isOpen && node.children.length > 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.15rem" }}>
+          {node.urlPath ? (
+            <Link
+              href={node.urlPath}
+              onClick={() => {
+                setIsOpen(true);
+                onClose();
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.4rem",
+                flex: 1,
+                minWidth: 0,
+                color: "inherit",
+                textDecoration: "none",
+              }}
+            >
+              <span style={{ display: "flex", alignItems: "center", flexShrink: 0, width: 16 }}>
+                <IconResolver
+                  name={node.slug}
+                  fallback="folder"
+                  size={14}
+                  className={isCurrentActive ? "text-blue-400" : "text-neutral-400"}
+                />
+              </span>
+              <span
+                style={{
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  flex: 1,
+                  minWidth: 0,
+                  fontSize: "0.82rem",
+                }}
+                title={node.title}
+              >
+                {node.title}
+              </span>
+            </Link>
+          ) : (
+            <div
+              onClick={() => setIsOpen(!isOpen)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.4rem",
+                flex: 1,
+                minWidth: 0,
+                cursor: "pointer",
+              }}
+            >
+              <span style={{ display: "flex", alignItems: "center", flexShrink: 0, width: 16 }}>
+                <IconResolver
+                  name={node.slug}
+                  fallback="folder"
+                  size={14}
+                  className="text-neutral-400"
+                />
+              </span>
+              <span
+                style={{
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  flex: 1,
+                  minWidth: 0,
+                  fontSize: "0.82rem",
+                }}
+                title={node.title}
+              >
+                {node.title}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Nested container with vertical guide line */}
+        {isOpen && hasChildren && (
+          <div
+            style={{
+              position: "relative",
+              marginRight: "0.6rem",
+              paddingRight: "0.4rem",
+              borderRight: "1px solid var(--dd-border-subtle)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "0.15rem",
+            }}
+          >
             {node.children
               .sort((a, b) => a.order - b.order)
               .map((c) => (
@@ -647,28 +785,57 @@ function MobileTreeItem({
     );
   }
 
+  // File leaf item
   return (
-    <Link
-      href={node.urlPath}
-      onClick={onClose}
+    <div
       style={{
         display: "flex",
         alignItems: "center",
-        gap: "0.4rem",
-        padding: "0.35rem 0.5rem",
-        paddingRight,
-        fontSize: "0.8rem",
+        gap: "0.25rem",
+        minHeight: "30px",
+        padding: "0.15rem 0.25rem",
         borderRadius: "5px",
-        color: isActive ? "var(--dd-accent)" : "var(--dd-text-secondary)",
-        backgroundColor: isActive ? "rgba(79, 141, 245, 0.08)" : "transparent",
-        fontWeight: isActive ? 500 : 400,
-        textDecoration: "none",
+        color: isCurrentActive ? "var(--dd-accent)" : "var(--dd-text-secondary)",
+        backgroundColor: isCurrentActive ? "rgba(79, 141, 245, 0.08)" : "transparent",
+        fontWeight: isCurrentActive ? 500 : 400,
       }}
     >
-      <IconResolver name={node.slug} fallback="file" size={14} />
-      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-        {node.title}
-      </span>
-    </Link>
+      <span style={{ width: 20, height: 20, flexShrink: 0 }} aria-hidden="true" />
+      <Link
+        href={node.urlPath}
+        onClick={onClose}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "0.4rem",
+          flex: 1,
+          minWidth: 0,
+          color: "inherit",
+          textDecoration: "none",
+        }}
+      >
+        <span style={{ display: "flex", alignItems: "center", flexShrink: 0, width: 16 }}>
+          <IconResolver
+            name={node.slug}
+            fallback="file"
+            size={14}
+            className={isCurrentActive ? "text-blue-400" : "text-neutral-400"}
+          />
+        </span>
+        <span
+          style={{
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            flex: 1,
+            minWidth: 0,
+            fontSize: "0.82rem",
+          }}
+          title={node.title}
+        >
+          {node.title}
+        </span>
+      </Link>
+    </div>
   );
 }

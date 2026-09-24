@@ -26,17 +26,14 @@ export const ANON_CTX: AccessContext = {
   roots: new Set(["public"]),
 };
 
-/* ── Paths ───────────────────────────────────────────────────── */
-const DOCS_DIR = path.resolve(process.cwd(), "..", "docs");
-const OUT_PUBLIC = path.resolve(process.cwd(), "out", "public");
-const OUT_PRIVATE = path.resolve(process.cwd(), "out", "private");
+import { getDocsDir, getOutPublic, getOutPrivate } from "./paths";
 
 /* ── Manifest cache ──────────────────────────────────────────── */
 let _manifest: ContentManifest | null = null;
 
 function loadManifest(): ContentManifest {
   if (_manifest) return _manifest;
-  const p = path.join(OUT_PUBLIC, "_manifest.json");
+  const p = path.join(getOutPublic(), "_manifest.json");
   if (fs.existsSync(p)) {
     _manifest = JSON.parse(fs.readFileSync(p, "utf8")) as ContentManifest;
     return _manifest;
@@ -48,18 +45,19 @@ function loadManifest(): ContentManifest {
 function buildManifestSync(): ContentManifest {
   const roots: RootMeta[] = [];
   const nodes: Record<string, TreeNode> = {};
+  const docsDir = getDocsDir();
 
-  if (!fs.existsSync(DOCS_DIR)) {
+  if (!fs.existsSync(docsDir)) {
     return { buildTime: new Date().toISOString(), roots, nodes };
   }
 
   const rootDirs = fs
-    .readdirSync(DOCS_DIR, { withFileTypes: true })
+    .readdirSync(docsDir, { withFileTypes: true })
     .filter((d) => d.isDirectory())
     .map((d) => d.name);
 
   for (const rootName of rootDirs) {
-    const rootDir = path.join(DOCS_DIR, rootName);
+    const rootDir = path.join(docsDir, rootName);
     const indexPath = path.join(rootDir, "index.md");
     let rootMeta: RootMeta = {
       name: rootName,
@@ -206,6 +204,9 @@ export function listRoots(ctx: AccessContext): RootMeta[] {
 export function getTree(rootId: string, ctx: AccessContext): TreeNode[] | null {
   if (!canAccess(ctx, rootId)) return null;
   const manifest = loadManifest();
+  if (manifest.tree && manifest.tree[rootId]) {
+    return manifest.tree[rootId];
+  }
   return Object.values(manifest.nodes).filter(
     (n) => n.root === rootId && !n.hidden
   );
@@ -237,10 +238,20 @@ export async function getPage(
     .replace(/\//g, "_")
     .replace(/\.md$/, "");
 
-  const htmlPath =
+  let htmlPath =
     node.root === "public"
-      ? path.join(OUT_PUBLIC, "pages", `${safeId}.html`)
-      : path.join(OUT_PRIVATE, node.root, "pages", `${safePrivateId}.html`);
+      ? path.join(getOutPublic(), "pages", `${safeId}.html`)
+      : path.join(getOutPrivate(), node.root, "pages", `${safePrivateId}.html`);
+
+  if (!fs.existsSync(htmlPath)) {
+    const indexSafePath =
+      node.root === "public"
+        ? path.join(getOutPublic(), "pages", `${safeId}_index.html`)
+        : path.join(getOutPrivate(), node.root, "pages", `${safePrivateId}_index.html`);
+    if (fs.existsSync(indexSafePath)) {
+      htmlPath = indexSafePath;
+    }
+  }
 
   let html = "";
   let headings = node.headings;
@@ -249,9 +260,14 @@ export async function getPage(
     html = fs.readFileSync(htmlPath, "utf8");
   } else {
     // Dev fallback: render on demand
-    const mdPath = path.join(DOCS_DIR, node.path);
-    if (!fs.existsSync(mdPath)) return null;
-    const { content } = matter(fs.readFileSync(mdPath, "utf8"));
+    const fullDocPath = path.isAbsolute(node.path)
+      ? node.path
+      : path.join(
+          getDocsDir(),
+          node.path.startsWith(node.root) ? node.path : `${node.root}/${node.path}`
+        );
+    if (!fs.existsSync(fullDocPath)) return null;
+    const { content } = matter(fs.readFileSync(fullDocPath, "utf8"));
     const rendered = await renderMarkdown(content);
     html = rendered.html;
     headings = rendered.headings;

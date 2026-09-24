@@ -114,6 +114,7 @@ export interface ContentManifest {
   buildTime: string;
   roots: RootMeta[];
   nodes: Record<string, TreeNode>;
+  tree?: Record<string, TreeNode[]>;
 }
 
 export interface RootMeta {

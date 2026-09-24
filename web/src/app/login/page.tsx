@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 interface LoginPageProps {
-  searchParams: Promise<{ next?: string; error?: string }>;
+  searchParams: Promise<{ next?: string; error?: string; email?: string }>;
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
@@ -45,9 +45,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         {/* Error message */}
         {params.error && (
           <div className="login-error" role="alert">
-            {params.error === "unauthorized"
-              ? "این حساب دسترسی به ریشه‌های درخواستی ندارد."
-              : "خطایی در فرآیند ورود رخ داد."}
+            {params.error === "unauthorized" ? (
+              <span>
+                ایمیل {params.email ? <strong dir="ltr">{params.email}</strong> : "شما"} مجاز به دسترسی به پروژه‌های خصوصی نیست.
+              </span>
+            ) : params.error === "misconfigured" ? (
+              <span>تنظیمات احراز هویت در سیستم کامل نیست.</span>
+            ) : (
+              <span>خطایی در فرآیند ورود رخ داد. دوباره امتحان کنید.</span>
+            )}
           </div>
         )}
 

@@ -26,38 +26,70 @@ export function PageContent({ html }: PageContentProps) {
       block.appendChild(btn);
     }
 
-    // Lazy-load Mermaid diagrams
+    // Remove any duplicate leading H1 (since page-header already renders the canonical H1)
+    const prose = document.querySelector(".article-content .prose");
+    if (prose) {
+      const firstH1 = prose.querySelector("h1");
+      if (firstH1) {
+        const parentLink = firstH1.closest(".heading-anchor-link");
+        if (parentLink && parentLink.parentElement === prose) {
+          parentLink.remove();
+        } else if (firstH1.parentElement === prose) {
+          firstH1.remove();
+        }
+      }
+    }
+
+    // Lazy-load Mermaid diagrams safely
     const mermaidBlocks = document.querySelectorAll(".language-mermaid");
     if (mermaidBlocks.length > 0) {
-      import("mermaid").then((m) => {
-        m.default.initialize({
-          startOnLoad: false,
-          theme: "dark",
-          themeVariables: {
-            background: "#090a0c",
-            primaryColor: "#17191d",
-            primaryTextColor: "#ededef",
-            lineColor: "#202327",
-          },
-        });
-        for (const block of mermaidBlocks) {
-          const wrapper = document.createElement("div");
-          wrapper.className = "mermaid-wrapper";
-          const code = block.textContent ?? "";
-          const pre = block.closest("pre");
-          if (pre) {
-            pre.replaceWith(wrapper);
-            m.default
-              .render("mermaid-" + Math.random().toString(36).slice(2), code)
-              .then(({ svg }) => {
-                wrapper.innerHTML = svg;
-              })
-              .catch(() => {
-                wrapper.innerHTML = `<pre style="color:var(--dd-text-muted)">${code}</pre>`;
-              });
+      import("mermaid")
+        .then(async (m) => {
+          m.default.initialize({
+            startOnLoad: false,
+            securityLevel: "loose",
+            suppressErrorRendering: true,
+            theme: "dark",
+            themeVariables: {
+              background: "#090a0c",
+              primaryColor: "#17191d",
+              primaryTextColor: "#ededef",
+              lineColor: "#202327",
+            },
+          });
+
+          for (const block of Array.from(mermaidBlocks)) {
+            const pre = block.closest("pre");
+            if (!pre) continue;
+            const code = block.textContent?.trim() ?? "";
+            if (!code) continue;
+
+            try {
+              // Pre-validate syntax before rendering to prevent Mermaid from injecting error banners
+              const isValid = await m.default.parse(code, { suppressErrors: true });
+              if (isValid === false) continue;
+
+              const id = "mermaid-" + Math.random().toString(36).slice(2, 9);
+              const { svg } = await m.default.render(id, code);
+              const wrapper = document.createElement("div");
+              wrapper.className = "mermaid-wrapper";
+              wrapper.innerHTML = svg;
+              pre.replaceWith(wrapper);
+            } catch {
+              // Ignore and leave raw code block intact
+            } finally {
+              // Remove any temporary/error containers injected directly into document.body
+              document
+                .querySelectorAll('body > [id^="dmermaid"], body > [id*="mermaid"], [id^="dmermaid"]')
+                .forEach((el) => {
+                  if (!el.closest(".mermaid-wrapper")) {
+                    el.remove();
+                  }
+                });
+            }
           }
-        }
-      });
+        })
+        .catch(() => {});
     }
   }, [html]);
 

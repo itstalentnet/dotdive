@@ -9,7 +9,6 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["shiki", "mermaid"],
   // Disable auto-generating AI agent rule files
   agentRules: false,
-  // Smooth scroll requires data attribute for route transitions
   experimental: {
     scrollRestoration: true,
   },

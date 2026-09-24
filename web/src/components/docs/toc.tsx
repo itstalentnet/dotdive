@@ -1,11 +1,25 @@
 "use client";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import type { Heading } from "@/server/content/types";
 
 interface TocProps {
   headings: Heading[];
   isOpen?: boolean;
   onClose?: () => void;
+}
+
+function findHeadingElement(id: string): HTMLElement | null {
+  if (typeof document === "undefined") return null;
+  return (
+    document.getElementById(id) ||
+    document.getElementById(`user-content-${id}`) ||
+    (typeof CSS !== "undefined" && CSS.escape
+      ? document.querySelector(`[id="${CSS.escape(id)}"]`)
+      : null) ||
+    (typeof CSS !== "undefined" && CSS.escape
+      ? document.querySelector(`[id="user-content-${CSS.escape(id)}"]`)
+      : null)
+  );
 }
 
 export function TableOfContents({ headings, isOpen, onClose }: TocProps) {
@@ -17,27 +31,75 @@ export function TableOfContents({ headings, isOpen, onClose }: TocProps) {
   useEffect(() => {
     if (!h2Headings.length) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
-            break;
+    function handleScroll() {
+      const topOffset = 80; // 52px sticky header + 28px buffer
+      let currentActive = "";
+
+      for (const h of h2Headings) {
+        const el = findHeadingElement(h.id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= topOffset + 40) {
+            currentActive = h.id;
           }
         }
-      },
-      { rootMargin: "-70px 0px -60% 0px", threshold: 0.1 }
-    );
+      }
 
-    for (const h of h2Headings) {
-      const el = document.getElementById(h.id);
-      if (el) observer.observe(el);
+      if (currentActive) {
+        setActiveId(currentActive);
+      } else if (h2Headings[0]) {
+        const firstEl = findHeadingElement(h2Headings[0].id);
+        if (firstEl && firstEl.getBoundingClientRect().top <= window.innerHeight * 0.45) {
+          setActiveId(h2Headings[0].id);
+        } else {
+          setActiveId("");
+        }
+      }
     }
 
-    return () => observer.disconnect();
+    // Run on mount
+    handleScroll();
+
+    let ticking = false;
+    function onScroll() {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, [h2Headings]);
 
   if (!h2Headings || h2Headings.length === 0) return null;
+
+  function scrollToHeading(e: React.MouseEvent, id: string) {
+    e.preventDefault();
+    const el = findHeadingElement(id);
+    if (el) {
+      const headerOffset = 70; // 52px header + 18px top margin
+      const elementPosition = el.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: Math.max(0, offsetPosition),
+        behavior: "smooth",
+      });
+
+      history.pushState(null, "", `#${id}`);
+      setActiveId(id);
+      onClose?.();
+    }
+  }
 
   return (
     <>
@@ -68,16 +130,8 @@ export function TableOfContents({ headings, isOpen, onClose }: TocProps) {
                   href={`#${h.id}`}
                   className={`toc-link ${isActive ? "active" : ""}`}
                   aria-current={isActive ? "location" : undefined}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    const target = document.getElementById(h.id);
-                    if (target) {
-                      target.scrollIntoView({ behavior: "smooth" });
-                      history.pushState(null, "", `#${h.id}`);
-                      setActiveId(h.id);
-                      onClose?.();
-                    }
-                  }}
+                  onClick={(e) => scrollToHeading(e, h.id)}
+                  title={h.text}
                 >
                   {h.text}
                 </a>

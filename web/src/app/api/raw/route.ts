@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import path from "node:path";
 import fs from "node:fs";
 
-const OUT_PUBLIC = path.resolve(process.cwd(), "out", "public");
+import { getOutPublic } from "@/server/content/paths";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -12,12 +12,13 @@ export async function GET(request: NextRequest) {
     return new NextResponse("Path parameter is required", { status: 400 });
   }
 
+  const outPublic = getOutPublic();
   // Prevent directory traversal
   const cleanPath = targetPath.replace(/^\//, "").replace(/\.md$/, "");
-  const mdFile = path.resolve(OUT_PUBLIC, `${cleanPath}.md`);
+  const mdFile = path.resolve(outPublic, `${cleanPath}.md`);
 
-  // Ensure file is within OUT_PUBLIC
-  if (!mdFile.startsWith(OUT_PUBLIC)) {
+  // Ensure file is within outPublic
+  if (!mdFile.startsWith(outPublic)) {
     return new NextResponse("Access denied", { status: 403 });
   }
 
