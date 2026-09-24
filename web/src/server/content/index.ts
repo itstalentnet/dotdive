@@ -257,6 +257,18 @@ export async function getPage(
     headings = rendered.headings;
   }
 
+  // Calculate prev and next pages in the same root
+  const siblingNodes = Object.values(manifest.nodes)
+    .filter((n) => n.root === node.root && n.kind === "file" && !n.hidden && !n.draft)
+    .sort((a, b) => a.order - b.order);
+
+  const currentIndex = siblingNodes.findIndex((n) => n.id === node.id);
+  const prevNode = currentIndex > 0 ? siblingNodes[currentIndex - 1] : undefined;
+  const nextNode =
+    currentIndex >= 0 && currentIndex < siblingNodes.length - 1
+      ? siblingNodes[currentIndex + 1]
+      : undefined;
+
   return {
     id: node.id,
     root: node.root,
@@ -271,6 +283,8 @@ export async function getPage(
     hidden: node.hidden,
     updatedAt: node.updatedAt,
     urlPath: node.urlPath,
+    prevPage: prevNode ? { title: prevNode.title, urlPath: prevNode.urlPath } : undefined,
+    nextPage: nextNode ? { title: nextNode.title, urlPath: nextNode.urlPath } : undefined,
   };
 }
 

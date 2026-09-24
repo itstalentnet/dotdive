@@ -120,6 +120,7 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.35;
   letter-spacing: normal;
   color: var(--dd-text-primary);
+  scroll-margin-top: calc(var(--dd-header-height, 48px) + 1.25rem);
 }
 
 h1 { font-size: 1.65rem; }
@@ -161,23 +162,39 @@ code, kbd, samp, pre, .ltr {
 }
 
 .prose h2 {
-  margin-top: 2rem;
-  margin-bottom: 0.65rem;
-  padding-bottom: 0.35rem;
+  margin-top: 2.25rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.4rem;
   border-bottom: 1px solid var(--dd-border-subtle);
   font-weight: 600;
 }
 
 .prose h3 {
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
+  margin-top: 1.75rem;
+  margin-bottom: 0.6rem;
   font-weight: 600;
 }
 
 .prose h4 {
-  margin-top: 1.25rem;
-  margin-bottom: 0.4rem;
+  margin-top: 1.35rem;
+  margin-bottom: 0.45rem;
   font-weight: 500;
+}
+
+.heading-anchor-link {
+  position: relative;
+  color: inherit;
+  text-decoration: none !important;
+}
+.heading-anchor-link:hover::before {
+  content: "#";
+  position: absolute;
+  right: -1.15rem;
+  top: 0;
+  color: var(--dd-accent);
+  font-size: 0.85em;
+  opacity: 0.8;
+  font-family: var(--font-mono);
 }
 
 .prose p {
@@ -246,37 +263,43 @@ code, kbd, samp, pre, .ltr {
   background-color: var(--dd-surface-2);
 }
 
-/* Callouts — Refined Notion style */
+/* Callouts — Refined Notion / GitHub style */
 .prose blockquote {
-  border-right: 2px solid var(--dd-border-focus);
+  border-right: 3px solid var(--dd-border-focus);
   background-color: var(--dd-surface-1);
-  padding: 0.65rem 1rem;
-  border-radius: 0 4px 4px 0;
-  margin-block: 1rem;
+  padding: 0.85rem 1.15rem;
+  border-radius: 6px;
+  margin-block: 1.25rem;
   color: var(--dd-text-secondary);
   font-size: 0.875rem;
-  line-height: 1.75;
+  line-height: 1.8;
+  position: relative;
 }
 
 .callout-note {
   border-right-color: var(--dd-accent) !important;
-  background-color: rgba(79, 141, 245, 0.04) !important;
+  background-color: rgba(79, 141, 245, 0.05) !important;
+  color: #d5e0f2 !important;
 }
 .callout-warning {
-  border-right-color: #eab308 !important;
-  background-color: rgba(234, 179, 8, 0.04) !important;
+  border-right-color: #f59e0b !important;
+  background-color: rgba(245, 158, 11, 0.05) !important;
+  color: #f5e4c6 !important;
 }
 .callout-tip {
-  border-right-color: #22c55e !important;
-  background-color: rgba(34, 197, 94, 0.04) !important;
+  border-right-color: #10b981 !important;
+  background-color: rgba(16, 185, 129, 0.05) !important;
+  color: #d1fae5 !important;
 }
 .callout-caution {
   border-right-color: #ef4444 !important;
-  background-color: rgba(239, 68, 68, 0.04) !important;
+  background-color: rgba(239, 68, 68, 0.05) !important;
+  color: #fed7d7 !important;
 }
 .callout-important {
   border-right-color: #a855f7 !important;
-  background-color: rgba(168, 85, 247, 0.04) !important;
+  background-color: rgba(168, 85, 247, 0.05) !important;
+  color: #f3e8ff !important;
 }
 
 /* Lists */

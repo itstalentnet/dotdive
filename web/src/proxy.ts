@@ -9,11 +9,10 @@ import { NextResponse } from "next/server";
 const PRIVATE_PATTERNS = [
   /^\/p\//,
   /^\/projects/,
-  /^\/api\/search/,
   /^\/api\/asset\//,
 ];
 
-const PUBLIC_API_PATTERNS = [/^\/api\/auth\//];
+const PUBLIC_API_PATTERNS = [/^\/api\/auth\//, /^\/api\/search/];
 
 export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
