@@ -260,17 +260,35 @@ export async function getPage(
     html = fs.readFileSync(htmlPath, "utf8");
   } else {
     // Dev fallback: render on demand
-    const fullDocPath = path.isAbsolute(node.path)
+    let fullDocPath = path.isAbsolute(node.path)
       ? node.path
       : path.join(
           getDocsDir(),
           node.path.startsWith(node.root) ? node.path : `${node.root}/${node.path}`
         );
     if (!fs.existsSync(fullDocPath)) return null;
-    const { content } = matter(fs.readFileSync(fullDocPath, "utf8"));
-    const rendered = await renderMarkdown(content);
-    html = rendered.html;
-    headings = rendered.headings;
+
+    if (fs.statSync(fullDocPath).isDirectory()) {
+      const indexMd = path.join(fullDocPath, "index.md");
+      const readmeMd = path.join(fullDocPath, "README.md");
+      if (fs.existsSync(indexMd)) {
+        fullDocPath = indexMd;
+      } else if (fs.existsSync(readmeMd)) {
+        fullDocPath = readmeMd;
+      } else {
+        return null;
+      }
+    }
+
+    try {
+      const fileContent = fs.readFileSync(fullDocPath, "utf8");
+      const { content } = matter(fileContent);
+      const rendered = await renderMarkdown(content);
+      html = rendered.html;
+      headings = rendered.headings;
+    } catch {
+      return null;
+    }
   }
 
   // Calculate prev and next pages in the same root

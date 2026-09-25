@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node --import tsx scripts/build-content.ts",
     "build": "next build",
     "build:content": "node --import tsx scripts/build-content.ts",
     "content:check": "node --import tsx scripts/content-check.ts",
