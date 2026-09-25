@@ -1,13 +1,35 @@
 import type { Metadata } from "next";
 import "@/styles/globals.css";
 
+function getMetadataBase(): URL {
+  const siteUrl = process.env.SITE_URL?.trim();
+  if (siteUrl) {
+    try {
+      return new URL(siteUrl.startsWith("http") ? siteUrl : `https://${siteUrl}`);
+    } catch {
+      // ignore
+    }
+  }
+
+  const vercelUrl = process.env.VERCEL_URL?.trim();
+  if (vercelUrl) {
+    try {
+      return new URL(`https://${vercelUrl}`);
+    } catch {
+      // ignore
+    }
+  }
+
+  return new URL("http://localhost:3000");
+}
+
 export const metadata: Metadata = {
   title: {
     template: "%s | دات دایو",
     default: "دات دایو — یک لینک تا قلب پروژه",
   },
   description: "دانش هر پروژه، همیشه در دسترس؛ مستقل از اینکه چه کسی آن را ساخته.",
-  metadataBase: new URL(process.env.SITE_URL ?? "http://localhost:3000"),
+  metadataBase: getMetadataBase(),
   icons: {
     icon: [
       { url: "/icon.svg", type: "image/svg+xml" },
