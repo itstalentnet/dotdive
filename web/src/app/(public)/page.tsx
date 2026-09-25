@@ -1,222 +1,70 @@
 import Link from "next/link";
 import {
-  BookOpen,
-  ShieldCheck,
-  Search,
-  GitBranch,
   ArrowLeft,
-  Terminal,
-  Layers,
-  Lock,
-  Workflow,
+  BookOpen,
+  BrainCircuit,
+  Check,
   FileText,
+  LockKeyhole,
+  Search,
   Sparkles,
-  ChevronLeft,
-  Compass,
-  Code2,
 } from "lucide-react";
 import { SiteHeader } from "@/components/layout/site-header";
+
+const values = [
+  { icon: LockKeyhole, title: "استقلال", text: "دانش پروژه مال کسب‌وکار است؛ نه گروگان یک تیم یا یک نفر." },
+  { icon: FileText, title: "شفافیت", text: "هر تصمیم، دلیلش و مسیر رسیدن به آن در یک مرجع زنده ثبت می‌شود." },
+  { icon: Sparkles, title: "سادگی", text: "یک لینک، یک نقطهٔ شروع روشن و بدون پنل پیچیده برای همهٔ تیم." },
+];
+
+const posts = [
+  { tag: "شروع کار", title: "چطور یک مرجع دانش برای پروژه بسازیم؟", date: "۲۴ شهریور ۱۴۰۵", time: "۶ دقیقه" },
+  { tag: "تصمیم‌گیری", title: "چرا ثبت دلیل تصمیم‌ها از خود تصمیم مهم‌تر است؟", date: "۱۸ شهریور ۱۴۰۵", time: "۴ دقیقه" },
+  { tag: "هوش مصنوعی", title: "مستنداتی که مدل هوش مصنوعی هم می‌خواند", date: "۱۰ شهریور ۱۴۰۵", time: "۷ دقیقه" },
+];
 
 export default function LandingPage() {
   return (
     <div className="landing">
       <SiteHeader />
       <main>
-        <HeroSection />
-        <WorkspacePreview />
-        <FeaturesSection />
+        <section className="hero-section">
+          <div className="hero-orbit orbit-one" />
+          <div className="hero-orbit orbit-two" />
+          <div className="landing-container hero-inner">
+            <div className="eyebrow"><span className="eyebrow-dot" />مرجع دانش پروژه‌های شما</div>
+            <h1>یک لینک تا<br /><span>قلب پروژه.</span></h1>
+            <p className="hero-copy">مستندات پروژه را زنده، قابل‌جستجو و همیشه در دسترس نگه دارید؛ برای انسان‌ها و مدل هوش مصنوعی دلخواهتان.</p>
+            <div className="hero-actions">
+              <Link href="/login" className="landing-button primary">وارد مستندات شو <ArrowLeft data-icon="inline-end" /></Link>
+              <Link href="/docs" className="landing-button secondary">مشاهدهٔ مستندات عمومی <BookOpen data-icon="inline-start" /></Link>
+            </div>
+            <div className="hero-proof"><Check /> بدون پنل اضافه <span /> <Check /> بر پایهٔ Markdown <span /> <Check /> آماده برای AI</div>
+          </div>
+        </section>
+
+        <section className="product-preview-section" aria-label="پیش‌نمایش محصول">
+          <div className="landing-container">
+            <div className="product-window">
+              <div className="window-bar"><span /><span /><span /><code>docs.dotdive / architecture / decisions</code><div className="window-status"><span className="status-dot" />همگام‌سازی شده</div></div>
+              <div className="window-body">
+                <aside className="window-sidebar"><div className="window-project"><div className="project-mark">n</div><div><strong>nons</strong><small>پروژهٔ نمونه</small></div><span>⌄</span></div><div className="window-label">مستندات</div>{["شروع کار", "معماری سیستم", "تصمیم‌های فنی", "راهنمای استقرار"].map((item, index) => <div className={`window-nav ${index === 2 ? "selected" : ""}`} key={item}><FileText />{item}</div>)}</aside>
+                <div className="window-content"><div className="window-breadcrumb">nons <span>/</span> تصمیم‌های فنی</div><h2>ثبت تصمیم‌های معماری</h2><p>چرا این مسیر را انتخاب کردیم و چه گزینه‌هایی را بررسی کردیم؟ اینجا پاسخ هر دو سؤال، کنار خود تصمیم باقی می‌ماند.</p><div className="window-callout"><BrainCircuit /><div><strong>برای انسان و ماشین</strong><span>محتوا ساختاریافته است تا مدل هوش مصنوعی شما هم بتواند از آن استفاده کند.</span></div></div><div className="fake-lines"><i /><i /><i className="short" /></div></div>
+                <aside className="window-toc"><strong>در این صفحه</strong><span className="active">مسئله چه بود؟</span><span>گزینه‌های بررسی‌شده</span><span>تصمیم نهایی</span></aside>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="values-section"><div className="landing-container"><div className="section-intro"><span className="section-kicker">چرا dotdive</span><h2>دانش پروژه، مستقل از آدم‌ها</h2><p>وقتی دلیل تصمیم‌ها ثبت باشد، تیم‌ها سریع‌تر حرکت می‌کنند و کسب‌وکارها کنترل بیشتری دارند.</p></div><div className="values-grid">{values.map(({ icon: Icon, title, text }) => <article className="value-card" key={title}><div className="value-icon"><Icon /></div><h3>{title}</h3><p>{text}</p></article>)}</div></div></section>
+
+        <section className="blog-section"><div className="landing-container"><div className="section-heading-row"><div><span className="section-kicker">از وبلاگ</span><h2>چیزهایی که یاد می‌گیریم</h2></div><Link href="/blog" className="text-link">همهٔ نوشته‌ها <ArrowLeft /></Link></div><div className="blog-grid">{posts.map((post) => <Link className="post-card" href="/blog" key={post.title}><div className="post-cover"><span>{post.tag}</span><div className="post-glyph"><Search /></div></div><div className="post-meta">{post.date}<span />{post.time} مطالعه</div><h3>{post.title}</h3><span className="read-more">خواندن نوشته <ArrowLeft /></span></Link>)}</div></div></section>
       </main>
-      <Footer />
+      <footer className="landing-footer"><div className="landing-container footer-inner"><div><strong>dotdive</strong><p>دانش پروژه، همیشه در دسترس.</p></div><nav><Link href="/about">دربارهٔ ما</Link><Link href="/contact">تماس با ما</Link><Link href="/docs">مستندات</Link><Link href="/login">ورود</Link></nav><small>© ۱۴۰۵ dotdive</small></div></footer>
     </div>
   );
 }
 
-/* ── Refined Hero ───────────────────────────────────────────── */
-function HeroSection() {
-  return (
-    <section className="hero">
-      <div className="container">
-        <div className="hero-badge">
-          <Sparkles size={12} strokeWidth={2} className="text-amber-400" />
-          <span>دانشنامه و مستندات فنی تیم‌های نرم‌افزاری</span>
-        </div>
+export const dynamic = "force-dynamic";
 
-        <h1 className="hero-title">
-          نقطهٔ شیرجه به پروژه‌ها
-          <br />
-          <span className="hero-title-accent">یکپارچه، سریع و کاملاً فارسی</span>
-        </h1>
-
-        <p className="hero-desc">
-          مستندات معماری، سرویس‌ها و جریان‌های داده را بدون دیتابیس و در قالب
-          فایل‌های سادهٔ Markdown در گیت‌هاب نگهداری کنید؛ با جستجوی هوشمند و
-          تفکیک سطوح دسترسی.
-        </p>
-
-        <div className="hero-actions">
-          <Link href="/login" className="btn-primary large">
-            <span>شروع شیرجه</span>
-            <ArrowLeft size={14} strokeWidth={2} />
-          </Link>
-          <Link href="/docs" className="btn-ghost large">
-            <BookOpen size={14} strokeWidth={1.75} />
-            <span>مشاهده مستندات عمومی</span>
-          </Link>
-        </div>
-
-        <div className="hero-specs">
-          <div className="spec-item">
-            <GitBranch size={13} strokeWidth={1.75} />
-            <span>فقط Markdown در گیت‌هاب</span>
-          </div>
-          <div className="spec-item">
-            <ShieldCheck size={13} strokeWidth={1.75} />
-            <span>تفکیک امنیتی Zero-Leak</span>
-          </div>
-          <div className="spec-item">
-            <Search size={13} strokeWidth={1.75} />
-            <span>جستجوی هوشمند فارسی</span>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ── Notion-Style Workspace Mockup ──────────────────────────── */
-function WorkspacePreview() {
-  return (
-    <div className="container">
-      <div className="preview-wrapper">
-        <div className="preview-topbar">
-          <div className="preview-controls">
-            <span className="preview-dot" />
-            <span className="preview-dot" />
-            <span className="preview-dot" />
-          </div>
-          <div className="preview-breadcrumb">
-            dotdive / nons / backend / auth-service.md
-          </div>
-          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-            <Lock size={12} strokeWidth={1.75} />
-            <span>خصوصی</span>
-          </div>
-        </div>
-
-        <div className="preview-body">
-          {/* Sidebar */}
-          <div className="preview-sidebar">
-            <div className="preview-nav-item">
-              <Compass size={13} strokeWidth={1.75} />
-              <span>پروژه nons</span>
-            </div>
-            <div className="preview-nav-item active">
-              <Lock size={13} strokeWidth={1.75} />
-              <span>سرویس احراز هویت</span>
-            </div>
-            <div className="preview-nav-item">
-              <Workflow size={13} strokeWidth={1.75} />
-              <span>چرخه سفارشات</span>
-            </div>
-            <div className="preview-nav-item">
-              <Code2 size={13} strokeWidth={1.75} />
-              <span>استاندارد خطاها</span>
-            </div>
-          </div>
-
-          {/* Document Content */}
-          <div className="preview-content">
-            <div className="preview-content-title">
-              <Lock size={16} strokeWidth={1.75} />
-              <span>جریان احراز هویت و صدور نشست‌ها</span>
-            </div>
-            <p className="preview-content-desc">
-              تمام ریشه‌های خصوصی پشت لایهٔ احراز هویت یکپارچه محافظت می‌شوند.
-              نشست‌ها به صورت HttpOnly و با سکرت رمزنگاری‌شده صادر می‌گردند.
-            </p>
-            <div className="preview-code-box">
-              <span style={{ color: "#79c0ff" }}>GET</span> /api/auth/verify?token=...<br />
-              <span style={{ color: "#7ee787" }}>200 OK</span> — Cache-Control: private, no-store
-            </div>
-          </div>
-
-          {/* Table of contents */}
-          <div className="preview-toc">
-            <div className="preview-toc-title">در این صفحه</div>
-            <div className="preview-toc-item" style={{ color: "var(--dd-accent)" }}>
-              • احراز هویت با گوگل
-            </div>
-            <div className="preview-toc-item">• کد یک‌بارمصرف (OTP)</div>
-            <div className="preview-toc-item">• دفاع در عمق</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── Features Section ───────────────────────────────────────── */
-function FeaturesSection() {
-  const features = [
-    {
-      icon: <GitBranch size={15} strokeWidth={1.75} />,
-      title: "معماری بر پایه گیت",
-      desc: "هیچ فرم، ویرایشگر آنلاین یا دیتابیسی وجود ندارد. نوشتن مستندات با commit کردن فایل‌های Markdown در ریپو انجام می‌شود.",
-    },
-    {
-      icon: <ShieldCheck size={15} strokeWidth={1.75} />,
-      title: "تفکیک امنیتی بدون نشت",
-      desc: "صفحات خصوصی هرگز در خروجی‌های استاتیک یا CDN قرار نمی‌گیرند و در هر درخواست سمت سرور اعتبارسنجی می‌شوند.",
-    },
-    {
-      icon: <Search size={15} strokeWidth={1.75} />,
-      title: "موتور جستجوی اختصاصی فارسی",
-      desc: "پردازش کامل نیم‌فاصله، نویسه‌های عربی (ی/ک)، ارقام و پیشوندها با فیلتر بلادرنگ سطح دسترسی کاربر.",
-    },
-  ];
-
-  return (
-    <section className="features">
-      <div className="container">
-        <div className="section-header">
-          <h2 className="section-title">طراحی‌شده برای تیم‌های فنی مدرن</h2>
-          <p className="section-desc">
-            ترکیب سادگی Notion با امنیت و سرعت مستندات مهندسی
-          </p>
-        </div>
-
-        <div className="features-grid">
-          {features.map((f) => (
-            <div key={f.title} className="feature-card">
-              <div className="feature-icon-wrapper">{f.icon}</div>
-              <h3 className="feature-title">{f.title}</h3>
-              <p className="feature-desc">{f.desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ── Minimal Footer ─────────────────────────────────────────── */
-function Footer() {
-  return (
-    <footer className="landing-footer">
-      <div className="container">
-        <span>dotdive — دانشنامه و نقطهٔ شیرجه زدن به پروژه‌ها</span>
-        <div className="footer-links">
-          <Link href="/docs" className="footer-link">
-            مستندات
-          </Link>
-          <Link href="/projects" className="footer-link">
-            پروژه‌ها
-          </Link>
-          <Link href="/login" className="footer-link">
-            ورود
-          </Link>
-        </div>
-      </div>
-    </footer>
-  );
-}
+      

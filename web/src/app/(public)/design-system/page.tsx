@@ -1,0 +1,7 @@
+import type { Metadata } from "next";
+import { AlertTriangle, Check, Info, Search } from "lucide-react";
+import { SiteHeader } from "@/components/layout/site-header";
+
+export const metadata: Metadata = { title: "سیستم طراحی", robots: { index: false, follow: false } };
+export default function DesignSystemPage() { return <div className="simple-page"><SiteHeader /><main className="design-shell"><span className="section-kicker">dotdive UI</span><h1>سیستم طراحی</h1><p className="lead">توکن‌ها و کامپوننت‌های پایه برای تجربه‌ای یکدست، خوانا و RTL.</p><section className="design-section"><h2>رنگ‌ها</h2><div className="swatches"><div><i className="swatch accent" /><span>accent</span></div><div><i className="swatch surface" /><span>surface</span></div><div><i className="swatch border" /><span>border</span></div></div></section><section className="design-section"><h2>دکمه‌ها و ورودی</h2><div className="component-row"><button className="landing-button primary">دکمهٔ اصلی</button><button className="landing-button secondary">دکمهٔ ثانویه</button><label className="demo-input"><Search /><input placeholder="جستجو در مستندات" /></label></div></section><section className="design-section"><h2>وضعیت‌ها</h2><div className="alerts"><div className="demo-alert info"><Info /> اطلاعات مهم برای ادامهٔ مسیر</div><div className="demo-alert success"><Check /> عملیات با موفقیت انجام شد</div><div className="demo-alert warning"><AlertTriangle /> این بخش نیاز به توجه دارد</div></div></section></main></div>; }
+      

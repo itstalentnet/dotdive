@@ -266,7 +266,7 @@ export async function getPage(
           getDocsDir(),
           node.path.startsWith(node.root) ? node.path : `${node.root}/${node.path}`
         );
-    if (!fs.existsSync(fullDocPath)) return null;
+    if (!fs.existsSync(fullDocPath) || !fs.statSync(fullDocPath).isFile()) return null;
     const { content } = matter(fs.readFileSync(fullDocPath, "utf8"));
     const rendered = await renderMarkdown(content);
     html = rendered.html;
