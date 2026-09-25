@@ -329,10 +329,23 @@ export function getPublicSitemap(): SitemapEntry[] {
   const manifest = loadManifest();
   return Object.values(manifest.nodes)
     .filter((n) => n.root === "public" && !n.hidden && !n.draft)
-    .map((n) => ({
-      url: n.urlPath,
-      lastmod: n.updatedAt?.toISOString(),
-      changefreq: "weekly",
-      priority: n.urlPath === "/" ? 1 : 0.8,
-    }));
+    .map((n) => {
+      const rawDate = n.updatedAt as unknown;
+      let lastmod: string | undefined;
+      if (rawDate instanceof Date) {
+        lastmod = rawDate.toISOString();
+      } else if (typeof rawDate === "string" && rawDate.trim()) {
+        try {
+          lastmod = new Date(rawDate).toISOString();
+        } catch {
+          lastmod = rawDate;
+        }
+      }
+      return {
+        url: n.urlPath,
+        lastmod,
+        changefreq: "weekly",
+        priority: n.urlPath === "/" ? 1 : 0.8,
+      };
+    });
 }

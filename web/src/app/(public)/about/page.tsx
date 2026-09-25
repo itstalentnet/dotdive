@@ -7,12 +7,38 @@ import { SiteFooter } from "@/components/layout/site-footer";
 
 export const metadata: Metadata = {
   title: "دربارهٔ دات دایو",
-  description: "چرا دات دایو ساخته شد و چه مشکلی را حل می‌کند",
+  description: "چرا دات دایو ساخته شد و چه مشکلی را حل می‌کند؛ استقلال دانش فنی و اتصال به هوش مصنوعی",
+  alternates: {
+    canonical: "/about",
+  },
+  openGraph: {
+    title: "دربارهٔ دات دایو",
+    description: "چرا دات دایو ساخته شد و چه مشکلی را حل می‌کند",
+    url: "/about",
+  },
+};
+
+const aboutJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  name: "دربارهٔ دات دایو",
+  url: "https://www.dotdive.ir/about",
+  description: "چرا دات دایو ساخته شد و چه مشکلی را در حفظ دانش پروژه‌ها حل می‌کند.",
+  mainEntity: {
+    "@type": "Organization",
+    name: "دات دایو",
+    alternateName: "DotDive",
+    url: "https://www.dotdive.ir",
+  },
 };
 
 export default function AboutPage() {
   return (
     <div className="public-page-wrapper">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(aboutJsonLd) }}
+      />
       <SiteHeader />
 
       <main className="page-main">

@@ -5,7 +5,29 @@ import { DocViewer } from "@/components/docs/doc-viewer";
 
 export const metadata: Metadata = {
   title: "مستندات عمومی",
-  description: "دانشنامه و مستندات باز دات دایو",
+  description: "دانشنامه و مستندات باز معماری و مهندسی دات دایو",
+  alternates: {
+    canonical: "/docs",
+  },
+  openGraph: {
+    title: "مستندات عمومی | دات دایو",
+    description: "دانشنامه و مستندات باز معماری و مهندسی دات دایو",
+    url: "/docs",
+  },
+};
+
+const docsJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "مستندات عمومی دات دایو",
+  url: "https://www.dotdive.ir/docs",
+  description: "دانشنامه و مستندات باز فنی دات دایو",
+  publisher: {
+    "@type": "Organization",
+    name: "دات دایو",
+    alternateName: "DotDive",
+    url: "https://www.dotdive.ir",
+  },
 };
 
 export default async function DocsIndexPage() {
@@ -27,10 +49,16 @@ export default async function DocsIndexPage() {
   }
 
   return (
-    <DocViewer
-      page={page}
-      tree={tree}
-      rootTitle="مستندات عمومی"
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(docsJsonLd) }}
+      />
+      <DocViewer
+        page={page}
+        tree={tree}
+        rootTitle="مستندات عمومی"
+      />
+    </>
   );
 }

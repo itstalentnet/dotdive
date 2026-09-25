@@ -25,6 +25,9 @@ export function SiteFooter() {
             <Link href="/contact" className="footer-link">
               تماس با ما
             </Link>
+            <a href="/llms.txt" className="footer-link" title="فایل متنی استاندارد هوش مصنوعی">
+              llms.txt
+            </a>
             <Link href="/login" className="footer-link">
               ورود
             </Link>

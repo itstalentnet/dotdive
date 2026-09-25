@@ -1,27 +1,50 @@
-"use client";
-
-import React, { useState } from "react";
+import React from "react";
+import type { Metadata } from "next";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { ContactForm } from "@/components/contact/contact-form";
+
+export const metadata: Metadata = {
+  title: "تماس با ما",
+  description:
+    "راه‌های ارتباط با تیم مهندسی و پشتیبانی دات دایو؛ ارسال پیام و درخواست مشاوره مستندسازی پروژه",
+  alternates: {
+    canonical: "/contact",
+  },
+  openGraph: {
+    title: "تماس با دات دایو",
+    description: "راه‌های ارتباط با تیم مهندسی و پشتیبانی دات دایو",
+    url: "/contact",
+  },
+};
+
+const contactJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  name: "تماس با دات دایو",
+  url: "https://www.dotdive.ir/contact",
+  description: "راه‌های ارتباطی، ارسال پیام و ایمیل به تیم دات دایو.",
+  mainEntity: {
+    "@type": "Organization",
+    name: "دات دایو",
+    alternateName: "DotDive",
+    url: "https://www.dotdive.ir",
+    contactPoint: {
+      "@type": "ContactPoint",
+      email: "hi@dotdive.ir",
+      contactType: "customer service",
+      availableLanguage: ["Persian", "English"],
+    },
+  },
+};
 
 export default function ContactPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [status, setStatus] = useState<"idle" | "submitting" | "sent">("idle");
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim() || !email.trim() || !message.trim()) return;
-
-    setStatus("submitting");
-    setTimeout(() => {
-      setStatus("sent");
-    }, 450);
-  };
-
   return (
     <div className="public-page-wrapper">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(contactJsonLd) }}
+      />
       <SiteHeader />
 
       <main className="page-main">
@@ -31,91 +54,14 @@ export default function ContactPage() {
             <p className="contact-desc">
               سؤالی دارید یا می‌خواهید مستندات پروژه‌تان را به دات دایو بیاورید؟
               برای ما بنویسید یا مستقیماً به{" "}
-              <a href="mailto:hi@dotdive.dev" dir="ltr">
-                hi@dotdive.dev
+              <a href="mailto:hi@dotdive.ir" dir="ltr" className="hover:underline">
+                hi@dotdive.ir
               </a>{" "}
               ایمیل ارسال کنید.
             </p>
           </header>
 
-          {status === "sent" ? (
-            <div className="contact-success">
-              <h2 className="contact-success-title">پیام شما دریافت شد</h2>
-              <p className="contact-success-desc">
-                با تشکر از پیام شما؛ در کوتاه‌ترین زمان پاسخ خواهیم داد.
-              </p>
-              <button
-                type="button"
-                className="btn-minimal"
-                onClick={() => {
-                  setStatus("idle");
-                  setName("");
-                  setEmail("");
-                  setMessage("");
-                }}
-                style={{ marginTop: "1.25rem", height: "34px", fontSize: "0.8rem" }}
-              >
-                ارسال پیام جدید
-              </button>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="contact-form" noValidate>
-              <div className="contact-field">
-                <label htmlFor="contact-name" className="contact-label">
-                  نام
-                </label>
-                <input
-                  id="contact-name"
-                  type="text"
-                  required
-                  className="contact-input"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="نام شما"
-                />
-              </div>
-
-              <div className="contact-field">
-                <label htmlFor="contact-email" className="contact-label">
-                  ایمیل
-                </label>
-                <input
-                  id="contact-email"
-                  type="email"
-                  required
-                  dir="ltr"
-                  className="contact-input"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.com"
-                />
-              </div>
-
-              <div className="contact-field">
-                <label htmlFor="contact-message" className="contact-label">
-                  پیام
-                </label>
-                <textarea
-                  id="contact-message"
-                  required
-                  rows={5}
-                  className="contact-textarea"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="پیام یا توضیحات پروژه..."
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="btn-minimal"
-                disabled={status === "submitting"}
-                style={{ width: "100%", marginTop: "0.25rem" }}
-              >
-                {status === "submitting" ? "در حال ارسال..." : "ارسال پیام"}
-              </button>
-            </form>
-          )}
+          <ContactForm />
         </div>
       </main>
 

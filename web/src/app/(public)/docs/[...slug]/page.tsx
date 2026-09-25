@@ -16,9 +16,27 @@ export async function generateMetadata({
 
   if (!page) return { title: "مستند پیدا نشد" };
 
+  const description =
+    page.description ||
+    `مستند فنی و راهنمای مهندسی ${page.title} در پایگاه دانش دات دایو`;
+
   return {
     title: page.title,
-    description: page.description,
+    description,
+    alternates: {
+      canonical: urlPath,
+    },
+    openGraph: {
+      title: `${page.title} | مستندات دات دایو`,
+      description,
+      url: urlPath,
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${page.title} | مستندات دات دایو`,
+      description,
+    },
   };
 }
 
@@ -35,11 +53,75 @@ export default async function DocSubPage({ params }: DocPageProps) {
     notFound();
   }
 
+  const rawSiteUrl = process.env.SITE_URL?.trim();
+  const siteUrl = (
+    rawSiteUrl && rawSiteUrl.startsWith("http")
+      ? rawSiteUrl
+      : "https://www.dotdive.ir"
+  ).replace(/\/+$/, "");
+
+  const fullUrl = `${siteUrl}${urlPath}`;
+
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "TechArticle",
+        "@id": `${fullUrl}#article`,
+        url: fullUrl,
+        headline: page.title,
+        description: page.description || `مستند فنی ${page.title}`,
+        inLanguage: "fa-IR",
+        mainEntityOfPage: fullUrl,
+        dateModified: page.updatedAt
+          ? new Date(page.updatedAt).toISOString()
+          : undefined,
+        publisher: {
+          "@type": "Organization",
+          name: "دات دایو",
+          alternateName: "DotDive",
+          url: siteUrl,
+          logo: `${siteUrl}/icon.svg`,
+        },
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${fullUrl}#breadcrumb`,
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "دات دایو",
+            item: siteUrl,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "مستندات",
+            item: `${siteUrl}/docs`,
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: page.title,
+            item: fullUrl,
+          },
+        ],
+      },
+    ],
+  };
+
   return (
-    <DocViewer
-      page={page}
-      tree={tree}
-      rootTitle="مستندات عمومی"
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <DocViewer
+        page={page}
+        tree={tree}
+        rootTitle="مستندات عمومی"
+      />
+    </>
   );
 }
