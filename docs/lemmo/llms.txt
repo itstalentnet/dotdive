@@ -4,7 +4,9 @@
 
 ## Architecture & Core System Rules
 
-- [ADR-004: Proposed Backend Service and Tenant Boundaries](01-architecture/decisions/adr-004-backend-microservices.md): Proposed decision record for independent backend services, tenant/project authorization and durable AI execution; pending architecture review.
+- [ADR-004: Proposed Backend Service and Tenant Boundaries](01-architecture/decisions/adr-004-backend-microservices.md): Decision record for independent backend services, tenant/project authorization and durable AI execution based on ratified backend specifications.
+- [ADR-005: Frontend Styling Strategy with Tailwind CSS v4 in app/](01-architecture/decisions/ADR-005-tailwind-v4-styling-strategy.md): Authoritative decision locking Tailwind CSS v4 as the official styling strategy for app/, superseding CSS Modules.
+- [ADR-006: Auth Gateway Scope and Deferred Component System Integration](01-architecture/decisions/ADR-006-auth-gateway-and-deferred-components.md): Designates auth/ as the sole system authentication gateway and defers shared component system integration until after backend-frontend connectivity.
 - [Documentation Agent Rules & Zero-Contradiction Governance](09-governance/rules.md): Binding operational rules, strict zero-contradiction policy, and STOP protocol for AI agents modifying the Lemmo documentation repo.
 - [Lemmo Documentation Guidelines & Single Source of Truth (SSOT)](index.md): Central index, folder governance, authoring standards, and architectural blueprints for Lemmo.
 - [Lemmo Frontend Rules & Agent Constraints](01-architecture/AGENTS.md): Mandatory engineering constraints, import boundaries, token rules, and coding standards for developers and AI agents.

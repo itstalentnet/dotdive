@@ -4,11 +4,11 @@
 | **Title (FA)** | ADR-004: پیشنهاد مرز سرویس‌ها و مدل چندمستأجری بک‌اند |
 | **ID** | DOC-ARCH-004 |
 | **Category** | `architecture` |
-| **Status** | `Draft` |
+| **Status** | `Approved` |
 | **Owner** | Backend & Platform Team |
-| **Last Updated** | 2026-09-23 |
-| **Summary (EN)** | Proposed decision record for independent backend services, tenant/project authorization and durable AI execution; pending architecture review. |
-| **Summary (FA)** | ثبت پیشنهاد استقلال سرویس‌های بک‌اند، مجوز پروژه‌ای و اجرای پایدار هوش مصنوعی؛ در انتظار بررسی معماری. |
+| **Last Updated** | 2026-09-26 |
+| **Summary (EN)** | Decision record for independent backend services, tenant/project authorization and durable AI execution based on ratified backend specifications. |
+| **Summary (FA)** | ثبت تصمیم استقلال سرویس‌های بک‌اند، مدل چندمستأجری و اجرای پایدار بر اساس معماری مصوب nons-api. |
 | **Tags** | `adr`, `backend`, `microservices`, `multi-tenancy` |
 
 ---

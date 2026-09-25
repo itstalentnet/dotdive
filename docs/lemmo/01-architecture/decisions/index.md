@@ -15,4 +15,6 @@ icon: "file-check"
 - **[ADR-002: استک تست و فرم‌ها](./ADR-002-form-test-stack.md)** — انتخاب کتابخانه‌های مدیریت فرم و استراتژی آزمون
 - **[ADR-003: ممیزی منبع یگانه حقیقت](./ADR-003-single-source-of-truth-audit.md)** — اعتبارسنجی انطباق با قواعد SSOT
 - **[ADR-004: مایکروسرویس‌های بک‌اند](./adr-004-backend-microservices.md)** — توپولوژی سرویس‌های بک‌اند و نحوه ارتباطات
+- **[ADR-005: استراتژی استایل‌دهی Tailwind CSS v4 در app](./ADR-005-tailwind-v4-styling-strategy.md)** — تثبیت Tailwind v4 و لغو الزام CSS Modules
+- **[ADR-006: مرزبندی احراز هویت و تعویق سیستم کامپوننت](./ADR-006-auth-gateway-and-deferred-components.md)** — درگاه انحصاری auth و تعویق یکپارچه‌سازی کامپوننت مشترک
 - **[پروپوزال استخراج دیزاین سیستم](./proposal-design-system-extraction.md)** — طرح تفکیک پکیج دیزاین سیستم به عنوان پکیج مستقل
