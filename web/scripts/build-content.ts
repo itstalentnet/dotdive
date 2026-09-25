@@ -73,6 +73,9 @@ const FOLDER_TITLE_FALLBACKS: Record<string, string> = {
   roadmap: "نقشه راه",
   templates: "قالب‌ها",
   decisions: "تصمیمات",
+  overview: "معرفی و دید کلی",
+  operations: "عملیات و برندینگ",
+  governance: "قوانین و استانداردها",
 };
 
 /* ── Main ────────────────────────────────────────────────────── */
@@ -554,8 +557,9 @@ function buildUrlPath(root: string, relPath: string): string {
   const clean = relPath
     .replace(/\.md$/, "")
     .replace(/\/index$/, "")
-    .replace(/\/?\d+-/g, "/")
-    .replace(/^index$/, "");
+    .replace(/(^|\/)\d+-/g, "$1")
+    .replace(/^index$/, "")
+    .replace(/^\/+/, "");
 
   if (root === "public") return clean ? `/${clean}` : "/";
   return clean ? `/p/${root}/${clean}` : `/p/${root}`;

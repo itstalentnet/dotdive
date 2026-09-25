@@ -175,12 +175,14 @@ function buildUrlPath(root: string, relPath: string): string {
   const cleanPath = relPath
     .replace(/\.md$/, "")
     .replace(/\/index$/, "")
-    .replace(/^\d+-/, "");
+    .replace(/(^|\/)\d+-/g, "$1")
+    .replace(/^index$/, "")
+    .replace(/^\/+/, "");
 
   if (root === "public") {
-    return `/${cleanPath}`;
+    return cleanPath ? `/${cleanPath}` : "/";
   }
-  return `/p/${root}/${cleanPath}`;
+  return cleanPath ? `/p/${root}/${cleanPath}` : `/p/${root}`;
 }
 
 /* ══════════════════════════════════════════════════════════════
