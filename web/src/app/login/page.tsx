@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 interface LoginPageProps {
-  searchParams: Promise<{ next?: string; error?: string; email?: string }>;
+  searchParams: Promise<{ next?: string; error?: string; email?: string; reason?: string }>;
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
@@ -50,7 +50,17 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 ایمیل {params.email ? <strong dir="ltr">{params.email}</strong> : "شما"} مجاز به دسترسی به پروژه‌های خصوصی نیست.
               </span>
             ) : params.error === "misconfigured" ? (
-              <span>تنظیمات احراز هویت در سیستم کامل نیست.</span>
+              <span>تنظیمات احراز هویت در سیستم کامل نیست (Client ID یا Client Secret ثبت نشده است).</span>
+            ) : params.error === "token_exchange_failed" ? (
+              <span>
+                {params.reason === "redirect_uri_mismatch"
+                  ? "آدرس بازگشت (Redirect URI) با کنسول گوگل همخوانی ندارد. لطفاً هر دو آدرس https://www.dotdive.ir/api/auth/google/callback و https://dotdive.ir/api/auth/google/callback را در کنسول گوگل ثبت کنید."
+                  : params.reason === "invalid_client"
+                  ? "کلید Client Secret در تنظیمات Vercel اشتباه یا منقضی است. لطفاً متغیر GOOGLE_CLIENT_SECRET را در Vercel بررسی کنید."
+                  : params.reason === "invalid_grant"
+                  ? "کد احراز هویت گوگل منقضی یا نامعتبر شده است. لطفاً دوباره امتحان کنید."
+                  : `خطا در تأیید با گوگل${params.reason ? ` (${params.reason})` : ""}.`}
+              </span>
             ) : (
               <span>خطایی در فرآیند ورود رخ داد. دوباره امتحان کنید.</span>
             )}

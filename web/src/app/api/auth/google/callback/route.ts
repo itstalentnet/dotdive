@@ -2,18 +2,32 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSessionToken } from "@/server/auth/session";
 import { getAccessContext } from "@/server/access/index";
 
+function getBaseOrigin(request: NextRequest): string {
+  if (process.env.SITE_URL) {
+    const raw = process.env.SITE_URL.trim();
+    if (raw.startsWith("http://") || raw.startsWith("https://")) {
+      return raw.replace(/\/+$/, "");
+    }
+  }
+  const hostHeader =
+    request.headers.get("x-forwarded-host") ||
+    request.headers.get("host") ||
+    request.nextUrl.host ||
+    "localhost:3000";
+  const host = hostHeader.split(",")[0].trim();
+  const isLocal = host.startsWith("localhost") || host.startsWith("127.0.0.1");
+  const protoHeader = request.headers.get("x-forwarded-proto")?.split(",")[0].trim();
+  const proto = protoHeader || (isLocal ? "http" : "https");
+  return `${proto}://${host}`;
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const state = searchParams.get("state");
   const errorParam = searchParams.get("error");
 
-  const host =
-    request.headers.get("x-forwarded-host") ||
-    request.headers.get("host") ||
-    "localhost:3000";
-  const proto = request.headers.get("x-forwarded-proto") || "http";
-  const origin = `${proto}://${host}`;
+  const origin = getBaseOrigin(request);
 
   if (errorParam || !code || !state) {
     return NextResponse.redirect(`${origin}/login?error=oauth_failed`);
@@ -22,11 +36,13 @@ export async function GET(request: NextRequest) {
   // Parse state
   let nextUrl = "/projects";
   let stateNonce = "";
+  let stateRedirectUri = "";
   try {
     const parsedState = JSON.parse(
       Buffer.from(state, "base64url").toString("utf8")
     );
     stateNonce = parsedState.nonce;
+    stateRedirectUri = parsedState.redirectUri;
     if (
       parsedState.next &&
       typeof parsedState.next === "string" &&
@@ -45,15 +61,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/login?error=invalid_state`);
   }
 
-  const clientId = process.env.CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET;
+  const rawClientId = process.env.CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
+  const rawClientSecret = process.env.CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET;
+
+  const clientId = rawClientId?.trim().replace(/^["']|["']$/g, "").trim();
+  const clientSecret = rawClientSecret?.trim().replace(/^["']|["']$/g, "").trim();
 
   if (!clientId || !clientSecret) {
     return NextResponse.redirect(`${origin}/login?error=misconfigured`);
   }
 
-  // Reconstruct exact redirect_uri used in initiation
-  const redirectUri = `${origin}/api/auth/google/callback`;
+  // Use the exact redirect_uri recorded in state, fallback to current origin
+  const redirectUri = stateRedirectUri || `${origin}/api/auth/google/callback`;
 
   // Exchange code for Google tokens
   try {
@@ -70,7 +89,18 @@ export async function GET(request: NextRequest) {
     });
 
     if (!tokenResponse.ok) {
-      return NextResponse.redirect(`${origin}/login?error=token_exchange_failed`);
+      const errorBody = await tokenResponse.text();
+      console.error("[Google OAuth Error] Token exchange failed:", tokenResponse.status, errorBody);
+      let reason = "unknown";
+      try {
+        const parsed = JSON.parse(errorBody);
+        reason = parsed.error || reason;
+      } catch {
+        reason = errorBody.slice(0, 100);
+      }
+      return NextResponse.redirect(
+        `${origin}/login?error=token_exchange_failed&reason=${encodeURIComponent(reason)}`
+      );
     }
 
     const tokenData = await tokenResponse.json();

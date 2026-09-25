@@ -1,8 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "node:crypto";
 
+function getBaseOrigin(request: NextRequest): string {
+  if (process.env.SITE_URL) {
+    const raw = process.env.SITE_URL.trim();
+    if (raw.startsWith("http://") || raw.startsWith("https://")) {
+      return raw.replace(/\/+$/, "");
+    }
+  }
+  const hostHeader =
+    request.headers.get("x-forwarded-host") ||
+    request.headers.get("host") ||
+    request.nextUrl.host ||
+    "localhost:3000";
+  const host = hostHeader.split(",")[0].trim();
+  const isLocal = host.startsWith("localhost") || host.startsWith("127.0.0.1");
+  const protoHeader = request.headers.get("x-forwarded-proto")?.split(",")[0].trim();
+  const proto = protoHeader || (isLocal ? "http" : "https");
+  return `${proto}://${host}`;
+}
+
 export async function GET(request: NextRequest) {
-  const clientId = process.env.CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
+  const rawClientId = process.env.CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
+  const clientId = rawClientId?.trim().replace(/^["']|["']$/g, "").trim();
   if (!clientId) {
     return NextResponse.json(
       { error: "Google OAuth is not configured (CLIENT_ID missing)" },
@@ -13,20 +33,15 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const next = searchParams.get("next") || "/projects";
 
-  // Generate random state nonce to prevent CSRF
+  // Determine redirect URI
+  const origin = getBaseOrigin(request);
+  const redirectUri = `${origin}/api/auth/google/callback`;
+
+  // Generate random state nonce to prevent CSRF and embed redirectUri
   const stateNonce = crypto.randomBytes(16).toString("hex");
   const statePayload = Buffer.from(
-    JSON.stringify({ nonce: stateNonce, next })
+    JSON.stringify({ nonce: stateNonce, next, redirectUri })
   ).toString("base64url");
-
-  // Determine redirect URI
-  const host =
-    request.headers.get("x-forwarded-host") ||
-    request.headers.get("host") ||
-    "localhost:3000";
-  const proto = request.headers.get("x-forwarded-proto") || "http";
-  const origin = `${proto}://${host}`;
-  const redirectUri = `${origin}/api/auth/google/callback`;
 
   const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
   authUrl.searchParams.set("client_id", clientId);
