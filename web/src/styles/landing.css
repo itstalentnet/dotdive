@@ -9,6 +9,20 @@
 .hero-section h1 { max-width: 760px; margin: 26px auto 18px; font-size: clamp(3rem, 9vw, 6.3rem); font-weight: 700; letter-spacing: -.06em; line-height: 1.12; }
 .hero-section h1 span { color: var(--dd-accent); }
 .hero-copy { max-width: 590px; margin: 0 auto; color: var(--dd-text-secondary); font-size: 1.05rem; line-height: 2; }
+.ai-prompt { width: min(100%, 620px); margin: 32px auto 0; padding: 16px; border: 1px solid var(--dd-border); border-radius: 14px; background: color-mix(in srgb, var(--dd-surface-1) 92%, transparent); box-shadow: 0 20px 60px rgba(0,0,0,.22); text-align: start; }
+.prompt-topline, .prompt-footer { display: flex; align-items: center; gap: 8px; color: var(--dd-text-muted); font-size: .75rem; }
+.prompt-topline svg { width: 15px; color: var(--dd-accent); }
+.ai-prompt textarea { width: 100%; min-height: 92px; margin: 13px 0; padding: 0; border: 0; outline: 0; resize: vertical; background: transparent; color: var(--dd-text-primary); font: inherit; line-height: 1.9; }
+.ai-prompt textarea::placeholder { color: var(--dd-text-muted); }
+.prompt-footer { justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--dd-border); }
+.prompt-footer button { display: grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 8px; background: var(--dd-accent); color: #071316; cursor: pointer; }
+.prompt-footer button:hover { background: var(--dd-accent-hover); }
+.prompt-footer button svg { width: 16px; }
+.hero-links { display: flex; align-items: center; justify-content: center; gap: 22px; margin-top: 20px; }
+.text-link { color: var(--dd-text-secondary); font-size: .82rem; }
+.text-link:hover { color: var(--dd-accent); }
+.hero-grid { position: absolute; inset: 0; z-index: -2; opacity: .5; background-image: linear-gradient(var(--dd-border) 1px, transparent 1px), linear-gradient(90deg, var(--dd-border) 1px, transparent 1px); background-size: 72px 72px; mask-image: linear-gradient(to bottom, black, transparent 75%); }
+.hero-glow { position: absolute; top: 10%; left: 50%; z-index: -1; width: 560px; height: 300px; transform: translateX(-50%); background: color-mix(in srgb, var(--dd-accent) 12%, transparent); filter: blur(90px); pointer-events: none; }
 .hero-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 30px; }
 .landing-button { min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 0 20px; border-radius: 8px; font-size: .9rem; font-weight: 700; transition: transform .2s, background .2s, border-color .2s; }
 .landing-button:hover { transform: translateY(-2px); }.landing-button.primary { background: var(--dd-accent); color: #071316; }.landing-button.primary:hover { background: var(--dd-accent-hover); }.landing-button.secondary { border: 1px solid var(--dd-border); color: var(--dd-text-primary); background: var(--dd-surface-1); }.landing-button.secondary:hover { border-color: var(--dd-accent); }
