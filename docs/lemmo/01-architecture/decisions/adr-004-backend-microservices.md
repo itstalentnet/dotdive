@@ -17,15 +17,15 @@
 
 ## زمینه
 
-فرانت لمو مسیر تولید AI، بوم، فایل، اعضا، افزونه و اعتبار را نشان می‌دهد؛ درخواست ۲۰۲۶-۰۹-۲۳ هدف میکروسرویس و دعوت تیم به پروژه را صریح می‌کند. `api` هنوز پیاده‌سازی دامنه ندارد. [ممیزی فرانت](../../backend/frontend-requirements-audit.md) وضعیت مشاهده‌شده و [ارزیابی نونز](../../backend/dotdive-reuse-assessment.md) محدودیت انتقال معماری قبلی را ثبت کرده‌اند.
+فرانت لمو مسیر تولید AI، بوم، فایل، اعضا، افزونه و اعتبار را نشان می‌دهد؛ هدف میکروسرویس و دعوت تیم به پروژه بر اساس معماری nons-api در [معماری بک‌اند](../../03-backend/architecture.md) ثبت شده است.
 
-## تصمیم پیشنهادی — هنوز تصویب نشده
+## تصمیم رسمی
 
-1. سرویس‌ها بر اساس bounded context، با داده و استقرار مستقل مطابق [DOC-BE-003](../../backend/architecture.md) ساخته شوند. مونورپو به معنای shared database یا release اجباری همزمان نیست.
-2. Workspace مرز tenant و billing، Project مرز همکاری، Team گروه اعضای همان tenant باشد. احراز هویت از مجوز منبع جدا و مدل دسترسی مطابق [DOC-BE-004](../../backend/auth-and-workspace.md) باشد.
-3. اجرای AI پایدار و asynchronous با outbox/inbox، idempotency و Saga رزرو/تسویه اعتبار باشد؛ frontend state مرجع Job نیست.
-4. schema-driven plugins و SDK واحد مطابق تصمیم Active فرانت حفظ شوند؛ استقلال افزونه به قرارداد نسخه‌دار و runtime مناسب متکی باشد، طبق [DOC-BE-008](../../backend/plugin-contract.md).
-5. انتخاب‌های زبان، IdP، broker، استقرار و سیاست‌های تجاری طبق گیت‌های [DOC-BE-009](../../backend/decision-register.md) بررسی شوند. این ADR بدون امضای تیم آن انتخاب‌ها را قفل نمی‌کند.
+1. سرویس‌ها بر اساس bounded context، با داده و استقرار مستقل مطابق [DOC-BE-001](../../03-backend/architecture.md) ساخته شوند. مونورپو به معنای shared database یا release اجباری همزمان نیست.
+2. Workspace مرز tenant و billing، Project مرز همکاری، Team گروه اعضای همان tenant باشد. کاتالوگ سرویس‌ها و تفکیک مسئولیت‌ها مطابق [DOC-BE-002](../../03-backend/services.md) است.
+3. اجرای AI پایدار و asynchronous با outbox/inbox، idempotency و ثبت اتمیک مصرف در صف‌های پیام باشد.
+4. قراردادهای سیستم بر پایه Protobuf و پاکت رویدادها (EventEnvelope) طبق [DOC-BE-003](../../03-backend/contracts.md) تعریف شوند.
+5. استانداردهای کدنویسی زبان Go، تنظیمات golangci-lint، پاکت خطا بر اساس AIP-193 و ساختار مایگریشن‌ها مطابق [DOC-BE-004](../../03-backend/style-guide.md) است.
 
 ## گزینه‌ها
 

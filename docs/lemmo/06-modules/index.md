@@ -22,7 +22,7 @@ icon: "blocks"
 
 # ماژول‌های دامنه برنامه کاربردی (Workspace Modules)
 
-مطابق با سند معماری مرجع فرانت‌اند ([DOC-FE-001](../frontend/workspace-architecture.md))، کلیه منطق‌های دامنه (Domain Logic) پروژه به صورت کاملاً ماژولار و مستقل از مسیرها (Routes) در پوشه `src/modules/` قرار دارند.
+مطابق با سند معماری مرجع فرانت‌اند ([DOC-FE-001](../02-frontend/workspace-architecture.md))، کلیه منطق‌های دامنه (Domain Logic) پروژه به صورت کاملاً ماژولار و مستقل از مسیرها (Routes) در پوشه `src/modules/` قرار دارند.
 
 ## ساختار ماژول‌ها
 
@@ -44,5 +44,5 @@ icon: "blocks"
 ---
 
 ## اسناد مرجع
-- [معماری فرانت‌اند Workspace — ساختار پوشه‌ها و قوانین وابستگی (DOC-FE-001)](../frontend/workspace-architecture.md)
-- [تصمیمات کلیدی معماری: سیستم پلاگین ابزار، لایه SDK و Job Manager (DOC-FE-002)](../frontend/workspace-decisions.md)
+- [معماری فرانت‌اند Workspace — ساختار پوشه‌ها و قوانین وابستگی (DOC-FE-001)](../02-frontend/workspace-architecture.md)
+- [تصمیمات کلیدی معماری: سیستم پلاگین ابزار، لایه SDK و Job Manager (DOC-FE-002)](../02-frontend/workspace-decisions.md)

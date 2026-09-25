@@ -33,6 +33,6 @@ icon: "layout"
 - **قوانین باندری:** مرزهای ایمپورت لایه‌ها (`app → modules → tool-engine → sdk → backend`).
 
 ## اسناد کلیدی مرتبط
-- [قوانین ایجنت‌ها و الزامات کدنویسی (DOC-ARCH-001)](../architecture/AGENTS.md)
-- [نمای کلی ماژول‌های دامنه و فیچرها (DOC-MOD-000)](../modules/README.md)
-- [راهنمای استایل و دیزاین سیستم (DOC-DS-001)](../design-system/STYLEGUIDE.md)
+- [قوانین ایجنت‌ها و الزامات کدنویسی (DOC-ARCH-001)](../01-architecture/AGENTS.md)
+- [نمای کلی ماژول‌های دامنه و فیچرها (DOC-MOD-000)](../06-modules/index.md)
+- [راهنمای استایل و دیزاین سیستم (DOC-DS-001)](../04-design-system/STYLEGUIDE.md)

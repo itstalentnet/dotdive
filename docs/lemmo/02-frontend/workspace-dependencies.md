@@ -183,8 +183,8 @@ export const fontSatoshi = localFont({
 ### اسناد حیاتی مرتبط با `app`:
 - **[`docs/frontend/workspace-architecture.md`](./workspace-architecture.md) (DOC-FE-001):** سند مصوب و قفل‌شده معماری Next.js، ساختار پوشه‌ها و قوانین مرز لایه‌ها.
 - **[`docs/frontend/workspace-decisions.md`](./workspace-decisions.md) (DOC-FE-002):** تصمیمات کلیدی معماری سیستم ابزار مانیفست‌محور، گلوگاه `@/sdk` و معماری عدم نشت دیتای ساختگی (Zero-Leakage Mock).
-- **[`docs/AGENTS.md`](../AGENTS.md) (DOC-META-002):** قوانین الزامی ایجنت‌ها، پروتکل توقف فوری (STOP Protocol) و دستورالعمل‌های ضدتضاد.
-- **[`docs/design-system/STYLEGUIDE.md`](../design-system/STYLEGUIDE.md) (DOC-DS-001):** راهنمای جامع مصرف توکن‌ها و الگوهای تعاملی.
+- **[`docs/AGENTS.md`](../01-architecture/AGENTS.md) (DOC-META-002):** قوانین الزامی ایجنت‌ها، پروتکل توقف فوری (STOP Protocol) و دستورالعمل‌های ضدتضاد.
+- **[`docs/design-system/STYLEGUIDE.md`](../04-design-system/STYLEGUIDE.md) (DOC-DS-001):** راهنمای جامع مصرف توکن‌ها و الگوهای تعاملی.
 - **[`docs/llms.txt`](../llms.txt):** ایندکس هوشمند تمام اسناد برای مدل‌های زبانی.
 
 ---

@@ -50,7 +50,7 @@ This rule applies to humans and to AI agents alike.
 
 ## 1. Architecture and boundaries (Workspace — Next.js)
 
-> Authoritative reference: [DOC-FE-001 — Workspace Frontend Architecture](../frontend/workspace-architecture.md) and [DOC-FE-002 — Workspace Architectural Decisions](../frontend/workspace-decisions.md).
+> Authoritative reference: [DOC-FE-001 — Workspace Frontend Architecture](../02-frontend/workspace-architecture.md) and [DOC-FE-002 — Workspace Architectural Decisions](../02-frontend/workspace-decisions.md).
 
 Strict unidirectional dependency flow (enforced by linting and architecture review):
 `app → modules → tool-engine → sdk → backend` (and `shared` as utility layer across all levels, never reversed).
@@ -79,16 +79,13 @@ src/
 
 ## 2. Styling (CSS strategy — finalized)
 
-Strategy: **Vanilla CSS + CSS Modules**, scoped per component.
+Strategy: **Tailwind CSS v4** (with token integration via `@tailwindcss/postcss` and `@lemmo-lab/tokens`).
 
-- Every component gets a co-located `X.module.css` (`camelCaseOnly`; unitClass
-  is reachable as `styles.unitClass`).
-- Values come ONLY from tokens: `var(--lemmo-*)`. `padding: var(--lemmo-space-300)`
-  is legal; `padding: 17px` is NOT.
-- No hardcoded hex anywhere (linted). No "design by eye" — if a token does not
-  exist, REQUEST it from the designer.
-- Layout-only/global styles may live in `src/styles/*.css` (e.g. tokens.css,
-  global.css); component styles must be CSS Modules.
+- Styling is driven by Tailwind CSS v4 utility classes bound to Lemmo design tokens.
+- Values come ONLY from tokens: `var(--lemmo-*)` or mapped Tailwind theme token classes. Using token variables/utilities is legal; arbitrary hardcoded pixel values (`17px`) are NOT.
+- No hardcoded hex anywhere (linted). No "design by eye" — if a token does not exist, REQUEST it from the designer.
+- Global styles and token imports live in `src/styles/` (e.g. `globals.css`).
+- CSS Modules are no longer the required styling strategy for `app/` (superseded by Tailwind CSS v4 per architectural decision).
 
 ## 3. Design system constraints
 

@@ -35,5 +35,5 @@ icon: "badge-check"
    - فاوآیکون رسمی نسخه رستر و بهینه‌شده در فایل `favicon.ico` قرار دارد.
 
 ## اسناد و منابع مرتبط
-- [مشخصات فنی و استفاده از لوگو](../design-system/logo.md)
-- [سیستم پالت رنگ](../design-system/color.md)
+- [مشخصات فنی و استفاده از لوگو](../04-design-system/logo.md)
+- [سیستم پالت رنگ](../04-design-system/color.md)

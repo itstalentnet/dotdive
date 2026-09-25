@@ -6,8 +6,8 @@
 > ⚠️ **این تصمیم معماری منسوخ شده است (SUPERSEDED):**  
 > این سند مربوط به معماری قدیمی SPA در فاز ۳ است. مدل ۵ لایه‌ای شامل `features/` و روتینگ React Router v6 به طور کامل منسوخ شده و با معماری نهایی **Next.js Workspace** جایگزین شده است.  
 > برای دسترسی به معماری معتبر و قفل‌شده به اسناد زیر مراجعه کنید:  
-> - [معماری فرانت‌اند Workspace — Next.js (DOC-FE-001)](../../frontend/workspace-architecture.md)  
-> - [تصمیمات کلیدی معماری: سیستم پلاگین و SDK (DOC-FE-002)](../../frontend/workspace-decisions.md)
+> - [معماری فرانت‌اند Workspace — Next.js (DOC-FE-001)](../../02-frontend/workspace-architecture.md)  
+> - [تصمیمات کلیدی معماری: سیستم پلاگین و SDK (DOC-FE-002)](../../02-frontend/workspace-decisions.md)
 
 ## Context
 

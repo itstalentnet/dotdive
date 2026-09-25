@@ -1,0 +1,77 @@
+# Lemmo Documentation
+
+> Lemmo is an integrated AI creative suite bridging generative AI models with an infinite interactive canvas. This index provides structured references to the system architecture, design tokens, frontend, backend, branding, and DevOps standards.
+
+## Architecture & Core System Rules
+
+- [ADR-004: Proposed Backend Service and Tenant Boundaries](01-architecture/decisions/adr-004-backend-microservices.md): Proposed decision record for independent backend services, tenant/project authorization and durable AI execution; pending architecture review.
+- [Documentation Agent Rules & Zero-Contradiction Governance](09-governance/rules.md): Binding operational rules, strict zero-contradiction policy, and STOP protocol for AI agents modifying the Lemmo documentation repo.
+- [Lemmo Documentation Guidelines & Single Source of Truth (SSOT)](index.md): Central index, folder governance, authoring standards, and architectural blueprints for Lemmo.
+- [Lemmo Frontend Rules & Agent Constraints](01-architecture/AGENTS.md): Mandatory engineering constraints, import boundaries, token rules, and coding standards for developers and AI agents.
+
+## Design System & Tokens
+
+- [AI Design Decision Principles & Judgment Framework](04-design-system/design-decision-principles.md): Functional decision-making rules, relational spacing, typography scales, animation budgets, and UX patterns guiding AI models beyond raw tokens.
+- [Agent-Operable Interfaces & Accessibility Tree Architecture](04-design-system/agent-operable-interfaces.md): Designing interfaces operable by AI agents via the accessibility tree, Name/Role/Value triad, stable Playwright locators, WebMCP standard, and race-condition prevention.
+- [Assistive Technology, Micro-States & Error Handling Principles](04-design-system/assistive-technology-and-microstates.md): WCAG 1.4.13 hover/focus standards, accessible alt text and labels, skeleton vs spinner loading guidelines, ARIA live regions, and structured error/empty states.
+- [Color Tokens, Semantic Palette & Contrast Audit](04-design-system/color.md): Color tokens, dark theme specification, brand accents, status colors, and WCAG AA contrast compliance.
+- [Container Relationship Styling & Inheritance Architecture](04-design-system/container-relationship-and-inheritance.md): Concentric border-radius mathematical formula, container padding custom properties, three-tier token inheritance, and density synchronization to eliminate hardcoded child styles.
+- [Design System Style Guide & Implementation Standards](04-design-system/STYLEGUIDE.md): Executive summary and mandatory rules for token consumption, colors, typography, spacing, and accessibility.
+- [Iconography Standards & Synthline Rules](04-design-system/iconography.md): Synthline icon set specification, sizing ladder (12-28px), stroke-width rules, and accessibility guidelines.
+- [Responsive Decision Principles & Algorithmic Layout Framework](04-design-system/responsive-decision-principles.md): Algorithmic and composable layout design principles, puzzle grid column scaling, responsive image rules, carousel constraints, Priority+ navigation, and back-button behaviors across viewport sizes.
+- [Typography, Font Stacks & Type Scale Rules](04-design-system/typography.md): Typography specifications, font loading (Satoshi, Oddval), type scale ladder, and language switching rules.
+- [UI/UX Design System Guidelines: Direction, Layout, Responsive & Interaction Principles](04-design-system/interaction-and-layout.md): Comprehensive framework for logical layout, Start/End directionality, directional vs non-directional icons, action hierarchy, dropdown behaviors, progressive reduction, and decision rules.
+
+## Brand Identity & Visual Guidelines
+
+- [Brand Identity & Visual Assets Guide](05-branding/index.md): Guidelines for brand logo mark, 3-dot triad, typography, color philosophy, and asset files.
+- [Brand Logo Mark, Icon Assets & Usage Rules](04-design-system/logo.md): Geometry, 3-dot triad mark, color variations, sizes, SVG assets, and prohibited usages of Lemmo logo.
+
+## Frontend Engineering
+
+- [Frontend Architecture & Engineering Guidelines](02-frontend/index.md): Central index for frontend architecture, state management, routing, and coding conventions.
+- [Workspace Architectural Decisions: Plugin System, SDK Gateway & Job Manager](02-frontend/workspace-decisions.md): Detailed architectural decisions for the Lemmo Workspace covering schema-driven tool plugins, central SDK gateway, and global AI job management.
+- [Workspace Frontend Architecture — Next.js](02-frontend/workspace-architecture.md): Finalized dependency rules, directory structure, and modular boundaries for the Lemmo Next.js workspace.
+- [Workspace Satellite Projects, Shared Resources & Dependencies](02-frontend/workspace-dependencies.md): Guide and reference for peripheral monorepo projects, font assets, token engines, documentation, and the Synthline icon package used in the Lemmo Workspace app.
+
+## Backend & API Specifications
+
+- [Backend Architecture & Engineering Specifications](03-backend/index.md): Central index for backend microservices monorepo architecture, service catalog, contracts, and style guide.
+- [Backend Microservices Monorepo Architecture](03-backend/architecture.md): Canonical architecture of lemmo-api monorepo: directory layout, service independence, core libraries, infra, and scaling.
+- [Backend Style Guide & Engineering Standards](03-backend/style-guide.md): Authoritative Go source formatting, golangci-lint, package layout, error envelope, protobuf, and migration rules.
+- [Contracts, Schemas and Event Envelope Governance](03-backend/contracts.md): Specification for contracts/ directory, platform and lemmo protos, JSON schemas, event envelopes, and code generation.
+- [Microservices Catalog & Phased Delivery Roadmap](03-backend/services.md): Complete breakdown of nons reused services, Lemmo specific microservices, service anatomy, and phased delivery roadmap.
+
+## DevOps, CI/CD & Infrastructure
+
+- [DevOps, CI/CD Pipelines & Infrastructure Guide](07-devops/index.md): Documentation for deployment pipelines, Docker environments, monitoring, and infrastructure.
+
+## Feature Modules & Components
+
+- [Workspace Feature Modules & Domain Logic Overview](06-modules/index.md): Overview of domain modules in the Lemmo workspace including tool-engine, chat, canvas, gallery, assets, and billing.
+
+## General Documentation & Guidelines
+
+- [ADR template](01-architecture/decisions/_template.md): Documentation file for ADR template.
+- [ADR-001 — Phase-3 code architecture (grouped)](01-architecture/decisions/ADR-001-phase3-code-architecture.md): ⚠️ **این تصمیم معماری منسوخ شده است (SUPERSEDED):**
+- [ADR-002 — Form & test stack](01-architecture/decisions/ADR-002-form-test-stack.md): Documentation file for ADR-002 — Form & test stack.
+- [ADR-003 — Single source of truth: audit & resolution](01-architecture/decisions/ADR-003-single-source-of-truth-audit.md): Documentation file for ADR-003 — Single source of truth: audit & resolution.
+- [Frontend Development Roadmap](08-roadmap/index.md): Documentation file for Frontend Development Roadmap.
+- [Phase 0 — Tooling & Governance](08-roadmap/01-phase-0-tooling-and-governance.md): **⛔ SUPERSEDED — historical phase deliverable.** Folder-structure and timeline claims inside may
+- [Phase 1 — Design System Documentation](08-roadmap/02-phase-1-design-system.md): **⛔ SUPERSEDED — historical phase deliverable.** Baseline values inside are old and do NOT match
+- [Phase 2 — Frontend Architecture](08-roadmap/03-phase-2-frontend-architecture.md): **⛔ SUPERSEDED — historical phase deliverable.** Architecture references inside use the old
+- [Phase 3 Task — Showcase + Layout Wireframe](08-roadmap/04-phase-3-showcase-wireframe.md): **Rule of this document:** No value, number, color, size, sample filename, or hypothetical example has been written in this task and none should be used during execution either. The only source of truth for the project is the existing documents (Phase 0, Phase 1, Phase 2, Auth/Workspace Decision Document, and Component Architecture Decision Document). Any value that is required must be read directly from those documents — not from this task, memory, or the developer’s assumptions.
+- [Phase 3 — Step 0 Review: Document Consistency (STOP REPORT)](08-roadmap/05-phase-3-review.md): Documentation file for Phase 3 — Step 0 Review: Document Consistency (STOP REPORT).
+- [QA-1 — Phase 1 Review & Approval (Design System Documentation)](08-roadmap/06-qa1-phase-1-approval.md): **Amendment (2026-09-12):** Originally REJECTED for critical ❌ #7 (IRANSansX weight range `100 900` under-declaring the vendor's 100–1000). Developer applied the one-line fix (`font-weight: 100 1000` in `src/design-system/fonts/fonts.css`). Re-verified live: `document.fonts.check()` matches at weights 100, 400, 700, 900, 950, 1000. Lint, typecheck, and production build all pass. **Decision upgraded to Fully Approved.**
+- [[English Title of Document]](09-governance/document-template.md): [One or two sentences in English describing the purpose of this document]
+- [design-system/primitives/ — pure primitives (decision 2026-09-12 — ADR-001)](04-design-system/primitives.md): **Implemented (Phase 3, 2026-09-12):** `Button.tsx` + `Button.module.css` +
+- [تصمیمات رسمی معماری (ADR) — پروژه Lemmo](01-architecture/decisions/index.md): Documentation file for تصمیمات رسمی معماری (ADR) — پروژه Lemmo.
+- [سند پیشنهادی معماری: استخراج دیزاین سیستم به پکیج `ui` و مصرف در `frontend`](01-architecture/decisions/proposal-design-system-extraction.md): **تاریخ:** ۱۴ سپتامبر ۲۰۲۶
+- [سیستم دیزاین پروژه لیمو (Lemmo Design System)](04-design-system/index.md): Documentation file for سیستم دیزاین پروژه لیمو (Lemmo Design System).
+- [قوانین حاکمیت پروژه و استانداردهای مستندنویسی (Governance)](09-governance/index.md): Documentation file for قوانین حاکمیت پروژه و استانداردهای مستندنویسی (Governance).
+- [معماری و تصمیمات کلان پروژه لیمو (Lemmo)](01-architecture/index.md): Documentation file for معماری و تصمیمات کلان پروژه لیمو (Lemmo).
+
+## Optional Files & External Resources
+
+- [Documentation Guidelines](README.md): Comprehensive guide on contributing and documenting in the Lemmo ecosystem.
+- [Standard Document Template](templates/DOCUMENT_TEMPLATE.md): Template with mandatory bilingual metadata table header.
