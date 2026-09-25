@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     return new NextResponse("Access denied", { status: 403 });
   }
 
-  if (!fs.existsSync(mdFile)) {
+  if (!fs.existsSync(mdFile) || !fs.statSync(mdFile).isFile()) {
     return new NextResponse("Document not found", { status: 404 });
   }
 

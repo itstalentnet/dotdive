@@ -256,7 +256,7 @@ export async function getPage(
   let html = "";
   let headings = node.headings;
 
-  if (fs.existsSync(htmlPath)) {
+  if (fs.existsSync(htmlPath) && fs.statSync(htmlPath).isFile()) {
     html = fs.readFileSync(htmlPath, "utf8");
   } else {
     // Dev fallback: render on demand
