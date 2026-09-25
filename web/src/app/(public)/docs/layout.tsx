@@ -6,8 +6,8 @@ import "@/styles/docs.css";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | مستندات dotdive",
-    default: "مستندات | dotdive",
+    template: "%s | مستندات دات دایو",
+    default: "مستندات | دات دایو",
   },
 };
 

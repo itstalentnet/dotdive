@@ -2,9 +2,13 @@
   "name": "dotdive",
   "private": true,
   "description": "دانشنامه و نقطهٔ شیرجه زدن به پروژه‌ها",
+  "workspaces": [
+    "web"
+  ],
   "scripts": {
     "dev": "npm --prefix web run dev",
     "build": "npm --prefix web run build",
+    "postinstall": "npm --prefix web install",
     "build:content": "npm --prefix web run build:content",
     "content:check": "npm --prefix web run content:check",
     "start": "npm --prefix web run start",

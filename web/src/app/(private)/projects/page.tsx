@@ -5,17 +5,15 @@ import {
   ArrowLeft,
   Lock,
   Globe,
-  Layers,
-  FileText,
-  Boxes,
   Shield,
 } from "lucide-react";
 import { listRoots } from "@/server/content/index";
 import { getSessionContext } from "@/server/auth/session";
-import { LogoIcon } from "@/components/ui/logo";
+import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 export const metadata: Metadata = {
-  title: "پروژه‌ها و ریشه‌ها",
+  title: "پروژه‌ها | دات دایو",
   robots: { index: false, follow: false },
 };
 
@@ -25,25 +23,18 @@ export default async function ProjectsPage() {
 
   return (
     <div className="projects-container">
-      {/* Top Header */}
-      <header className="projects-topbar">
-        <Link href="/" className="logo-link">
-          <LogoIcon size={18} />
-          <span style={{ fontFamily: "var(--font-heading)", fontWeight: 600 }}>
-            dotdive
-          </span>
-        </Link>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <span className="user-pill">
-            <Shield size={12} strokeWidth={2} />
-            <span>{ctx.email ?? "کاربر مهمان"}</span>
-          </span>
-        </div>
-      </header>
+      {/* Unified Site Header with responsive search & navigation */}
+      <SiteHeader />
 
       <main className="projects-content">
         <div className="projects-header">
-          <h1 className="projects-title">نقطهٔ شیرجه به پروژه‌ها</h1>
+          <div className="projects-header-top">
+            <h1 className="projects-title">نقطهٔ شیرجه به پروژه‌ها</h1>
+            <span className="user-pill">
+              <Shield size={12} strokeWidth={2} />
+              <span>{ctx.email ?? "کاربر مهمان"}</span>
+            </span>
+          </div>
           <p className="projects-subtitle">
             ریشه‌ها و فضاهای محتوایی در دسترس حساب کاربری شما
           </p>
@@ -97,52 +88,57 @@ export default async function ProjectsPage() {
         </div>
       </main>
 
+      <SiteFooter />
+
       <style>{`
         .projects-container {
           min-height: 100vh;
           background-color: var(--dd-surface-0);
           color: var(--dd-text-primary);
-        }
-        .projects-topbar {
-          height: 48px;
-          border-bottom: 1px solid var(--dd-border-subtle);
-          background-color: rgba(13, 14, 17, 0.85);
-          backdrop-filter: blur(12px);
-          padding-inline: 1.5rem;
           display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-        .user-pill {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.35rem;
-          padding: 0.15rem 0.5rem;
-          background: var(--dd-surface-2);
-          border: 1px solid var(--dd-border);
-          border-radius: 4px;
-          font-size: 0.72rem;
-          color: var(--dd-text-secondary);
-          font-family: var(--font-mono);
+          flex-direction: column;
         }
         .projects-content {
+          flex: 1;
+          width: 100%;
           max-width: 860px;
           margin-inline: auto;
-          padding: 2.5rem 1.25rem;
+          padding: calc(52px + 2.5rem) 1.25rem 4rem;
         }
         .projects-header {
           margin-bottom: 2rem;
+        }
+        .projects-header-top {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+          margin-bottom: 0.35rem;
         }
         .projects-title {
           font-family: var(--font-heading);
           font-size: 1.45rem;
           font-weight: 600;
           color: var(--dd-text-primary);
-          margin-bottom: 0.35rem;
+        }
+        .user-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+          padding: 0.2rem 0.6rem;
+          background: var(--dd-surface-2);
+          border: 1px solid var(--dd-border);
+          border-radius: 4px;
+          font-size: 0.75rem;
+          color: var(--dd-text-secondary);
+          font-family: var(--font-mono);
+          direction: ltr;
         }
         .projects-subtitle {
           color: var(--dd-text-secondary);
-          font-size: 0.825rem;
+          font-size: 0.85rem;
+          line-height: 1.6;
         }
         .projects-grid {
           display: grid;
@@ -152,7 +148,7 @@ export default async function ProjectsPage() {
         .project-card {
           display: flex;
           flex-direction: column;
-          padding: 1.15rem;
+          padding: 1.25rem;
           background: var(--dd-surface-1);
           border: 1px solid var(--dd-border);
           border-radius: 8px;

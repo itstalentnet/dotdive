@@ -5,7 +5,7 @@ import { LogoIcon } from "@/components/ui/logo";
 import { EmailLoginForm } from "@/components/ui/email-login-form";
 
 export const metadata: Metadata = {
-  title: "ورود به dotdive",
+  title: "ورود به دات دایو",
   robots: { index: false, follow: false },
 };
 
@@ -36,7 +36,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <div className="login-logo-container">
             <LogoIcon size={24} />
           </div>
-          <h1 className="login-title">ورود به dotdive</h1>
+          <h1 className="login-title">ورود به دات دایو</h1>
           <p className="login-subtitle">
             دسترسی به مستندات خصوصی تیم‌های مهندسی
           </p>

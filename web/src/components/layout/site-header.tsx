@@ -40,6 +40,8 @@ export function SiteHeader({
   const isDocsPage = pathname.startsWith("/docs") || pathname.startsWith("/p/");
   const isPublicDocs = pathname.startsWith("/docs");
   const isPrivateDocs = pathname.startsWith("/p/") || pathname.startsWith("/projects");
+  const isAbout = pathname === "/about";
+  const isContact = pathname === "/contact";
 
   const h2Headings = docHeadings?.filter((h) => h.level === 2) ?? [];
 
@@ -79,7 +81,7 @@ export function SiteHeader({
         <div className="site-header-inner">
           {/* Start: Logo + Brand */}
           <div className="site-header-start">
-            <Link href="/" className="site-logo" aria-label="dotdive — صفحه اصلی">
+            <Link href="/" className="site-logo" aria-label="دات دایو — صفحه اصلی">
               <LogoIcon size={20} />
               <span className="site-logo-text">dotdive</span>
             </Link>
@@ -97,6 +99,18 @@ export function SiteHeader({
                 className={`site-nav-link ${isPrivateDocs ? "active" : ""}`}
               >
                 پروژه‌های خصوصی
+              </Link>
+              <Link
+                href="/about"
+                className={`site-nav-link ${isAbout ? "active" : ""}`}
+              >
+                درباره ما
+              </Link>
+              <Link
+                href="/contact"
+                className={`site-nav-link ${isContact ? "active" : ""}`}
+              >
+                تماس با ما
               </Link>
             </nav>
           </div>
@@ -194,6 +208,20 @@ export function SiteHeader({
             className={`mobile-nav-link ${isPrivateDocs ? "active" : ""}`}
           >
             پروژه‌های خصوصی
+          </Link>
+          <Link
+            href="/about"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className={`mobile-nav-link ${isAbout ? "active" : ""}`}
+          >
+            درباره ما
+          </Link>
+          <Link
+            href="/contact"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className={`mobile-nav-link ${isContact ? "active" : ""}`}
+          >
+            تماس با ما
           </Link>
           <Link
             href="/login"

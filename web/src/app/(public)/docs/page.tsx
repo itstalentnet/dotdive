@@ -5,7 +5,7 @@ import { DocViewer } from "@/components/docs/doc-viewer";
 
 export const metadata: Metadata = {
   title: "مستندات عمومی",
-  description: "دانشنامه و مستندات باز dotdive",
+  description: "دانشنامه و مستندات باز دات دایو",
 };
 
 export default async function DocsIndexPage() {

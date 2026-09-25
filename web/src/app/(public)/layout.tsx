@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "@/styles/landing.css";
 
 export const metadata: Metadata = {
-  title: "dotdive — نقطهٔ شیرجه‌زدن به پروژه‌ها",
-  description: "مستندات فارسی تیم‌های مهندسی با ظاهر مدرن و مینیمال",
+  title: "دات دایو — یک لینک تا قلب پروژه",
+  description: "دانش هر پروژه، همیشه در دسترس؛ مستقل از اینکه چه کسی آن را ساخته.",
 };
 
 export default function PublicLayout({

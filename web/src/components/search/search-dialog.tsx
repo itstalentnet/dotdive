@@ -8,9 +8,10 @@ interface SearchDialogProps {
   isOpen: boolean;
   onClose: () => void;
   currentRoot?: string;
+  initialQuery?: string;
 }
 
-export function SearchDialog({ isOpen, onClose, currentRoot }: SearchDialogProps) {
+export function SearchDialog({ isOpen, onClose, currentRoot, initialQuery }: SearchDialogProps) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchHit[]>([]);
@@ -22,11 +23,11 @@ export function SearchDialog({ isOpen, onClose, currentRoot }: SearchDialogProps
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 50);
-      setQuery("");
+      setQuery(initialQuery ?? "");
       setResults([]);
       setSelectedIndex(0);
     }
-  }, [isOpen]);
+  }, [isOpen, initialQuery]);
 
   // Global keyboard listener for Esc and Arrow navigation
   useEffect(() => {
