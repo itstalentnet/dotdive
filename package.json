@@ -3,7 +3,8 @@
   "private": true,
   "description": "دانشنامه و نقطهٔ شیرجه زدن به پروژه‌ها",
   "workspaces": [
-    "web"
+    "web",
+    "mcp"
   ],
   "scripts": {
     "dev": "npm --prefix web run dev",

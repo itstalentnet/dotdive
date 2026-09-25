@@ -1,12 +1,15 @@
 # Dependencies
 node_modules
 .pnpm-store
+mcp/node_modules
 
 # Build outputs
 web/.next
 web/out
 web/coverage
 web/.turbo
+mcp/dist
+mcp/*.tsbuildinfo
 .turbo
 *.tsbuildinfo
 
@@ -20,9 +23,11 @@ web/.turbo
 .env
 .env.local
 .env.*.local
+mcp/.env
 
 # Fonts are in web/public/fonts (tracked) - don't ignore
 !web/public/fonts/
 
 # Lock files — keep only one
 web/package-lock.json
+mcp/package-lock.json
