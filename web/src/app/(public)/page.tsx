@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowUpLeft, Sparkles } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { AiPrompt } from "@/components/landing/ai-prompt";
 import { SiteHeader } from "@/components/layout/site-header";
 
 export default function LandingPage() {
@@ -15,14 +16,7 @@ export default function LandingPage() {
             <h1 id="hero-title">دانش پروژه،<br /><span>همیشه نزدیک.</span></h1>
             <p className="hero-copy">سؤال بپرسید، تصمیم‌ها را پیدا کنید و با یک مرجع روشن سریع‌تر بسازید.</p>
 
-            <form className="ai-prompt" onSubmit={(event) => event.preventDefault()}>
-              <div className="prompt-topline"><Sparkles aria-hidden="true" />از پروژه‌تان بپرسید</div>
-              <textarea aria-label="سؤال خود را درباره پروژه بنویسید" placeholder="مثلاً: چرا این معماری را انتخاب کردیم؟" rows={3} />
-              <div className="prompt-footer">
-                <span>پاسخ‌ها بر پایه مستندات پروژه هستند</span>
-                <button type="submit" aria-label="ارسال سؤال"><ArrowUpLeft data-icon="inline-start" /></button>
-              </div>
-            </form>
+            <AiPrompt />
 
             <div className="hero-links">
               <Link href="/login" className="landing-button primary">شروع کنید <ArrowLeft data-icon="inline-end" /></Link>
