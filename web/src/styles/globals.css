@@ -7,6 +7,7 @@
 @import "@lemmo-lab/tokens/css/variables.css";
 @import "@lemmo-lab/tokens/css/themes/light.css";
 @import "tailwindcss";
+@import "./header.css";
 
 /* ── Self-hosted Fonts ──────────────────────────────────────── */
 
