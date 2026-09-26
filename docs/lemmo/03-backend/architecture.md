@@ -66,7 +66,14 @@ lemmo-api/                      ← ریشه مونوریپوی بک‌اند (�
 │   ├── sdk-release/            ← اسکریپت و ابزار انتشار نسخه‌بندی packages/ts-sdk
 │   └── ci/                     ← اسکریپت‌های کمکی CI، لینت و بیلد چندماژوله
 │
-├── services/                   ← سرویس‌های مستقل تجاری (هر پوشه = یک سرویس لایه‌ای با cmd اختصاصی)
+├── services/                   ← سرویس‌های مستقل تجاری و پلتفرمی (هر پوشه = یک سرویس لایه‌ای با cmd اختصاصی)
+│   ├── auth-service/           ← احراز هویت، ثبت‌نام و مدیریت نشست‌ها (Ory Kratos)
+│   ├── iam-service/            ← موتور مجوزها، ماتریس دسترسی و نقش‌ها (Ory Keto)
+│   ├── user-service/           ← پروفایل، اطلاعات هویتی و تنظیمات کاربری
+│   ├── token-service/          ← صدور توکن‌های OAuth2/OIDC و API Keyها (Ory Hydra)
+│   ├── notification-service/   ← اعلان‌های سیستمی و وب‌سوکت بلادرنگ
+│   ├── storage-service/        ← انتزاع فضای ذخیره‌سازی S3/MinIO و لینک‌های امضاشده
+│   ├── node-registry-service/  ← رجیستری و قرارداد نودهای بوم (Protobuf)
 │   ├── project-service/        ← مدیریت JSON پروژه و گراف نودها
 │   ├── workspace-service/      ← تیم‌ها، فضاهای کاری و عضویت
 │   ├── orchestrator-service/   ← هدایت و اجرای ترتیبی گراف (اینترفیس QuotaChecker)
