@@ -17,4 +17,6 @@ icon: "file-check"
 - **[ADR-004: مایکروسرویس‌های بک‌اند](./adr-004-backend-microservices.md)** — توپولوژی سرویس‌های بک‌اند و نحوه ارتباطات
 - **[ADR-005: استراتژی استایل‌دهی Tailwind CSS v4 در app](./ADR-005-tailwind-v4-styling-strategy.md)** — تثبیت Tailwind v4 و لغو الزام CSS Modules
 - **[ADR-006: مرزبندی احراز هویت و تعویق سیستم کامپوننت](./ADR-006-auth-gateway-and-deferred-components.md)** — درگاه انحصاری auth و تعویق یکپارچه‌سازی کامپوننت مشترک
+- **[ADR-007: استانداردهای قراردادهای بک‌اند و ابزار اسکافولد](./ADR-007-backend-contracts-and-tooling-standards.md)** — تصویب کاتالوگ خطاها، نودهای پروتوباف و CLI اسکافولد
+- **[ADR-008: یکپارچه‌سازی ابزارهای داخلی، نسخه‌بندی SemVer و استاندارد چنج‌لاگ](./ADR-008-internal-tooling-and-versioning-governance.md)** — تجمیع ابزارها در tools/، قفل نهایی tools/lemmo-cli، تگ‌های پیشونددار و Keep a Changelog
 - **[پروپوزال استخراج دیزاین سیستم](./proposal-design-system-extraction.md)** — طرح تفکیک پکیج دیزاین سیستم به عنوان پکیج مستقل

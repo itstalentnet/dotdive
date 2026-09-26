@@ -15,6 +15,9 @@
 
 # Backend Style Guide (`api/`) — Engineering Standards
 
+> ⚠️ **وضعیت پیاده‌سازی در کد (`api/`):**  
+> وضعیت استانداردهای این سند `Approved` است؛ اما در حال حاضر در ریپازیتوری کدهای `api/` هیچ کد Go یا کاتالوگ خطایی نوشته نشده است (در حال حاضر ۰ سرویس فعال در مخزن وجود دارد). این سند به عنوان استایل‌گاید حاکمیتی قطعی، در زمان آغاز کدنویسی در گام ۰ نقشه راه اعمال خواهد شد. استانداردهای تکمیلی کاتالوگ خطاها و ابزار اسکافولد رسماً در [ADR-007](../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md) مصوب و قفل شده‌اند.
+
 This document defines the official Backend Style Guide for the Lemmo backend monorepo (`lemmo-api` / `api/`), built entirely from official and widely-adopted authoritative sources. Each section covers one core technology area: Go formatting & linting, project/package layout, the error envelope, Protobuf generation & management, and database migrations.
 
 ---
@@ -115,9 +118,19 @@ internal/
     handler.go      # gRPC / HTTP transport handlers
 ```
 
+> **Scaffolding Tooling (Ratified — [ADR-007](../../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md) & [ADR-008](../../01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md)):**  
+> Automated generation of this directory layout, `service.md`, migration pairs, and Dockerfile is handled by the canonical Go CLI in `tools/lemmo-cli` (`go run ./tools/lemmo-cli service <name>`).
+
 ---
 
 ## 4. Error Envelope: `google.rpc.Status` (AIP-193) & RFC 7807
+
+> ✅ **تصمیم مصوب معماری: رجیستری متمرکز کدهای خطا ([ADR-007](../../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md)):**  
+> ۱. یک رجیستری متمرکز در `contracts/platform/errors.proto` تعبیه شده و کلیه خطاهای مشترک در قالب `enum ErrorReason` تعریف می‌گردند.  
+> ۲. خطاهای اختصاصی دامنه‌ای در `contracts/<domain>/v1/errors.proto` تعریف و در بیلد نهایی تجمیع می‌شوند.  
+> ۳. تایپ‌های TypeScript مستقیماً در `@/sdk/errors.ts` با دستور `buf generate` تولید می‌شوند.  
+> ۴. در ران‌تایم، نام رشته‌ای Enum به فیلد `reason` در `google.rpc.ErrorInfo` نگاشت می‌شود (مثلاً `"WORKSPACE_QUOTA_EXCEEDED"`).  
+> ۵. **نحوه افزودن خطای جدید:** افزودن مقدار جدید به `enum ErrorReason` در فایل Proto، اجرای `buf generate` و ثبت کلید متناظر در فایل‌های محلی‌سازی فرانت‌اند.
 
 ### Protocol: Google AIP-193 Canonical Standard
 For cross-service gRPC communication and external client error envelopes, Lemmo adopts Google AIP-193 (`google.rpc.Status`).  
@@ -211,7 +224,59 @@ migrations/
 
 ---
 
-## 7. Summary of Engineering Standards
+## 7. Internal Tooling, Semantic Versioning & Changelogs (ADR-008)
+
+### Organization: Centralized `tools/` Directory
+All developer utilities, codegen scripts, and internal synchronization programs live exclusively under `tools/`:
+- `tools/lemmo-cli/` — Canonical Go CLI for service scaffolding (`go run ./tools/lemmo-cli service <name>`).
+- `tools/errgen/` — Error catalog code generator (`contracts/platform/errors.proto` → core + `@/sdk`).
+- `tools/nodegen/` — Node/Port contract code generator (`contracts/lemmo/v1/node.proto` → `@/sdk`).
+- `tools/sdk-release/` — Release automation for `packages/ts-sdk` (`@lemmo/sdk`).
+- `tools/ci/` — CI verification, linting, and build scripts.
+
+### Acceptance Criteria for Any Unit in `tools/`
+Every subdirectory `tools/<name>/` must satisfy these mandatory requirements before merge:
+1. **Independent Module Manifest:** Must contain an independent `go.mod` (or `package.json` if TS/Node).
+2. **Authoritative `README.md`:** Explains purpose, exact CLI commands, flags, inputs, and outputs.
+3. **Dedicated `CHANGELOG.md`:** Follows Keep a Changelog standard (see below).
+4. **Independent Git Tagging:** Releases must be tagged using the multi-module prefix scheme (`tools/<name>/vX.Y.Z`).
+5. **Designated Owner:** Team or lead explicitly identified in the README header.
+
+### Versioning Policy: Semantic Versioning 2.0.0
+All independent units (`core/`, each tool in `tools/`, and `packages/ts-sdk`) adhere strictly to [Semantic Versioning 2.0.0](https://semver.org/):
+- **MAJOR (`X.0.0`):** Incompatible API/contract changes (Breaking Changes).
+- **MINOR (`0.X.0`):** Backwards-compatible new features.
+- **PATCH (`0.0.X`):** Backwards-compatible bug fixes.
+
+#### Multi-Module Git Tag Scheme
+Per official Go multi-module convention, each module is versioned via path-prefixed tags:
+```text
+core/v0.4.0
+tools/lemmo-cli/v1.0.0
+tools/errgen/v0.3.1
+```
+
+#### Frontend Package Versioning (`packages/ts-sdk`)
+TypeScript bindings for frontend consumption are packaged as `@lemmo/sdk` in `packages/ts-sdk`. Frontend workspaces pin specific SemVer versions in `package.json` to prevent unintentional breakage upon backend schema changes.
+
+### Changelog Standard: Keep a Changelog
+Every versioned unit maintains a `CHANGELOG.md` adhering to [Keep a Changelog](https://keepachangelog.com/):
+- **Human-Readable:** Written for human engineers, never raw uncurated git commit dumps.
+- **Ordered Sections:** Dated ISO format `[X.Y.Z] - YYYY-MM-DD` and `[Unreleased]`.
+- **Standard Categories:**
+  - `Added` for new features.
+  - `Changed` for changes in existing functionality.
+  - `Deprecated` for soon-to-be removed features.
+  - `Removed` for now removed features.
+  - `Fixed` for any bug fixes.
+  - `Security` in case of vulnerabilities.
+
+### Conventional Commits Recommendation
+To streamline automated changelog generation and SemVer bumping, commits should follow Conventional Commits (`feat:`, `fix:`, `feat!:`, `BREAKING CHANGE:`).
+
+---
+
+## 8. Summary of Engineering Standards
 
 | Area | Mandated Standard | Enforcement Mechanism |
 | :--- | :--- | :--- |
@@ -219,6 +284,10 @@ migrations/
 | **Go Style** | Google Go Style Guide + Uber Go Style Guide | Code review & PR checklist |
 | **Linting** | `golangci-lint` (govet, staticcheck, errcheck, gosec, gocyclo min 15) | CI check (`golangci-lint run`) |
 | **Layout** | Modular feature-based layout under `internal/<domain>/` | Architecture boundary review |
+| **Tooling** | Centralized `tools/<name>/` with independent `go.mod`, README, CHANGELOG | PR gate & tool checklist |
+| **Versioning** | Semantic Versioning 2.0.0 with path-prefixed Git tags | Tagging CI release pipeline |
+| **Changelog** | Keep a Changelog format with human-curated sections | PR review requirement |
 | **Error Handling** | `google.rpc.Status` (AIP-193) + RFC 7807 at REST boundary | Central error middleware & SDK generation |
 | **Proto & RPC** | Google Protobuf Style + Buf CLI | CI gates (`buf lint`, `buf breaking`) |
 | **Migrations** | `golang-migrate` with sequential 6-digit numbers (`up`/`down` pairs) | Migration lint and CI test runs |
+

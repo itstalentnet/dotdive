@@ -7,6 +7,8 @@
 - [ADR-004: Proposed Backend Service and Tenant Boundaries](01-architecture/decisions/adr-004-backend-microservices.md): Decision record for independent backend services, tenant/project authorization and durable AI execution based on ratified backend specifications.
 - [ADR-005: Frontend Styling Strategy with Tailwind CSS v4 in app/](01-architecture/decisions/ADR-005-tailwind-v4-styling-strategy.md): Authoritative decision locking Tailwind CSS v4 as the official styling strategy for app/, superseding CSS Modules.
 - [ADR-006: Auth Gateway Scope and Deferred Component System Integration](01-architecture/decisions/ADR-006-auth-gateway-and-deferred-components.md): Designates auth/ as the sole system authentication gateway and defers shared component system integration until after backend-frontend connectivity.
+- [ADR-007: Backend Contracts, Scaffolding Tooling, and Core Interface Standards](01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md): Ratified decision locking centralized error catalog, canonical Protobuf node contracts, Go scaffolding CLI, and core auth/quota interfaces.
+- [ADR-008: Internal Tooling Directory, Multi-Module SemVer, and Changelog Standards](01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md): Ratified decision establishing tools/ as single home for internal tooling, finalizing tools/lemmo-cli for scaffolding, SemVer 2.0.0, multi-module git tags, and Keep a Changelog.
 - [Documentation Agent Rules & Zero-Contradiction Governance](09-governance/rules.md): Binding operational rules, strict zero-contradiction policy, and STOP protocol for AI agents modifying the Lemmo documentation repo.
 - [Lemmo Documentation Guidelines & Single Source of Truth (SSOT)](index.md): Central index, folder governance, authoring standards, and architectural blueprints for Lemmo.
 - [Lemmo Frontend Rules & Agent Constraints](01-architecture/AGENTS.md): Mandatory engineering constraints, import boundaries, token rules, and coding standards for developers and AI agents.
@@ -39,6 +41,7 @@
 ## Backend & API Specifications
 
 - [Backend Architecture & Engineering Specifications](03-backend/index.md): Central index for backend microservices monorepo architecture, service catalog, contracts, and style guide.
+- [Backend Implementation Roadmap & Execution Plan](03-backend/roadmap.md): Pragmatic step-by-step roadmap for developing lemmo-api: foundational scaffolding, contracts, MVP critical path, and milestone gates.
 - [Backend Microservices Monorepo Architecture](03-backend/architecture.md): Canonical architecture of lemmo-api monorepo: directory layout, service independence, core libraries, infra, and scaling.
 - [Backend Style Guide & Engineering Standards](03-backend/style-guide.md): Authoritative Go source formatting, golangci-lint, package layout, error envelope, protobuf, and migration rules.
 - [Contracts, Schemas and Event Envelope Governance](03-backend/contracts.md): Specification for contracts/ directory, platform and lemmo protos, JSON schemas, event envelopes, and code generation.
