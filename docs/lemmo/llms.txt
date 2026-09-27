@@ -53,6 +53,7 @@
 
 ## Feature Modules & Components
 
+- [Canvas Dual-Mode Architecture & Dynamic Node Port Specifications](06-modules/canvas-modes.md): Architectural specification for Canvas Dual-Mode (Free Design Mode vs Paid Workflow Mode), dynamic and extensible node port schemas, and unhardcoded LoRA/Prompt variable socket configurations.
 - [Lemmo Product Proposal & Functional Overview](proposal.md): Comprehensive functional product proposal describing what Lemmo is, its core capabilities, visual canvas workflow, specialized creative tool engine, and practical user journeys without technical jargon.
 - [Workspace Feature Modules & Domain Logic Overview](06-modules/index.md): Overview of domain modules in the Lemmo workspace including tool-engine, chat, canvas, gallery, assets, and billing.
 

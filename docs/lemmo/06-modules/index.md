@@ -44,5 +44,6 @@ icon: "blocks"
 ---
 
 ## اسناد مرجع
+- [معماری دوحالته بوم و مشخصات پورت‌های پویای نودها (DOC-MOD-001)](./canvas-modes.md)
 - [معماری فرانت‌اند Workspace — ساختار پوشه‌ها و قوانین وابستگی (DOC-FE-001)](../02-frontend/workspace-architecture.md)
 - [تصمیمات کلیدی معماری: سیستم پلاگین ابزار، لایه SDK و Job Manager (DOC-FE-002)](../02-frontend/workspace-decisions.md)

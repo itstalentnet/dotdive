@@ -49,10 +49,10 @@
 
 | نام سرویس | مسئولیت و وظیفه اصلی | فاز تحویل | وضعیت پیاده‌سازی در مخزن |
 | :--- | :--- | :---: | :---: |
-| **`project-service`** | نگهداری و مدیریت JSON مرجع پروژه‌ها (نودها، اتصالات، متادیتا، کلون رمزشده) | فاز ۱ | ساختار لایه‌ای و `service.md` آماده (`Scaffolded`) |
+| **`project-service`** | نگهداری و مدیریت JSON مرجع پروژه‌ها (نودها، پورت‌های پویا، متادیتا، لایه‌های وکتور Design Mode) | فاز ۱ | پیاده‌سازی لایه‌ای، مایگریشن و gRPC تکمیل شد (`Completed`) |
 | **`workspace-service`** | مدیریت فضاهای کاری چندمستأجری، تیم‌ها، سطوح دسترسی و دعوت اعضا | فاز ۱ | ساختار لایه‌ای و `service.md` آماده (`Scaffolded`) |
 | **`orchestrator-service`** | تفسیر گراف جریان کار (DAG Execution) و هدایت ترتیبی نودها (اینترفیس سهمیه `QuotaChecker` مصوب طبق [ADR-007](../../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md)) | فاز ۱ | پیاده‌سازی فعال هسته (`Core Stub Active`) |
-| **`node-registry-service`** | ثبت و اعتبارسنجی اسکیما و قرارداد نودها (فرمت Protobuf مصوب طبق [ADR-007](../../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md)) | فاز ۱ | ساختار لایه‌ای و `service.md` آماده (`Scaffolded`) |
+| **`node-registry-service`** | ثبت و اعتبارسنجی اسکیما و قرارداد نودها و پورت‌های پویا ([DOC-MOD-001](../06-modules/canvas-modes.md) و [ADR-007](../../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md)) | فاز ۱ | در حال توسعه در فاز ۱ (`In Progress - Stage 4`) |
 | **`job-service`** | صف‌بندی کارهای سنگین هوش مصنوعی، اولویت‌بندی، تلاش مجدد (Retry) و وضعیت زنده | فاز ۱ | ساختار لایه‌ای و `service.md` آماده (`Scaffolded`) |
 | **`model-router-service`** | مسیریابی هوشمند پرامپت‌ها به ارائه‌دهندگان مختلف هوش مصنوعی بر اساس هزینه و سرعت | فاز ۱ | ساختار لایه‌ای و `service.md` آماده (`Scaffolded`) |
 | **`image-service`** | ارتباط با مدل‌های مولد تصویر (Stable Diffusion، ComfyUI و مدل‌های اختصاصی GPU) | فاز ۱ | ساختار لایه‌ای و `service.md` آماده (`Scaffolded`) |
