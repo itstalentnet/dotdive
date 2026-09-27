@@ -49,7 +49,7 @@
 
 ## DevOps, CI/CD & Infrastructure
 
-- [DevOps, CI/CD Pipelines & Infrastructure Guide](07-devops/index.md): Documentation for deployment pipelines, Docker environments, monitoring, and infrastructure.
+- [DevOps, CI/CD Pipelines & Docker Infrastructure Guide](07-devops/index.md): Authoritative guide for Docker-centric hosting, deployment, multi-stage builds, Docker Compose orchestration, and CI/CD pipelines.
 
 ## Feature Modules & Components
 

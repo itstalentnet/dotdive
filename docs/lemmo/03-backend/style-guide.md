@@ -102,7 +102,7 @@ For services in `api/`:
 - `/api` — OpenAPI/Swagger specs, JSON schema files, or protocol definition files (`.proto` sources).
 - `/migrations` — Database migration SQL files (see §6).
 - `/configs` — Configuration file templates or default configs.
-- `/build`, `/deployments` — Packaging and deployment manifests (Dockerfiles, CI, k8s manifests).
+- `/build`, `/deployments` — Packaging and deployment manifests (Dockerfiles, CI, Docker Compose configurations).
 - `/scripts` — Build, install, and analysis scripts.
 - `/test` — Extra external integration test apps and test data.
 
