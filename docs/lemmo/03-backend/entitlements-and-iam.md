@@ -1,0 +1,128 @@
+| فیلد / Field | مقدار / Value |
+| :--- | :--- |
+| **Title (EN)** | Entitlements, Storage Quotas, Retention & Access Governance |
+| **Title (FA)** | مدیریت دسترسی‌ها، سهمیه‌ها، دوره نگهداری فایل‌ها و حاکمیت سهمیه تیمی |
+| **ID** | DOC-BE-008 |
+| **Category** | `backend` |
+| **Status** | `Approved` |
+| **Owner** | Backend, Platform & Security Team |
+| **Last Updated** | 2026-09-28 |
+| **Summary (EN)** | Authoritative specification for IAM Entitlement Grants, machine-readable plan matrix, storage quotas, retention policies, over-quota lifecycle, team credit pooling, and gateway rate limiting. |
+| **Summary (FA)** | مشخصات مرجع مدل اعطای دسترسی IAM (Entitlement Grants)، ماتریس ماشین‌خوان پلن‌ها، سهمیه فضا، دوره نگهداری، چرخه اور-کوتا، تسهیم کردیت در تیم و ریت‌لیمیتینگ گیت‌وی. |
+| **Tags** | `backend`, `entitlements`, `iam`, `quotas`, `retention`, `team-sharing`, `rate-limiting` |
+
+---
+
+# مدیریت دسترسی‌ها، سهمیه‌ها، دوره نگهداری و حاکمیت سازمانی (Entitlements & Quotas)
+
+> **اصل بنیادین جداسازی سهمیه از پلن (Grant Abstraction Invariant):**  
+> سهمیه‌ها و اختیارات کاربری به صورت مستقیم و سخت به پلن اشتراک متصل نمی‌شوند؛ بلکه از طریق مدل **اعطای امتیاز (Entitlement Grant)** در لایه IAM مدیریت می‌گردند. سهمیه مؤثر کاربر حاصل‌جمع جبری کلیه Grantهای معتبر و فعال وی (پلن، افزونه‌ها، هدایا و ارتقاهای موقت) است.
+
+---
+
+## ۱. مدل داده اعطای امتیاز (Entitlement Grant Model - C3.4)
+
+هرگونه سهمیه فضا، کردیت، تعداد پروژه یا همزمانی جاب در قالب ساختار استاندارد زیر صادر می‌شود:
+
+| فیلد | نوع داده | توضیح |
+|---|---|---|
+| `grant_id` | `string` (ULID) | شناسه یکتای امتیاز |
+| `subject_type` | `enum` | نوع دارنده: `USER`، `WORKSPACE` |
+| `subject_id` | `string` | شناسه کاربر یا فضای کاری |
+| `resource` | `string` | منبع هدف: `storage_bytes`، `credits`، `active_projects`، `concurrency` |
+| `amount` | `int64` | مقدار تخصیص‌یافته (مثلاً ۵۰ گیگابایت به بایت) |
+| `source` | `enum` | خاستگاه امتیاز: `PLAN`، `ADDON`، `MANUAL`، `PROMO` |
+| `valid_from` | `timestamp` | زمان آغاز اعتبار |
+| `valid_until`| `timestamp` | زمان انقضای امتیاز |
+| `status` | `enum` | وضعیت: `ACTIVE`، `EXPIRED`، `REVOKED` |
+
+---
+
+## ۲. ماتریس ماشین‌خوان پلن‌ها و قابلیت‌ها (Entitlements Matrix - D2.2)
+
+تعاریف پیش‌فرض پلن‌ها در یک سند ماشین‌خوان (YAML/Proto) به عنوان منبع حقیقت مشترک برای فرانت‌اند، گیت‌وی و میکروسرویس‌ها نگهداری می‌شود:
+
+```yaml
+plans:
+  free:
+    display_name: "رایگان"
+    default_grants:
+      storage_bytes: 5368709120       # 5 GB
+      concurrency: 1
+      active_projects: 3
+    features:
+      design_mode: true
+      export_resolution_max: "1080p"
+      allow_custom_byo: false
+
+  pro:
+    display_name: "حرفه‌ای"
+    default_grants:
+      storage_bytes: 107374182400     # 100 GB
+      concurrency: 4
+      active_projects: -1             # نامحدود
+    features:
+      design_mode: true
+      export_resolution_max: "4K"
+      allow_custom_byo: true
+
+  team:
+    display_name: "سازمانی / تیم"
+    default_grants:
+      storage_bytes: 1073741824000    # 1 TB
+      concurrency: 16
+      active_projects: -1
+    features:
+      team_pooling: true
+      audit_logs: true
+      dedicated_egress: true
+```
+
+---
+
+## ۳. سیاست دوره نگهداری، سقف فضا و چرخه Over-Quota (C3.4 & D2.5)
+
+برای جلوگیری از انباشت بی‌رویه فایل‌ها و محافظت همزمان از داده‌های کاربران:
+
+```mermaid
+stateDiagram-v2
+    [*] --> Active: اشتراک معتبر
+    Active --> OverQuota: عبور از سقف / پایان اعتبار پلن
+    OverQuota --> GracePeriod: اعطای مهلت حفظ داده (Grace Period)
+    GracePeriod --> ReadOnly: محدودسازی به حالت فقط‌خواندنی
+    ReadOnly --> SoftDelete: حذف موقت فایل‌های بدون رفرنس
+    SoftDelete --> Purged: پاکسازی قطعی پس از ۷ روز
+    ReadOnly --> Active: ارتقای مجدد پلن
+```
+
+### قواعد چرخه عمر فایل‌ها و پروژه‌ها:
+1. **وضعیت Over-Quota (مازاد مصرف):** با پایان اعتبار پلن، کاربر وارد وضعیت اضافه مصرف می‌شود. در این حالت:
+   - مشاهده، دانلود فایل‌ها، حذف و Duplicate مجاز است.
+   - آپلود فایل جدید و اجرای تولیدات هوش مصنوعی جدید مسدود می‌گردد.
+2. **عدم حذف ناگهانی:** داده‌های کاربران هرگز بلافاصله حذف نمی‌شوند. یک دوره مهلت (Grace Period - پیش‌فرض ۳۰ روز) همراه با اعلان‌های شمارش معکوس به کاربر اعطا می‌شود تا پروژه‌های فعال خود را انتخاب کند.
+3. **فایل‌های رفرنس‌دار در برابر رهاشده:** مدیاهایی که به نودهای یک پروژه زنده متصل هستند هرگز حذف نمی‌شوند. فایل‌های خروجی رهاشده (بدون رفرنس به هیچ پروژه‌ای) در پلن رایگان پس از ۳۰ روز به مرحله Soft-Delete (۷ روزه) و سپس Purge می‌روند.
+4. **ذخیره‌سازی سرد (Cold Storage):** فایل‌های پروژه‌های بدون فعالیت بیش از ۳۰ روز به باکت‌های آرشیو با هزینه کمتر منتقل می‌شوند.
+5. **هشدارهای زودهنگام:** سیستم در ظرفیت‌های ۸۰٪ و ۹۵٪ اعلان هشدار را به کاربر و مدیر سازمان ارسال می‌کند.
+
+---
+
+## ۴. سیاست تسهیم و مدیریت کردیت در تیم (Team Credit Sharing - D2.6)
+
+مدیران سازمان برای مدیریت مصرف اعضای تیم دو ابزار در اختیار دارند:
+1. **استخر مشترک با سقف فردی (Pooled Quota with Member Cap):**  
+   تمامی اعضا از استخر اعتباری سازمان استفاده می‌کنند اما ادمین می‌تواند برای هر عضو سقف ماهانه تعیین کند. رسیدن به ۸۰٪ سقف با اخطار همراه بوده و عبور از ۱۰۰٪ به توقف سخت (Hard Stop) منجر می‌شود.
+2. **تخصیص مستقیم (Direct Member Allocation):**  
+   انتقال مستقیم بخش مشخصی از کردیت سازمان به کیف‌پول عضو به عنوان تنخواه مستقل، که در دفترکل با نوع `GRANT` یا `ADJUST` ثبت می‌گردد.
+
+---
+
+## ۵. معماری ریت‌لیمیتینگ گیت‌وی با پروفایل‌های IAM (Rate Limiting - E4.2)
+
+1. **تفکیک منبع تصمیم‌گیری از اجرا:**  
+   - **مرجع پروفایل:** سرویس IAM مشخص‌کننده `RateLimitProfile` هر کاربر، کلید API یا سازمان است.
+   - **مجری ریت‌لیمیت:** گیت‌وی ورودی (Envoy / Gateway) با استفاده از اسکریپت Token Bucket یا Sliding Window در Redis محدودیت را اعمال می‌کند و برای هر درخواست با IAM تماس نمی‌گیرد (پروفایل‌ها کش می‌شوند).
+2. **سیاست‌های اعمالی:**
+   - درخواست‌های ناشناس: بر مبنای IP.
+   - درخواست‌های احرازشده: بر مبنای `user_id`، `workspace_id` و `api_key_id`.
+   - وزن‌دهی به اندپوینت‌ها: فراخوانی‌های سنگین تولید و رندر وزن بالاتری در مصرف توکن ریت‌لیمیت دارند.
+   - هدرهای استاندارد: ارسال همیشگی هدرهای استاندارد `RateLimit-Limit`، `RateLimit-Remaining` و `Retry-After`.

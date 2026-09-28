@@ -15,8 +15,8 @@
 
 # مدیریت قراردادها، اسکیماها و پاکت رویدادها (`contracts/`)
 
-> ⚠️ **وضعیت پیاده‌سازی در کد (`api/`):**  
-> وضعیت معماری این سند `Approved` است؛ اما در حال حاضر پوشه `contracts/` و تعاریف فیزیکی Proto و فایل‌های اسکیما در مخزن کدهای `api/` هنوز ایجاد نشده‌اند (در حال حاضر ۰ فایل قرارداد در مخزن وجود دارد). پیاده‌سازی ساختار این سند در گام ۰ نقشه راه ([DOC-BE-005](./roadmap.md)) انجام خواهد شد. تصمیمات مرتبط با قراردادها رسماً در [ADR-007](../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md) تصویب و قفل شده‌اند.
+> **وضعیت پیاده‌سازی در کد (`api/`):**  
+> تمامی قراردادهای پایه به صورت رسمی و کامپایل‌شده در دایرکتوری `api/contracts/` بر پایه Protobuf v3 مستقر هستند (شامل ۹ فایل قرارداد در بسته‌های `platform/v1/` و `lemmo/v1/`). قراردادها به صورت منظم با کامپایلر `buf` بیلد شده و تایپ‌های کلاینت در `@lemmo/sdk` تولید می‌شوند.
 
 پوشه **`contracts/`** در مونوریپوی بک‌اند، **منبع یگانه حقیقت (SSOT)** برای تمامی تعاریف API، بایندینگ‌های کلاینت، رویدادهای منتشرشده و اسکیماهای اعتبارسنجی داده است. هیچ سرویسی بدون اتکا به تعاریف رسمی این بخش مجاز به تبادل اطلاعات با سایر بخش‌های سیستم نیست.
 
@@ -47,9 +47,14 @@ contracts/
 
 ---
 
-## ۲. پاکت استاندارد رویدادها (Canonical Event Envelope)
+## ۲. رجیستری متمرکز و پاکت استاندارد رویدادها (Central Event Registry & EventEnvelope - F4)
 
-کلیه رویدادهای غیرهمگام که در صف‌های پیام (Message Broker) تبادل می‌شوند، درون پاکت استاندارد `EventEnvelope` قرار می‌گیرند:
+کلیه رویدادهای غیرهمگام در صف‌های پیام RabbitMQ درون ساختار استاندارد `EventEnvelope` قرار می‌گیرند.
+
+### ۲.۱. قوانین نام‌گذاری و رجیستری رویدادها (F4 Invariant)
+1. **الگوی نام‌گذاری سه‌بخشی نسخه‌دار:** کلیه نام‌ها از الگوی `<domain>.<entity>.<past_action>.v<version>` تبعیت می‌کنند (مانند `provider.call.completed.v1`).
+2. **معماری اکسچنج‌ها در RabbitMQ:** به ازای هر `<domain>` دقیقاً یک Topic Exchange ایجاد می‌شود و `Routing Key` دقیقاً برابر با نام کامل رویداد است.
+3. **ممنوعیت تاپیک‌های Ad-hoc و لینت در CI:** هیچ رویدادی بدون ثبت رسمی پی‌لود در `contracts/` اجازه انتشار ندارد و فرآیند CI رویدادها را لینت و اعتبارسنجی می‌کند.
 
 ```protobuf
 syntax = "proto3";
@@ -61,26 +66,32 @@ import "google/protobuf/any.proto";
 
 message EventEnvelope {
   string event_id = 1;                     // شناسه یکتای رخداد (UUID v4)
-  string event_type = 2;                   // نام رویداد (e.g. "lemmo.workflow.run_started")
+  string event_type = 2;                   // نام رویداد طبق رجیستری (e.g. "provider.call.completed.v1")
   string aggregate_id = 3;                // شناسه شیء هدف (e.g. project_id یا job_id)
   string tenant_id = 4;                   // شناسه فضای کاری (workspace_id)
   google.protobuf.Timestamp occurred_at = 5;// زمان دقیق وقوع رخداد
-  string producer = 6;                    // نام سرویس منتشرکننده (e.g. "orchestrator-service")
-  string trace_id = 7;                    // شناسه تریس اوپن‌تلمتری جهت پایش توزیع‌شده
+  string producer = 6;                    // نام سرویس منتشرکننده (e.g. "image-service")
+  string trace_id = 7;                    // شناسه تریس جهت پایش توزیع‌شده
   int32 schema_version = 8;               // نسخه اسکیمای رویداد
-  google.protobuf.Any payload = 9;        // بدنه اصلی پیام بر اساس نوع رویداد
+  google.protobuf.Any payload = 9;        // بدنه تایپ‌سیف پیام بر اساس نوع رویداد
 }
 ```
 
-### فهرست رویدادهای کلیدی فاز ۱ و ۲
-- `WorkflowRunStarted` — آغاز اجرای یک ورک‌فلو توسط کاربر.
-- `NodeExecutionCompleted` — پایان موفق پردازش یک نود منفرد در گراف.
-- `JobQueued` / `JobFinished` / `JobFailed` — چرخه حیات کارهای سنگین مدل هوش مصنوعی.
-- `UsageRecorded` — ثبت اتمیک مصرف کردیت یا توکن جهت اعمال در دفترکل حسابداری.
-- `ProjectAccessRevoked` — سلب فوری دسترسی یک عضو به یک پروژه مشترک.
+### ۲.۲. کاتالوگ جامع رویدادهای مصوب پلتفرم
 
-> **محل رجیستری رویدادها:**  
-> رویدادهای عمومی پلتفرم در پاکت استاندارد `contracts/platform/envelope.proto` قرار دارند و پی‌لود رویدادهای اختصاصی دامنه در `contracts/lemmo/v1/events.proto` متمرکز خواهند بود (طبق معماری قراردادهای یکپارچه Protobuf در [ADR-007](../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md)).
+| نام رویداد | دامنه | سرویس تولیدکننده | پی‌لود و هدف رویداد |
+|---|---|---|---|
+| `provider.call.completed.v1` | `provider` | `image-service` / `model-router` | **(قلاب ۳ MVP)** ثبت شناسه اینستنس، مدل، هزینه دلاری `actual_cost_micros` و لتنسی |
+| `credit.ledger.entry_created.v1` | `credit` | `usage-service` / `quota-service` | ثبت تراکنش جدید در دفترکل با `entry_id`، فیلد `type` و مانده باکت |
+| `entitlement.grant.expired.v1` | `entitlement`| `iam-service` / `quota-service` | انقضای یک سهمیه فضا یا کردیت و فعال‌سازی وضعیت `over_quota` یا grace period |
+| `generation.job.fallback_applied.v1`| `generation` | `model-router-service` | اعمال فالبک ۳ سطحی با ثبت مدل درخواستی و مدل واقعی جهت ممیزی |
+| `provider.instance.circuit_opened.v1`| `provider` | `model-router-service` | باز شدن مدار شکن یک پراویدر پس از خطاهای متوالی ۴۲۹ یا ۵۰۳ |
+| `asset.file.created.v1` | `asset` | `storage-service` | ایجاد فایل مدیا جدید با `asset_id`، `object_key` و حجم بایت‌ها |
+| `asset.file.deleted.v1` | `asset` | `storage-service` | حذف فایل مدیا در راستای سیاست Retention یا اقدام کاربر |
+| `workflow.run.started.v1` | `workflow` | `orchestrator-service` | شروع پردازش DAG پس از رزرو موفق کردیت |
+| `workflow.run.completed.v1` | `workflow` | `orchestrator-service` | پایان موفق کل ورک‌فلو و آزادسازی منابع |
+| `node.execution.completed.v1` | `workflow` | `orchestrator-service` | پایان موفق یک نود در بوم و آماده‌سازی داده برای نودهای بعدی |
+| `user.erasure.requested.v1` | `user` | `iam-service` | آغاز فرآیند ناهمگام حذف کامل اطلاعات کاربر طبق الزامات GDPR (فاز ۳) |
 
 ---
 

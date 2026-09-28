@@ -45,6 +45,8 @@
 - [Backend Phased Roadmap, Milestone Gates & Service Execution Plan](03-backend/roadmap.md): Authoritative backend roadmap defining Phase 1 MVP services (10 services), reordered stages 5-8, milestone quality gates (Gate 0-4), and MVP hooks.
 - [Backend Style Guide & Engineering Standards](03-backend/style-guide.md): Authoritative Go source formatting, golangci-lint, package layout, error envelope, protobuf, and migration rules.
 - [Contracts, Schemas and Event Envelope Governance](03-backend/contracts.md): Specification for contracts/ directory, platform and lemmo protos, JSON schemas, event envelopes, and code generation.
+- [Credit Economy, Flat Pricing, Rate Card & Ledger Architecture](03-backend/credit-and-ledger.md): Comprehensive specification for Flat pricing model, Rate Card, pre-execution cost estimation, 19-field immutable Credit Ledger, Bucket expiry model, and Payer Policy.
+- [Entitlements, Storage Quotas, Retention & Access Governance](03-backend/entitlements-and-iam.md): Authoritative specification for IAM Entitlement Grants, machine-readable plan matrix, storage quotas, retention policies, over-quota lifecycle, team credit pooling, and gateway rate limiting.
 - [Microservices Catalog & Phased Delivery Roadmap](03-backend/services.md): Complete breakdown of nons reused services, Lemmo specific microservices, service anatomy, and phased delivery roadmap.
 - [Multi-Provider Model Routing, Media Pipelines & Execution Architecture](03-backend/media-and-model-pipeline.md): Comprehensive architecture for cloud model routing, 4-layer provider registry, generic REST adapters, 3-level fallback, token bucket rate limiting, and async media pipeline.
 
