@@ -52,12 +52,13 @@
 | **`project-service`** | نگهداری و مدیریت JSON مرجع پروژه‌ها (نودها، پورت‌های پویا، متادیتا، لایه‌های وکتور Design Mode) | فاز ۱ | پیاده‌سازی لایه‌ای، مایگریشن و gRPC تکمیل شد (`Completed`) |
 | **`workspace-service`** | مدیریت فضاهای کاری چندمستأجری، تیم‌ها، سطوح دسترسی و دعوت اعضا | فاز ۱ | ساختار لایه‌ای و `service.md` آماده (`Scaffolded`) |
 | **`orchestrator-service`** | تفسیر گراف جریان کار (DAG Execution) و هدایت ترتیبی نودها (اینترفیس سهمیه `QuotaChecker` مصوب طبق [ADR-007](../../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md)) | فاز ۱ | پیاده‌سازی فعال هسته (`Core Stub Active`) |
-| **`node-registry-service`** | ثبت و اعتبارسنجی اسکیما و قرارداد نودها و پورت‌های پویا ([DOC-MOD-001](../06-modules/canvas-modes.md) و [ADR-007](../../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md)) | فاز ۱ | در حال توسعه در فاز ۱ (`In Progress - Stage 4`) |
-| **`job-service`** | صف‌بندی کارهای سنگین هوش مصنوعی، اولویت‌بندی، تلاش مجدد (Retry) و وضعیت زنده | فاز ۱ | ساختار لایه‌ای و `service.md` آماده (`Scaffolded`) |
-| **`model-router-service`** | مسیریابی هوشمند پرامپت‌ها به ارائه‌دهندگان مختلف هوش مصنوعی بر اساس هزینه و سرعت | فاز ۱ | ساختار لایه‌ای و `service.md` آماده (`Scaffolded`) |
-| **`image-service`** | ارتباط با مدل‌های مولد تصویر (Stable Diffusion، ComfyUI و مدل‌های اختصاصی GPU) | فاز ۱ | ساختار لایه‌ای و `service.md` آماده (`Scaffolded`) |
-| **`usage-service`** | ثبت اتمیک و قطعی میزان مصرف واقعی منابع و محاسبه هزینه‌های مصرف‌شده | فاز ۱ | ساختار لایه‌ای و `service.md` آماده (`Scaffolded`) |
-| **`quota-service`** | اعتبارسنجی سقف مجاز و رزرو اعتبار پیش از اجرا (اتصال به `QuotaChecker` ارکستریتور مصوب طبق [ADR-007](../../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md)) | فاز ۱ | ساختار لایه‌ای و `service.md` آماده (`Scaffolded`) |
+| **`node-registry-service`** | ثبت و اعتبارسنجی اسکیما و قرارداد نودها و پورت‌های پویا ([DOC-MOD-001](../06-modules/canvas-modes.md) و [ADR-007](../../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md)) | فاز ۱ | پیاده‌سازی لایه‌ای، مایگریشن و رجیستری داخلی تکمیل شد (`Completed - Stage 4`) |
+| **`job-service`** | صف‌بندی کارهای ناهمگام ابری با RabbitMQ، اولویت‌بندی، تلاش مجدد (Retry)، استریم وضعیت با SSE | فاز ۱ | برنامه‌ریزی‌شده (`Planned - Stage 6`) |
+| **`storage-service`** | ذخیره‌سازی پایدار در MinIO S3، تولید دسته‌ای Presigned URLs و تمدید امضا در خطای ۴۰۳ | فاز ۱ | برنامه‌ریزی‌شده (`Planned - Stage 6`) |
+| **`model-router-service`** | رجیستری ۴ لایه‌ای پراویدرها، آداپتورهای اعلانی REST، فالبک ۳ سطحی و ریت‌لیمیت توکن‌باکت در Redis | فاز ۱ | برنامه‌ریزی‌شده (`Planned - Stage 7`) |
+| **`image-service`** | ورکر ناهمگام سبک جهت فراخوانی API پراویدرهای ابری (Fal, Replicate)، شنود وب‌هوک و آپلود به S3 | فاز ۱ | برنامه‌ریزی‌شده (`Planned - Stage 7`) |
+| **`usage-service`** | سیستم دفترکل تغییرناپذیر (Credit Ledger) با مدل Bucket و انقضا، ثبت هزینه واقعی دلاری پراویدرها و محاسبه سود | فاز ۱ | برنامه‌ریزی‌شده (`Planned - Stage 8`) |
+| **`quota-service`** | مدیریت سهمیه‌ها بر پایه Entitlement Grant، رزرو دوسفره اعتبار، سیاست پرداخت‌کننده (Payer Policy) و مسدودسازی کیف‌پول خالی | فاز ۱ | برنامه‌ریزی‌شده (`Planned - Stage 8`) |
 | **`version-service`** | نسخه‌بندی تاریخچه تغییرات گراف پروژه، مقایسه نسخه‌ها (Diff) و بازگردانی | فاز ۲ | در صف توسعه (`Planned - Phase 2`) |
 | **`collaboration-service`** | همگام‌سازی لحظه‌ای بوم و نمایش نشانگر اعضای آنلاین از طریق WebSocket | فاز ۲ | در صف توسعه (`Planned - Phase 2`) |
 | **`video-service`** | تولید، تغییر فریم و تدوین ویدیو با مدل‌های تولید ویدیوی هوش مصنوعی | فاز ۲ | در صف توسعه (`Planned - Phase 2`) |
