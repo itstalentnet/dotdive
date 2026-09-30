@@ -50,15 +50,15 @@
 | نام سرویس | مسئولیت و وظیفه اصلی | فاز تحویل | وضعیت پیاده‌سازی در مخزن |
 | :--- | :--- | :---: | :---: |
 | **`project-service`** | نگهداری و مدیریت JSON مرجع پروژه‌ها (نودها، پورت‌های پویا، متادیتا، لایه‌های وکتور Design Mode) | فاز ۱ | پیاده‌سازی لایه‌ای، مایگریشن و gRPC تکمیل شد (`Completed`) |
-| **`workspace-service`** | مدیریت فضاهای کاری چندمستأجری، تیم‌ها، سطوح دسترسی و دعوت اعضا | فاز ۱ | ساختار لایه‌ای و `service.md` آماده (`Scaffolded`) |
+| **`workspace-service`** | مدیریت فضاهای کاری چندمستأجری، سازمان‌ها، تیم‌ها، سطوح دسترسی، دعوت اعضا و ارتباط با کیف‌پول سازمانی (پورت `50060` gRPC / `8089` HTTP) | فاز ۱ | در حال پیاده‌سازی (`Stage 9 - Milestone Gate 5`) |
 | **`orchestrator-service`** | تفسیر گراف جریان کار (DAG Execution) و هدایت ترتیبی نودها (اینترفیس سهمیه `QuotaChecker` مصوب طبق [ADR-007](../../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md)) | فاز ۱ | پیاده‌سازی فعال هسته (`Core Stub Active`) |
 | **`node-registry-service`** | ثبت و اعتبارسنجی اسکیما و قرارداد نودها و پورت‌های پویا ([DOC-MOD-001](../06-modules/canvas-modes.md) و [ADR-007](../../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md)) | فاز ۱ | پیاده‌سازی لایه‌ای، مایگریشن و رجیستری داخلی تکمیل شد (`Completed - Stage 4`) |
 | **`job-service`** | صف‌بندی کارهای ناهمگام ابری با RabbitMQ، اولویت‌بندی، تلاش مجدد (Retry)، استریم وضعیت با SSE | فاز ۱ | پیاده‌سازی لایه‌ای، صف RabbitMQ و ورکر تکمیل شد (`Completed - Stage 6`) |
 | **`storage-service`** | ذخیره‌سازی پایدار در MinIO S3، تولید دسته‌ای Presigned URLs و تمدید امضا در خطای ۴۰۳ | فاز ۱ | پیاده‌سازی لایه‌ای و درایور MinIO تکمیل شد (`Completed - Stage 6`) |
 | **`model-router-service`** | رجیستری ۴ لایه‌ای پراویدرها، آداپتورهای اعلانی REST، فالبک ۳ سطحی و ریت‌لیمیت توکن‌باکت در Redis | فاز ۱ | پیاده‌سازی لایه‌ای، کاتالوگ مدل‌ها و آداپتورها تکمیل شد (`Completed - Stage 7`) |
 | **`image-service`** | ورکر ناهمگام سبک جهت فراخوانی API پراویدرهای ابری (Fal, Replicate)، شنود وب‌هوک و آپلود به S3 (پورت `50057` gRPC / `8082` HTTP) | فاز ۱ | پیاده‌سازی ورکر ابری و پایپ‌لاین تولید تصویر تکمیل شد (`Completed - Stage 7`) |
-| **`quota-service`** | مدیریت سهمیه‌ها، سطل‌های منقضی‌شونده (FEFO)، رزرو دوسفره اعتبار، استقرار مستقل با موتور `financial-ledger` طبق ADR-009 (پورت `50058` gRPC / `8087` HTTP) | فاز ۱ | در حال پیاده‌سازی (`Stage 8 - Milestone Gate 4`) |
-| **`usage-service`** | سیستم دفترکل تغییرناپذیر ۱۹ فیلدی (Credit Ledger)، مصرف ناهمگام از RabbitMQ، ردیابی سود و هزینه ابری (پورت `50059` gRPC / `8088` HTTP) | فاز ۱ | در حال پیاده‌سازی (`Stage 8 - Milestone Gate 4`) |
+| **`quota-service`** | مدیریت سهمیه‌ها، سطل‌های منقضی‌شونده (FEFO)، رزرو دوسفره اعتبار، استقرار مستقل با موتور `financial-ledger` طبق ADR-009 (پورت `50058` gRPC / `8087` HTTP) | فاز ۱ | پیاده‌سازی کامل و بستن گیت ۴ (`Completed - Stage 8`) |
+| **`usage-service`** | سیستم دفترکل تغییرناپذیر ۱۹ فیلدی (Credit Ledger)، مصرف ناهمگام از RabbitMQ، ردیابی سود و هزینه ابری (پورت `50059` gRPC / `8088` HTTP) | فاز ۱ | پیاده‌سازی کامل و بستن گیت ۴ (`Completed - Stage 8`) |
 | **`version-service`** | نسخه‌بندی تاریخچه تغییرات گراف پروژه، مقایسه نسخه‌ها (Diff) و بازگردانی | فاز ۲ | در صف توسعه (`Planned - Phase 2`) |
 | **`collaboration-service`** | همگام‌سازی لحظه‌ای بوم و نمایش نشانگر اعضای آنلاین از طریق WebSocket | فاز ۲ | در صف توسعه (`Planned - Phase 2`) |
 | **`video-service`** | تولید، تغییر فریم و تدوین ویدیو با مدل‌های تولید ویدیوی هوش مصنوعی | فاز ۲ | در صف توسعه (`Planned - Phase 2`) |
@@ -118,6 +118,14 @@ type QuotaChecker interface {
    - **نقش:** دفترکل تحلیلی و بازرسی تغییرناپذیر ۱۹ فیلدی (Cold Historical & Audit Ledger) در دیتابیس PostgreSQL `lemmo_usage`.
    - **ورودی رویدادمحور:** مصرف رویدادهای ناهمگام `CreditLedgerEntryPayload` از صف RabbitMQ (`lemmo.events`) جهت Decouple بودن از خط لوله بوم، همراه با RPC مستقیم `CommitLedgerEntry`.
    - **ردیابی حاشیه سود:** ثبت هزینه ابری در سطح میکرو دلار (`provider_cost_micros`) و گزارش‌گیری مالی.
+
+### ۴. معماری سرویس فضاهای کاری و چندمستأجری (`workspace-service` — مصوب ADR-010)
+مطابق با [ADR-010](../01-architecture/decisions/ADR-010-workspace-service-and-phase1-completion.md) و [DOC-BE-008](./entitlements-and-iam.md)، سرویس دهم با مشخصات فنی زیر مستقر می‌گردد:
+- **پورت‌ها:** gRPC `50060` / HTTP Gateway `8089` (کانتینر `lemmo-svc-workspace`).
+- **پایگاه داده اختصاصی (`lemmo_workspace`):** شامل ۴ جدول رابطه‌ای `workspaces` (با ستون رسمی `on_wallet_empty VARCHAR NOT NULL DEFAULT 'block'`)، `workspace_memberships`، `workspace_invitations` و `workspace_settings`.
+- **الگوی تاب‌آوری Provisioning والت:** فضای کاری ابتدا در وضعیت `provisioning` ثبت شده و پس از هماهنگی همگام gRPC با `quota-service` جهت ساخت والت، وضعیت به `active` ارتقا می‌یابد. همزمان رویداد `workspace.created` به صف RabbitMQ منتشر می‌شود. در وضعیت `provisioning` اجرای گراف مسدود است.
+- **تجرید دسترسی با آداپتور دوگانه (`PermissionManager`):** جداسازی لایه دامنه از زیرساخت IAM با آداپتور محلی پیش‌فرض (`LocalMembershipAdapter`) و آداپتور ریموت Ory Keto (`KetoPermissionAdapter`).
+- **انقضای کانفیگ‌پذیر دعوت‌نامه‌ها:** نگهداری هش SHA-256 و خواندن مدت‌زمان انقضا از کانفیگ `invitation_expiry_duration` (بدون هاردکد constant).
 
 ---
 
