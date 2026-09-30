@@ -35,7 +35,7 @@
 | ۷ | `image-service` | ورکر ناهمگام سبک ابری جهت فراخوانی APIهای Fal/Replicate/OpenAI، پولینگ/وبهوک و آپلود به S3 | ✅ پیاده‌شده و تست‌شده (Stage 7) |
 | ۸ | `quota-service` | مدیریت سهمیه‌ها و اعتبارسنجی حق اجرا (Entitlement)، رزرو دوسفره اعتبار و مسدودسازی کیف‌پول خالی | ✅ پیاده‌شده و تست‌شده (Stage 8) |
 | ۹ | `usage-service` | سیستم دفترکل تغییرناپذیر (Credit Ledger) با مدل Bucket، ردیابی هزینه‌های دلاری پراویدر و محاسبه حاشیه سود | ✅ پیاده‌شده و تست‌شده (Stage 8) |
-| ۱۰ | `workspace-service` | مدیریت ورک‌اسپیس‌ها، تننت‌ها، نقش‌های کاربری پروژه و تنظیم سیاست‌های پرداخت‌کننده (Payer Policy) | 📋 در صف اجرا (Stage 9 — پایان فاز ۱) |
+| ۱۰ | `workspace-service` | مدیریت ورک‌اسپیس‌ها، تننت‌ها، نقش‌های کاربری پروژه و تنظیم سیاست‌های پرداخت‌کننده (Payer Policy) | ✅ پیاده‌شده و تست‌شده (Stage 9 — پایان فاز ۱) |
 
 ---
 
@@ -79,8 +79,8 @@ flowchart LR
   - اعمال کارمزد پلتفرم روی پراویدرهای کاستوم کاربر (`byo_fee`).
   - ردیابی هزینه دلاری پراویدرها (`provider_cost_micros`) و محاسبه حاشیه سود پلتفرم.
 
-### مرحله ۹: مدیریت فضاهای کاری و سازمان‌ها (`workspace-service`) 📋
-- **وضعیت:** در صف اجرا (Final Step of Phase 1 — Milestone Gate 5 مصوب [ADR-010](../01-architecture/decisions/ADR-010-workspace-service-and-phase1-completion.md))
+### مرحله ۹: مدیریت فضاهای کاری و سازمان‌ها (`workspace-service`) ✅
+- **وضعیت:** تکمیل ۱۰۰٪ و تست‌شده (Milestone Gate 5 Closed مصوب [ADR-010](../01-architecture/decisions/ADR-010-workspace-service-and-phase1-completion.md))
 - **دامنه:**
   - راه‌اندازی سرویس دهم با پورت‌های gRPC `50060` و HTTP `8089` (کانتینر `lemmo-svc-workspace`).
   - پایگاه داده اختصاصی `lemmo_workspace` با ۴ جدول: `workspaces` (با ستون رسمی `on_wallet_empty` و وضعیت `provisioning`)، `workspace_memberships`، `workspace_invitations` و `workspace_settings`.
@@ -121,7 +121,7 @@ flowchart LR
 [Gate 4: چرخه کامل مالی، لجر اتمیک و آماده‌سازی انتشار MVP] ✅ بسته شد (پایان مرحله ۸)
        │
        ▼
-[Gate 5: استقرار چندمستأجری، فضاهای کاری و بسته شدن نهایی فاز ۱] 📋 (پایان مرحله ۹)
+[Gate 5: استقرار چندمستأجری، فضاهای کاری و بسته شدن نهایی فاز ۱] ✅ بسته شد (پایان مرحله ۹)
 ```
 
 - **معیار پذیرش Gate 2 (پایان مرحله ۵):** ✅ بسته شد.
