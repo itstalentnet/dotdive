@@ -6,7 +6,7 @@
 | **Category** | `backend` |
 | **Status** | `Approved` |
 | **Owner** | Backend & Platform Team |
-| **Last Updated** | 2026-09-26 |
+| **Last Updated** | 2026-09-30 |
 | **Summary (EN)** | Complete breakdown of nons reused services, Lemmo specific microservices, service anatomy, and phased delivery roadmap. |
 | **Summary (FA)** | فهرست کامل سرویس‌های اشتراکی، میکروسرویس‌های اختصاصی Lemmo، ساختار داخلی هر سرویس و نقشه فازبندی. |
 | **Tags** | `backend`, `services`, `catalog`, `roadmap`, `microservices` |
@@ -16,7 +16,7 @@
 # شناسنامه میکروسرویس‌ها و نقشه فازبندی تحویل (`services/`)
 
 > ⚠️ **وضعیت پیاده‌سازی در کد (`api/`):**  
-> وضعیت معماری این سند `Approved` است و بر پایه تصمیمات مصوب [ADR-004](../01-architecture/decisions/adr-004-backend-microservices.md) و [ADR-007](../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md) تدوین شده است. در راستای متدولوژی **Contract-First & Spine-First**، کلیه ۹ سرویس مسیر حیاتی فاز ۱ با ساختار استاندارد لایه‌ای Clean Architecture، فایل شناسنامه `service.md` و الگوهای مایگریشن در پوشه `services/` اسکافولد شده‌اند. همچنین پیاده‌سازی عملیاتی استاب اینترفیس هسته `QuotaChecker` در `orchestrator-service` و میدل‌ور `MockAuthMiddleware` در پکیج `core/` مستقر گردیده است. تکمیل منطق تجاری داخلی و تست‌های یکپارچگی گام‌به‌گام مطابق نقشه راه ([DOC-BE-005](./roadmap.md)) انجام خواهد شد.
+> وضعیت معماری این سند `Approved` است و بر پایه تصمیمات مصوب [ADR-004](../01-architecture/decisions/adr-004-backend-microservices.md)، [ADR-007](../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md) و [ADR-009](../01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md) تدوین شده است. در راستای متدولوژی **Contract-First & Spine-First**، کلیه ۹ سرویس مسیر حیاتی فاز ۱ با ساختار استاندارد لایه‌ای Clean Architecture، فایل شناسنامه `service.md` و الگوهای مایگریشن در پوشه `services/` اسکافولد شده‌اند. همچنین پیاده‌سازی عملیاتی استاب اینترفیس هسته `QuotaChecker` در `orchestrator-service` و میدل‌ور `MockAuthMiddleware` در پکیج `core/` مستقر گردیده است. تکمیل منطق تجاری داخلی و تست‌های یکپارچگی گام‌به‌گام مطابق نقشه راه ([DOC-BE-005](./roadmap.md)) انجام خواهد شد.
 
 این سند کاتالوگ جامع کلیه سرویس‌های فعال و رزروشده در مونوریپوی بک‌اند (`lemmo-api`) را به همراه ساختار داخلی استاندارد و زمان‌بندی پیاده‌سازی فازها تشریح می‌کند.
 
@@ -56,9 +56,9 @@
 | **`job-service`** | صف‌بندی کارهای ناهمگام ابری با RabbitMQ، اولویت‌بندی، تلاش مجدد (Retry)، استریم وضعیت با SSE | فاز ۱ | پیاده‌سازی لایه‌ای، صف RabbitMQ و ورکر تکمیل شد (`Completed - Stage 6`) |
 | **`storage-service`** | ذخیره‌سازی پایدار در MinIO S3، تولید دسته‌ای Presigned URLs و تمدید امضا در خطای ۴۰۳ | فاز ۱ | پیاده‌سازی لایه‌ای و درایور MinIO تکمیل شد (`Completed - Stage 6`) |
 | **`model-router-service`** | رجیستری ۴ لایه‌ای پراویدرها، آداپتورهای اعلانی REST، فالبک ۳ سطحی و ریت‌لیمیت توکن‌باکت در Redis | فاز ۱ | پیاده‌سازی لایه‌ای، کاتالوگ مدل‌ها و آداپتورها تکمیل شد (`Completed - Stage 7`) |
-| **`image-service`** | ورکر ناهمگام سبک جهت فراخوانی API پراویدرهای ابری (Fal, Replicate)، شنود وب‌هوک و آپلود به S3 | فاز ۱ | پیاده‌سازی ورکر ابری و پایپ‌لاین تولید تصویر تکمیل شد (`Completed - Stage 7`) |
-| **`usage-service`** | سیستم دفترکل تغییرناپذیر (Credit Ledger) با مدل Bucket و انقضا، ثبت هزینه واقعی دلاری پراویدرها و محاسبه سود | فاز ۱ | در حال اجرا (`Pending Execution - Stage 8`) |
-| **`quota-service`** | مدیریت سهمیه‌ها بر پایه Entitlement Grant، رزرو دوسفره اعتبار، استقرار مستقل با موتور `financial-ledger` (ADR-009) | فاز ۱ | در حال اجرا (`Pending Execution - Stage 8`) |
+| **`image-service`** | ورکر ناهمگام سبک جهت فراخوانی API پراویدرهای ابری (Fal, Replicate)، شنود وب‌هوک و آپلود به S3 (پورت `50057` gRPC / `8082` HTTP) | فاز ۱ | پیاده‌سازی ورکر ابری و پایپ‌لاین تولید تصویر تکمیل شد (`Completed - Stage 7`) |
+| **`quota-service`** | مدیریت سهمیه‌ها، سطل‌های منقضی‌شونده (FEFO)، رزرو دوسفره اعتبار، استقرار مستقل با موتور `financial-ledger` طبق ADR-009 (پورت `50058` gRPC / `8087` HTTP) | فاز ۱ | در حال پیاده‌سازی (`Stage 8 - Milestone Gate 4`) |
+| **`usage-service`** | سیستم دفترکل تغییرناپذیر ۱۹ فیلدی (Credit Ledger)، مصرف ناهمگام از RabbitMQ، ردیابی سود و هزینه ابری (پورت `50059` gRPC / `8088` HTTP) | فاز ۱ | در حال پیاده‌سازی (`Stage 8 - Milestone Gate 4`) |
 | **`version-service`** | نسخه‌بندی تاریخچه تغییرات گراف پروژه، مقایسه نسخه‌ها (Diff) و بازگردانی | فاز ۲ | در صف توسعه (`Planned - Phase 2`) |
 | **`collaboration-service`** | همگام‌سازی لحظه‌ای بوم و نمایش نشانگر اعضای آنلاین از طریق WebSocket | فاز ۲ | در صف توسعه (`Planned - Phase 2`) |
 | **`video-service`** | تولید، تغییر فریم و تدوین ویدیو با مدل‌های تولید ویدیوی هوش مصنوعی | فاز ۲ | در صف توسعه (`Planned - Phase 2`) |
@@ -106,7 +106,18 @@ type QuotaChecker interface {
 }
 ```
 - **پیاده‌سازی فاز ۰ و ۱:** یک پیاده‌سازی خنثی (`NoopQuotaChecker`) که بدون مسدودسازی اجازه پیشروی می‌دهد.
-- **پیاده‌سازی نهایی فاز ۱:** پیاده‌سازی کلاینت gRPC متصل به `quota-service` جهت رزرو اتمیک اعتبار.
+- **پیاده‌سازی نهایی فاز ۱ (Stage 8):** پیاده‌سازی کلاینت gRPC متصل به `quota-service` جهت رزرو اتمیک اعتبار دوفازی پیش از ثبت جاب‌ها در DAG.
+
+### ۳. تفکیک معماری سرویس‌های مالی (`quota-service` و `usage-service`)
+مطابق با [DOC-BE-007](./credit-and-ledger.md) و [ADR-009](../01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md)، عملیات مالی و کردیت به دو سطح مکمل تفکیک شده است:
+1. **سرویس سهمیه و رزرو اتمیک (`quota-service` — پورت gRPC: `50058` / HTTP: `8087`):**
+   - **نقش:** موتور مالی آنلاین (Hot OLTP) متصل به کانتینر مستقل `financial-ledger` (TigerBeetle) با تجرید `FinancialLedgerPort`.
+   - **وظایف:** رزرو اعتبارات (Reserve)، تسویه (Settle)، بازگشت وجه (Refund)، ارزیابی الگوریتم سطل‌های منقضی‌شونده (FEFO) در دیتابیس `lemmo_quota`، و اعمال سیاست توقف قطعی سازمان (`WORKSPACE_WALLET_EMPTY`).
+   - **استقرار مستقل:** تعاریف داکر و کانفیگ‌ها منحصراً در `services/quota-service/deploy/` قرار دارد و با Compose `include:` به استک متصل می‌شود.
+2. **سرویس دفترکل و ثبت مصرف (`usage-service` — پورت gRPC: `50059` / HTTP: `8088`):**
+   - **نقش:** دفترکل تحلیلی و بازرسی تغییرناپذیر ۱۹ فیلدی (Cold Historical & Audit Ledger) در دیتابیس PostgreSQL `lemmo_usage`.
+   - **ورودی رویدادمحور:** مصرف رویدادهای ناهمگام `CreditLedgerEntryPayload` از صف RabbitMQ (`lemmo.events`) جهت Decouple بودن از خط لوله بوم، همراه با RPC مستقیم `CommitLedgerEntry`.
+   - **ردیابی حاشیه سود:** ثبت هزینه ابری در سطح میکرو دلار (`provider_cost_micros`) و گزارش‌گیری مالی.
 
 ---
 

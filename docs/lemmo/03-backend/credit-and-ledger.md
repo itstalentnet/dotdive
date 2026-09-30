@@ -6,10 +6,10 @@
 | **Category** | `backend` |
 | **Status** | `Approved` |
 | **Owner** | Backend, Platform & Finance Team |
-| **Last Updated** | 2026-09-28 |
-| **Summary (EN)** | Comprehensive specification for Flat pricing model, Rate Card, pre-execution cost estimation, 19-field immutable Credit Ledger, Bucket expiry model, and Payer Policy. |
-| **Summary (FA)** | مشخصات جامع مدل اقتصادی کردیت، فرمول قیمت‌گذاری ثابت (Flat)، پیش‌برآورد هزینه، دفترکل تغییرناپذیر ۱۹ فیلدی، مدل سطل‌های کردیت و سیاست پرداخت‌کننده در سازمان. |
-| **Tags** | `backend`, `credits`, `ledger`, `pricing`, `rate-card`, `billing`, `payer-policy` |
+| **Last Updated** | 2026-09-30 |
+| **Summary (EN)** | Comprehensive specification for Flat pricing model, Rate Card, pre-execution cost estimation, 19-field immutable Credit Ledger, Bucket expiry model, Payer Policy, and service architecture. |
+| **Summary (FA)** | مشخصات جامع مدل اقتصادی کردیت، فرمول قیمت‌گذاری ثابت (Flat)، پیش‌برآورد هزینه، دفترکل تغییرناپذیر ۱۹ فیلدی، مدل سطل‌های کردیت، سیاست پرداخت‌کننده و معماری سرویس‌ها. |
+| **Tags** | `backend`, `credits`, `ledger`, `pricing`, `rate-card`, `billing`, `payer-policy`, `quota-service`, `usage-service` |
 
 ---
 
@@ -27,7 +27,13 @@
 $$\text{Credits} = \left\lceil \text{Base}(\text{Tool}, \text{Model Tier}) \times \prod \text{Multipliers}(\text{Resolution}, \text{Steps}, \text{Duration}, \dots) \right\rceil$$
 
 ### اصول حاکم بر نرخ‌نامه (Rate Card):
-1. **نرخ‌نامه نسخه‌دار ماشین‌خوان:** کلیه قیمت‌های پایه و ضرایب در یک فایل نرخ‌نامه نسخه‌دار (مانند `rate-card-v1.json`) نگهداری می‌شوند. هیچ قیمتی در کدهای سرویس‌ها هاردکد نمی‌شود.
+1. **نرخ‌نامه نسخه‌دار ماشین‌خوان:** کلیه قیمت‌های پایه و ضرایب در یک فایل نرخ‌نامه نسخه‌دار در مسیر `services/quota-service/deploy/config/rate-card-v1.json` نگهداری می‌شوند. هیچ قیمتی در کدهای سرویس‌ها هاردکد نمی‌شود.
+   - مدل‌های پیش‌فرض فاز ۱:
+     - `fal-ai/flux/schnell`: پایه ۲ کردیت
+     - `fal-ai/flux/dev`: پایه ۸ کردیت
+     - `stabilityai/sdxl`: پایه ۴ کردیت
+     - کارمزد پلتفرم روی کلید کاربر (`byo_fee`): ۱ کردیت ثابت
+     - ضرایب رزولوشن: `1024x1024` برابر ۱.۰، ابعاد مستطیلی تا `1536` برابر ۱.۲۵، ابعاد بزرگتر برابر ۱.۵
 2. **قانون فالبک عادلانه:** در صورت وقوع فالبک سطوح ۲ و ۳ (تغییر مدل به دلیل قطعی)، نرخ کسر کردیت بر مبنای فرمول زیر محاسبه می‌شود:
    $$\text{Final Rate} = \min(\text{Tier}_{\text{requested}}, \text{Tier}_{\text{actual}})$$
 3. **کارمزد پراویدرهای کاربر (BYO Fee):** برای درخواست‌هایی که با کلید شخصی کاربر ارسال می‌شوند، نرخ مدل صفر بوده و صرفاً کارمزد ثابت پلتفرم (`byo_fee`) جهت پوشش هزینه‌های زیرساختی و صف کسر می‌گردد.
@@ -69,8 +75,10 @@ $$\text{Credits} = \left\lceil \text{Base}(\text{Tool}, \text{Model Tier}) \time
 | `actual_model` | `string` | مدل واقعی اجراشده توسط سیستم (شفافیت فالبک) |
 | `provider_instance_id`| `string` | اینستنس پراویدر اجراکننده جهت ردیابی هزینه‌های ابری |
 | `rate_card_version` | `string` | نسخه سند قیمت‌گذاری معتبر در لحظه ثبت تراکنش |
-| `reason_code` | `string` | کد علت تراکنش: `generation`, `fallback_adjust`, `cache_hit`, `byo_platform_fee`, `failure_refund` |
+| `reason_code` | `string` | کد علت تراکنش: `generation`, `fallback_adjust`, `cache_hit`, `byo_fee`, `failure_refund` |
+| `bucket_id` | `string` | شناسه سطل اعتباری کسرشده (جهت حسابرسی دقیق منشا اعتبار) |
 | `idempotency_key` | `string` | ممانعت از کسر مجدد در تلاش‌های مجدد شبکه (Retry) |
+| `provider_cost_micros`| `int64` | هزینه واقعی پرداختی به پراویدر ابری به میکرو دلار (جهت محاسبه حاشیه سود) |
 | `created_at` | `timestamp` | زمان دقیق ثبت تراکنش |
 
 ---
@@ -79,6 +87,7 @@ $$\text{Credits} = \left\lceil \text{Base}(\text{Tool}, \text{Model Tier}) \time
 
 اعتبار کاربران در قالب **سطل‌های مجزا (Buckets)** نگهداری می‌شود:
 - هر بسته خریداری‌شده یا کردیت اشتراکی، سطلی با فیلدهای `amount`، `source` (`plan` / `addon` / `promo`) و `expires_at` دارد.
+- جدول سطل‌های فعال (`wallet_buckets`) در دیتابیس `lemmo_quota` مستقر است تا در لحظه برآورد و رزرو سریعاً ارزیابی گردد.
 - **مانده کل قابل‌استفاده:** مجموع موجودی سطل‌های معتبر و منقضی‌نشده.
 - **ترتیب اولویت کسر (FEFO):** مصرف همیشه از سطلی آغاز می‌شود که نزدیک‌ترین تاریخ انقضا را دارد (First-Expiring, First-Out).
 - **استرداد منقضی‌شده:** در صورتی که تراکنشی نیاز به بازگشت وجه داشته باشد و سطل اولیه منقضی شده باشد، یک سطل کوتاه‌مدت جایگزین صادر می‌گردد.
@@ -97,3 +106,16 @@ $$\text{Credits} = \left\lceil \text{Base}(\text{Tool}, \text{Model Tier}) \time
    - **پیش‌فرض سیستم: توقف با خطای `WORKSPACE_WALLET_EMPTY`.** برای محافظت از جیب کارمندان و عدم اصطکاک حسابداری، کسر خودکار از کیف‌پول شخصی عضو انجام نمی‌شود.
    - **پیام خطای واضح با اکشن:** خطا همراه با دکمه «درخواست شارژ از ادمین» نمایش داده شده و نوتیفیکیشن فوری به مدیران ارسال می‌شود.
    - **حالت انتخابی (`member_fallback`):** این حالت فقط زمانی فعال می‌شود که ادمین آن را مجاز کرده باشد **و** عضو مورد نظر قبلاً رضایت صریح خود را با تعیین یک سقف مجاز ثبت کرده باشد. کسر در این حالت با کد علت `org_empty_member_paid` در دفترکل ثبت می‌گردد.
+
+---
+
+## ۶. تفکیک معماری سرویس‌ها و زیرساخت اختصاصی (ADR-009)
+
+1. **تفکیک لجر داغ عملیاتی از لجر سرد تحلیلی:**
+   - **سرویس سهمیه (`quota-service` — پورت gRPC: `50058` / HTTP: `8087`):** کانتینر اختصاصی `financial-ledger` (TigerBeetle) به عنوان Hot OLTP Engine برای نگهداری اتمیک بالانس‌ها، سطل‌های دارای تاریخ انقضا (`wallet_buckets` در `lemmo_quota`) و قفل‌های Two-Phase Transfer.
+   - **سرویس دفترکل مصرف (`usage-service` — پورت gRPC: `50059` / HTTP: `8088`):** دیتابیس PostgreSQL `lemmo_usage` برای جدول ۱۹ فیلدی `credit_ledger_entries` به عنوان Append-Only Historical & Audit Ledger جهت ثبت رویدادها، متادیتای هوش مصنوعی و گزارش‌گیری سود.
+2. **تعامل بین‌سرویسی رویدادمحور (Event-Driven Pipeline):**
+   - پس از اتمام رزرو/تسویه یا تولید مدیا در `image-service`، رویداد `CreditLedgerEntryPayload` روی RabbitMQ منتشر شده و به صورت ناهمگام توسط `usage-service` ذخیره می‌گردد تا جریان بوم مسدود نشود.
+3. **استقرار مستقل (Service-Owned Deployment):**
+   - زیرساخت اختصاصی `financial-ledger` منحصراً در `services/quota-service/deploy/compose.yaml` تعریف شده و فایل کامپوز ریشه صرفاً با دستور `include:` آن را فراخوانی می‌کند.
+
