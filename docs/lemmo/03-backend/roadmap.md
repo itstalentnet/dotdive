@@ -6,23 +6,23 @@
 | **Category** | `backend` |
 | **Status** | `Approved` |
 | **Owner** | Backend Team / @platform |
-| **Last Updated** | 2026-09-28 |
-| **Summary (EN)** | Authoritative backend roadmap defining Phase 1 MVP services (10 services), reordered stages 5-8, milestone quality gates (Gate 0-4), and MVP hooks. |
-| **Summary (FA)** | نقشه راه مرجع پیاده‌سازی بک‌اند شامل ۱۰ سرویس فاز ۱ (MVP)، ترتیب اصلاح‌شده مراحل ۵ تا ۸، گیت‌های کنترل کیفیت (Gate 0 تا 4) و قلاب‌های توسعه‌پذیری MVP. |
-| **Tags** | `backend`, `roadmap`, `milestones`, `architecture`, `services`, `mvp` |
+| **Last Updated** | 2026-10-01 |
+| **Summary (EN)** | Authoritative backend roadmap defining Phase 1 MVP services (Stages 1-9, closed Gate 0-5), Phase 2 Commercialization & Communication (Stages 10-13), and Phase 3 Community & Growth (Stages 14-16) per ADR-011. |
+| **Summary (FA)** | نقشه راه مرجع پیاده‌سازی بک‌اند شامل ۱۰ سرویس فاز ۱ (مراحل ۱ تا ۹، گیت‌های بسته شده ۰ تا ۵)، فاز ۲ تجاری‌سازی و ارتباطات (مراحل ۱۰ تا ۱۳) و فاز ۳ شبکه اجتماعی و رشد (مراحل ۱۴ تا ۱۶) مصوب ADR-011. |
+| **Tags** | `backend`, `roadmap`, `milestones`, `architecture`, `services`, `mvp`, `phase2`, `phase3` |
 
 ---
 
 # نقشه راه پیاده‌سازی گام‌به‌گام بک‌اند (Backend Roadmap & Quality Gates)
 
 > **اصل بنیادین حاکمیت معماری (Governance Invariant):**  
-> این سند، منبع واحد حقیقت (SSOT) برای گام‌های اجرایی، توالی تحویل سرویس‌ها و گیت‌های کنترل کیفیت در مخزن `api/` است. تمامی مراحل پیاده‌سازی باید دقیقاً با استانداردهای قراردادهای Proto ([DOC-BE-003](./contracts.md))، اصول کدنویسی Go Clean Architecture ([DOC-BE-004](./style-guide.md)) و خط مشی رسانه‌ها ([DOC-BE-006](./media-and-model-pipeline.md)) همگام باشند.
+> این سند، منبع واحد حقیقت (SSOT) برای گام‌های اجرایی، توالی تحویل سرویس‌ها و گیت‌های کنترل کیفیت در مخزن `api/` است. تمامی مراحل پیاده‌سازی باید دقیقاً با استانداردهای قراردادهای Proto ([DOC-BE-003](./contracts.md))، اصول کدنویسی Go Clean Architecture ([DOC-BE-004](./style-guide.md))، خط مشی رسانه‌ها ([DOC-BE-006](./media-and-model-pipeline.md)) و تصمیمات معماری مصوب ([ADR-011](../01-architecture/decisions/ADR-011-business-capabilities-and-phase2-roadmap.md)) همگام باشند.
 
 ---
 
-## ۱. کاتالوگ رسمی ۱۰ سرویس فاز ۱ (Phase 1 MVP Scope)
+## ۱. کاتالوگ رسمی ۱۰ سرویس فاز ۱ (Phase 1 MVP Scope — تکمیل‌شده ✅)
 
-فاز ۱ پلتفرم Lemmo منحصراً شامل ۱۰ میکروسرویس زیر است. کلیه سرویس‌های دیگر (`version`, `subscription`, `plugin-runtime`, `chat`, `audit`, `notification`) مربوط به فازهای ۲، ۲.۵ و ۳ هستند:
+فاز ۱ پلتفرم Lemmo منحصراً شامل ۱۰ میکروسرویس زیر بود که همگی با موفقیت پیاده‌سازی، کانتینریزه و در آزمون سرتاسری ۹ مرحله‌ای Gate 5 تایید شدند:
 
 | # | سرویس | مسئولیت و دامنه | وضعیت پیاده‌سازی |
 |---|---|---|---|
@@ -39,63 +39,56 @@
 
 ---
 
-## ۲. توالی مهندسی مراحل ۵ تا ۹ (Execution Stages)
+## ۲. توالی مهندسی مراحل ۵ تا ۹ (Execution Stages — Phase 1)
 
-به منظور جلوگیری از بن‌بست‌های وابستگی (به‌ویژه نیاز حیاتی ورکر تصویر به فضای ذخیره‌سازی S3 پیش از تولید اولین تصویر)، توالی مراحل به شرح زیر تثبیت شده است:
+به منظور جلوگیری از بن‌بست‌های وابستگی (به‌ویژه نیاز حیاتی ورکر تصویر به فضای ذخیره‌سازی S3 پیش از تولید اولین تصویر)، توالی مراحل فاز ۱ با موفقیت به پایان رسید:
 
 ```mermaid
 flowchart LR
     S5["مرحله ۵ ✅<br>orchestrator-service<br>(DAG Engine + QuotaChecker)"] --> S6["مرحله ۶ ✅<br>job-service + storage-service<br>(RabbitMQ Queue + MinIO S3)"]
     S6 --> S7["مرحله ۷ ✅<br>model-router + image-service<br>(Generic REST Adapter + Cloud Worker)"]
     S7 --> S8["مرحله ۸ ✅<br>quota-service + usage-service<br>(Credit Ledger + Payer Policy)"]
-    S8 --> S9["مرحله ۹ 📋<br>workspace-service<br>(Multi-Tenancy + Gate 5)"]
+    S8 --> S9["مرحله ۹ ✅<br>workspace-service<br>(Multi-Tenancy + Gate 5)"]
 ```
 
-### مرحله ۵: موتور ارکستراسیون گراف (`orchestrator-service`)
-- **دامنه:**
-  - پیاده‌سازی معماری Clean Architecture در `services/orchestrator-service/`.
-  - اعتبارسنجی گراف و کشف دورها با الگوریتم Kahn (Topological Sorting).
-  - پیاده‌سازی اینترفیس `QuotaChecker` جهت بررسی اولیه سهمیه پیش از ثبت جاب.
-  - پشتیبانی از پورت‌های پویا (`dynamic_prefix`) و تطبیق نوع داده‌ها (Type Coercion Allowlist).
-  - تولید تسک‌های اجرایی نودها و ارسال به `job-service`.
+### مرحله ۵: موتور ارکستراسیون گراف (`orchestrator-service`) ✅
+- پیاده‌سازی معماری Clean Architecture در `services/orchestrator-service/`.
+- اعتبارسنجی گراف و کشف دورها با الگوریتم Kahn (Topological Sorting).
+- پیاده‌سازی اینترفیس `QuotaChecker` جهت بررسی اولیه سهمیه پیش از ثبت جاب.
+- پشتیبانی از پورت‌های پویا (`dynamic_prefix`) و تطبیق نوع داده‌ها (Type Coercion Allowlist).
+- تولید تسک‌های اجرایی نودها و ارسال به `job-service`.
 
-### مرحله ۶: مدیریت جاب‌ها و ذخیره‌سازی اشیاء (`job-service` + `storage-service`)
-- **دامنه:**
-  - **job-service:** استیت ماشین وضعیت‌های جاب (`PENDING`, `QUEUED`, `RUNNING`, `SUCCEEDED`, `FAILED`, `CANCELLED`)، توزیع در صف‌های RabbitMQ و استریم رویدادهای پیشرفت لحظه‌ای با SSE.
-  - **storage-service:** راه‌اندازی کلاینت MinIO، اندپوینت آپلود، تولید Presigned URLs برای دانلود امن (TTL ۱۵ دقیقه) و اندپوینت تمدید امضا (`POST /assets/{id}/sign`) در خطای ۴۰۳.
+### مرحله ۶: مدیریت جاب‌ها و ذخیره‌سازی اشیاء (`job-service` + `storage-service`) ✅
+- **job-service:** استیت ماشین وضعیت‌های جاب (`PENDING`, `QUEUED`, `RUNNING`, `SUCCEEDED`, `FAILED`, `CANCELLED`)، توزیع در صف‌های RabbitMQ و استریم رویدادهای پیشرفت لحظه‌ای با SSE.
+- **storage-service:** راه‌اندازی کلاینت MinIO، اندپوینت آپلود، تولید Presigned URLs برای دانلود امن (TTL ۱۵ دقیقه) و اندپوینت تمدید امضا (`POST /assets/{id}/sign`) در خطای ۴۰۳.
 
-### مرحله ۷: مسیریابی ابری و ورکر تصویر (`model-router-service` + `image-service`)
-- **دامنه:**
-  - **model-router-service:** کاتالوگ مدل‌ها، رجیستری ۴ لایه‌ای (Provider, ProviderInstance, Model, RoutingGroup)، آداپتور عمومی اعلانی (Generic REST Adapter) بدون نیاز به کد برای پراویدرهای استاندارد، الگوریتم توکن‌باکت در Redis برای ریت‌لیمیت حساب پلتفرم، و فالبک ۳ سطحی (Instance -> Model -> Equivalence Group).
-  - **image-service:** ورکر کلاینت ابری مستقل برای فراخوانی APIهای ابری (Fal.ai, Replicate)، شنود وب‌هوک با امضای HMAC یا Fallback به Polling در محیط محلی، دانلود خروجی و آپلود به `storage-service`.
+### مرحله ۷: مسیریابی ابری و ورکر تصویر (`model-router-service` + `image-service`) ✅
+- **model-router-service:** کاتالوگ مدل‌ها، رجیستری ۴ لایه‌ای (Provider, ProviderInstance, Model, RoutingGroup)، آداپتور عمومی اعلانی (Generic REST Adapter) بدون نیاز به کد برای پراویدرهای استاندارد، الگوریتم توکن‌باکت در Redis برای ریت‌لیمیت حساب پلتفرم، و فالبک ۳ سطحی (Instance -> Model -> Equivalence Group).
+- **image-service:** ورکر کلاینت ابری مستقل برای فراخوانی APIهای ابری (Fal.ai, Replicate)، شنود وب‌هوک با امضای HMAC یا Fallback به Polling در محیط محلی، دانلود خروجی و آپلود به `storage-service`.
 
 ### مرحله ۸: اقتصاد و دفترکل کردیت (`quota-service` + `usage-service`) ✅
-- **وضعیت:** تکمیل ۱۰۰٪ و تست‌شده (Milestone Gate 4 Closed)
-- **دامنه پیاده‌شده:**
-  - سیستم دفترکل تغییرناپذیر کردیت (Append-Only Credit Ledger) با مدل Bucket و تاریخ انقضا (`expires_at`).
-  - الگوی دو فازی Reserve و Settle با بازگشت وجه در صورت شکست (Compensating Transaction) روی موتور `financial-ledger` (ADR-009).
-  - سیاست پرداخت‌کننده (Payer Policy) بر اساس ورک‌اسپیس محل پروژه (`member_pays`, `workspace_pays`, `hybrid`).
-  - توقف قطعی با خطای `WORKSPACE_WALLET_EMPTY` در صورت خالی بودن کیف‌پول سازمان و مدیریت حالت opt-in عضو.
-  - اعمال کارمزد پلتفرم روی پراویدرهای کاستوم کاربر (`byo_fee`).
-  - ردیابی هزینه دلاری پراویدرها (`provider_cost_micros`) و محاسبه حاشیه سود پلتفرم.
+- سیستم دفترکل تغییرناپذیر کردیت (Append-Only Credit Ledger) با مدل Bucket و تاریخ انقضا (`expires_at`).
+- الگوی دو فازی Reserve و Settle با بازگشت وجه در صورت شکست (Compensating Transaction) روی موتور `financial-ledger` (ADR-009).
+- سیاست پرداخت‌کننده (Payer Policy) بر اساس ورک‌اسپیس محل پروژه (`member_pays`, `workspace_pays`, `hybrid`).
+- توقف قطعی با خطای `WORKSPACE_WALLET_EMPTY` در صورت خالی بودن کیف‌پول سازمان و مدیریت حالت opt-in عضو.
+- اعمال کارمزد پلتفرم روی پراویدرهای کاستوم کاربر (`byo_fee`).
+- ردیابی هزینه دلاری پراویدرها (`provider_cost_micros`) و محاسبه حاشیه سود پلتفرم.
 
 ### مرحله ۹: مدیریت فضاهای کاری و سازمان‌ها (`workspace-service`) ✅
-- **وضعیت:** تکمیل ۱۰۰٪ و تست‌شده (Milestone Gate 5 Closed مصوب [ADR-010](../01-architecture/decisions/ADR-010-workspace-service-and-phase1-completion.md))
-- **دامنه:**
-  - راه‌اندازی سرویس دهم با پورت‌های gRPC `50060` و HTTP `8089` (کانتینر `lemmo-svc-workspace`).
-  - پایگاه داده اختصاصی `lemmo_workspace` با ۴ جدول: `workspaces` (با ستون رسمی `on_wallet_empty` و وضعیت `provisioning`)، `workspace_memberships`، `workspace_invitations` و `workspace_settings`.
-  - الگوی تاب‌آوری Provisioning والت در تعامل همگام gRPC با `quota-service` و انتشار رویدادهای `workspace.created` و `workspace.payer_policy_updated` به RabbitMQ.
-  - تجرید کنترل دسترسی‌ها با اینترفیس انتزاعی `PermissionManager` (آداپتور محلی `LocalMembershipAdapter` با پشتیبانی از `X-Mock-Roles` و آداپتور ریموت `KetoPermissionAdapter`).
-  - تفکیک کامل رفتار فضاهای کاری شخصی (`PERSONAL`) و سازمانی (`TEAM`).
-  - چرخه حیات امن دعوت‌نامه‌ها با توکن‌های تصادفی رمزنگاری‌شده، هش SHA-256 و انقضای کانفیگ‌پذیر (`invitation_expiry_duration`).
-  - استقرار مستقل سرویس در `services/workspace-service/deploy/compose.yaml` ذیل قوانین ADR-009.
+- راه‌اندازی سرویس دهم با پورت‌های gRPC `50060` و HTTP `8089` (کانتینر `lemmo-svc-workspace`).
+- پایگاه داده اختصاصی `lemmo_workspace` با ۴ جدول: `workspaces` (با ستون رسمی `on_wallet_empty` و وضعیت `provisioning`)، `workspace_memberships`، `workspace_invitations` و `workspace_settings`.
+- الگوی تاب‌آوری Provisioning والت در تعامل همگام gRPC با `quota-service` و انتشار رویدادهای `workspace.created` و `workspace.payer_policy_updated` به RabbitMQ.
+- تجرید کنترل دسترسی‌ها با اینترفیس انتزاعی `PermissionManager` (آداپتور محلی `LocalMembershipAdapter` با پشتیبانی از `X-Mock-Roles` و آداپتور ریموت `KetoPermissionAdapter`).
+- تفکیک کامل رفتار فضاهای کاری شخصی (`PERSONAL`) و سازمانی (`TEAM`).
+- چرخه حیات امن دعوت‌نامه‌ها با توکن‌های تصادفی رمزنگاری‌شده، هش SHA-256 و انقضای کانفیگ‌پذیر (`invitation_expiry_duration`).
+- استقرار مستقل سرویس در `services/workspace-service/deploy/compose.yaml` ذیل قوانین ADR-009.
 
 ---
 
 ## ۳. پنج قلاب حیاتی توسعه‌پذیری (Mandatory MVP Hooks)
 
-برای ممانعت از بازنویسی‌های پرهزینه در فازهای ۲ و ۳، این ۵ قلاب در کدهای فاز ۱ الزامی هستند:
-1. **مدل Bucket و `expires_at` در لجر:** ✅ پیاده‌سازی کامل سطل‌ها و کسر با الگوریتم FEFO در `quota-service` و `usage-service`.
+برای ممانعت از بازنویسی‌های پرهزینه در فازهای ۲ و ۳، این ۵ قلاب در کدهای فاز ۱ پیاده‌سازی و تثبیت شده‌اند:
+1. **مدل Bucket و `expires_at` در لجر:** ✅ پیاده‌سازی کامل سطل‌ها و کسر با الگوریتم FEFO در `quota-service` و `usage-service`. قلاب مستقیم برای جذب کدهای تخفیف و رفرال بدون تغییر اسکیما.
 2. **فیلد `actor_type` در لجر و گیت‌وی:** ✅ پشتیبانی از مقادیر `USER`، `API_KEY` و `SYSTEM` در اسکیما ۱۹ فیلدی دفترکل.
 3. **انتشار رویداد `provider.call.completed`:** ✅ ثبت هزینه هر فراخوانی پراویدر ابری به میکرو‌دلار (`provider_cost_micros`).
 4. **نگاشت خطای Content Policy و مرحله no-op:** ✅ نگاشت کدهای خطای پالیسی به `CONTENT_POLICY_VIOLATION_PROVIDER` و آزادسازی آنی اعتبار رزرو‌شده.
@@ -103,7 +96,80 @@ flowchart LR
 
 ---
 
-## ۴. گیت‌های کنترل کیفیت تحویل (Milestone Quality Gates)
+## ۴. فاز ۲: هویت زنده، تجاری‌سازی و ارتباطات (Phase 2 Roadmap — مصوب ADR-011)
+
+فاز ۲ بر تبدیل موتور پایپ‌لاین فاز ۱ به یک پلتفرم تجاری زنده با کاربران واقعی، سیستم صورت‌حساب، کدهای تبلیغاتی و اعلان‌های چندکاناله تمرکز دارد:
+
+```mermaid
+flowchart LR
+    S10["مرحله ۱۰ 📋<br>user-service + Live Auth<br>(Kratos Integration + Onboarding)"] --> S11["مرحله ۱۱ 📋<br>notification-service<br>(Novu Engine + In-App Inbox)"]
+    S11 --> S12["مرحله ۱۲ 📋<br>billing-service<br>(Subscriptions + Gateways)"]
+    S12 --> S13["مرحله ۱۳ 📋<br>promo-engine<br>(Campaigns + Quota Grants)"]
+```
+
+### مرحله ۱۰: سرویس هویت و پروفایل کاربران (`user-service` + Live Auth)
+- **دامنه:**
+  - یکپارچگی زنده با Ory Kratos و جایگزینی کامل `MockAuth` در محیط Production.
+  - جداسازی قطعی شناسه غیرقابل تغییر داخلی (`id` UUID) از نام‌کاربری یکتا و عمومی کاربر (`username`/`handle`).
+  - نگهداری اولویت‌ها و تنظیمات کاربری (`user_preferences`) شامل قالب، زبان، کانال‌های اعلان و تنظیمات حریم خصوصی.
+  - پیاده‌سازی ماشین وضعیت آنبوردینگ (Onboarding State Machine: `REGISTERED` -> `PROFILE_COMPLETED` -> `WORKSPACE_ASSIGNED` -> `READY`).
+  - قلاب‌های سیستمی معرفی کاربر (P2P Referral) و ساخت خودکار کد دعوت برای هر کاربر.
+
+### مرحله ۱۱: سرویس اعلان‌ها و پیام‌رسانی (`notification-service`)
+- **دامنه:**
+  - استقرار موتور اعلان منبع‌باز Novu به صورت سلف‌هاستد در استک دیپلویمنت.
+  - اتصال به تبادل `lemmo.events` در RabbitMQ جهت دریافت رویدادهای سیستمی (`job.completed`, `wallet.low_balance`, `workspace.invitation`).
+  - مدیریت صندوق پیام‌های درون‌برنامه‌ای (In-App Inbox Notification Feed) و وضعیت‌های خوانده‌شده (`read/unread`).
+  - یکپارچگی چندکاناله با ارائه‌دهندگان ایمیل و پیامک.
+
+### مرحله ۱۲: سرویس اشتراک و صورت‌حساب (`billing-service`)
+- **دامنه:**
+  - موتور مدیریت پلن‌ها و چرخه‌های اشتراک (`monthly`, `yearly`).
+  - درگاه‌های پرداخت چندگانه (ارزی Stripe/NowPayments و ریالی زرین‌پال/زیبال).
+  - صدور فاکتور رسمی و ذخیره PDF در `storage-service`.
+  - اعمال کدهای تخفیف روی سبد خرید اشتراک (`checkout discount`).
+  - تمدید خودکار دوره‌ای و مدیریت تراکنش‌های ناموفق (Dunning).
+
+### مرحله ۱۳: موتور کوپن و کمپین‌های تبلیغاتی (`promo-engine`)
+- **دامنه:**
+  - مدیریت چرخه حیات کدهای پرومو با محدودیت‌های سقف مصرف، تاریخ UTC و سیاست‌های ضدتقلب.
+  - اتصال مستقیم به `quota-service` برای شارژ مستقیم اعتبارات هدیه در باکت‌های `PROMO` با تاریخ انقضا.
+  - قانون منع انباشت (Non-Stackable Policy) و مصرف تک‌بار به ازای هر کاربر.
+
+---
+
+## ۵. فاز ۳: شبکه اجتماعی، همیاری و اکوسیستم (Phase 3 Roadmap)
+
+فاز ۳ پلتفرم Lemmo را به یک شبکه اشتراک‌گذاری خلاقانه با اکوسیستم درآمدزایی افیلیت و پلاگین‌ها تبدیل می‌نماید:
+
+```mermaid
+flowchart LR
+    S14["مرحله ۱۴ 📋<br>community-service<br>(Social Feed + Showcase)"] --> S15["مرحله ۱۵ 📋<br>affiliate-service<br>(Click Tracking + Anti-Fraud)"]
+    S16["مرحله ۱۶+ 📋<br>Advanced Platform<br>(version + plugin-runtime)"]
+```
+
+### مرحله ۱۴: سرویس جامع فید و کامیونیتی (`community-service`)
+- **دامنه:**
+  - تجمیع ماژول‌های رسانه، تعاملات، محتوا و ویترین در یک میکروسرویس منسجم Bounded Context.
+  - انتشار کارهای خلاقانه کاربران در ویترین عمومی پلتفرم (Showcase Gallery).
+  - تعاملات اجتماعی: لایک، کامنت، نشان‌کردن (Bookmark)، دنبال‌کردن کاربران و بازنشر گراف‌ها (Remix).
+  - استفاده مستقیم از `storage-service` برای ارائه CDN مدیا و کشینگ فید ترندها در Redis.
+
+### مرحله ۱۵: پلتفرم بازاریابی و همکاری در فروش (`affiliate-service`)
+- **دامنه:**
+  - رهگیری کلیک‌های تبلیغاتی با کوکی‌های ۳۰/۶۰/۹۰ روزه و الگوریتم انتساب First-Touch / Last-Touch.
+  - سیستم پیشرفته کشف تقلب (Anti-Fraud Engine) شامل تشخیص رفتارهای مشکوک و تطابق IP/Fingerprint.
+  - دفترکل پرداخت کارمزد بازاریابان (Payout Ledger) با دوره‌های انجماد وجه (Holding Period) جهت جلوگیری از لغو و استرداد.
+
+### مرحله ۱۶ به بعد: قابلیت‌های تکمیلی سازمانی
+- سرویس تاریخچه و شاخه‌بندی پروژه‌ها (`version-service`).
+- محیط اجرای ایزوله پلاگین‌ها و کاستوم‌نودها (`plugin-runtime-service`).
+- چت بلادرنگ بوم و پیام‌رسانی تیمی (`chat-service`).
+- حسابرسی و گزارش‌گیری امنیتی سازمانی (`audit-service`).
+
+---
+
+## ۶. گیت‌های کنترل کیفیت تحویل (Milestone Quality Gates)
 
 ```
 [Gate 0: اسکلت Day 0] ✅ بسته شد
@@ -122,19 +188,22 @@ flowchart LR
        │
        ▼
 [Gate 5: استقرار چندمستأجری، فضاهای کاری و بسته شدن نهایی فاز ۱] ✅ بسته شد (پایان مرحله ۹)
+       │
+       ▼
+[Gate 6: احراز هویت زنده، آنبوردینگ و سیستم اعلان‌ها] 📋 در نوبت (پایان مرحله ۱۱)
+       │
+       ▼
+[Gate 7: صورت‌حساب، درگاه‌های پرداخت، و سیستم پرومو] 📋 در نوبت (پایان مرحله ۱۳)
+       │
+       ▼
+[Gate 8: جامعه کاربری، ویترین عمومی و موتور افیلیت مارکتینگ] 📋 در نوبت (پایان مرحله ۱۵)
 ```
 
-- **معیار پذیرش Gate 2 (پایان مرحله ۵):** ✅ بسته شد.
-- **معیار پذیرش Gate 3 (پایان مرحله ۷):** ✅ بسته شد.
-- **معیار پذیرش Gate 4 (پایان مرحله ۸):** ✅ بسته شد (چرخه کامل رزرو و تسویه، لجر ۱۹ فیلدی تغییرناپذیر، خطای `WORKSPACE_WALLET_EMPTY`، Spike لجر مالی، و اسکریپت بک‌آپ).
-- **معیار پذیرش Gate 5 (پایان مرحله ۹ — آزمون ۹ مرحله‌ای E2E در `tests/e2e/phase1_gate5_test.go`):**  
-  بسته شدن نهایی و رسمی فاز ۱ کل پلتفرم بک‌اند مستلزم قبولی تست سرتاسری لایو در ۹ گام متوالی است:
-  1. ساخت فضای سازمانی (`TEAM`) با سیاست `workspace_pays` در `workspace-service`.
-  2. ارسال دعوت‌نامه برای عضو جدید با نقش `editor` و پذیرش دعوت با توکن معتبر.
-  3. شارژ اولیه کیف‌پول سازمانی در `quota-service`.
-  4. ایجاد پروژه و گراف نود هوش مصنوعی در `project-service` ذیل همین سازمان.
-  5. اجرای گراف در `orchestrator-service` و قفل موفق اعتبار از کیف‌پول سازمان.
-  6. توزیع تسک در صف `job-service` و فراخوانی ورکر تولید تصویر در `image-service`.
-  7. ذخیره پایدار تصویر در MinIO (`storage-service`) و تسویه موفق اعتبار در `quota-service` و ثبت در لجر ۱۹ فیلدی `usage-service`.
-  8. شبیه‌سازی اتمام موجودی والت سازمان و مسدود شدن قطعی اجرای عضو با خطای `WORKSPACE_WALLET_EMPTY` (تایید رفتار `on_wallet_empty = block`).
-  9. **آزمون فالبک مدل و قاعده `min(tier)`:** شبیه‌سازی خطای پراویدر اصلی، سوییچ خودکار به مدل فالبک در `model-router-service`، و اعتبارسنجی کسر وجه نهایی بر اساس کمینه نرخ مدل درخواستی و فالبک طبق تصمیم مصوب A3.1.
+- **معیار پذیرش Gate 5 (پایان مرحله ۹ — تست ۹ مرحله‌ای E2E):** ✅ رسماً در تاریخ ۲۰۲۶-۱۰-۰۱ بسته شد.
+- **معیار پذیرش Gate 6 (پایان مرحله ۱۱):**  
+  احراز هویت واقعی با Kratos، تکمیل پروفایل کاربر و نام کاربری عمومی، ثبت در ماشین وضعیت آنبوردینگ، دریافت اولین اعلان درون‌برنامه‌ای و ایمیلی از طریق Novu پس از ساخت پروژه یا تولید موفق تصویر.
+- **معیار پذیرش Gate 7 (پایان مرحله ۱۳):**  
+  خرید موفق اشتراک تیمی از طریق درگاه با اعمال کد تخفیف در سبد خرید، شارژ آنی سطل پرومو در والت سازمان از طریق کد هدیه توکن، و ثبت دقیق در فاکتورهای `billing-service` و لجر `usage-service`.
+- **معیار پذیرش Gate 8 (پایان مرحله ۱۵):**  
+  انتشار عمومی تصویر خروجی در ویترین Lemmo، بازنشر و لایک توسط کاربران دیگر، رهگیری لینک اختصاصی افیلیت با کوکی معتبر، و ثبت کمیسیون در دفترکل افیلیت پس از خرید کاربر ارجاع‌شده.
+

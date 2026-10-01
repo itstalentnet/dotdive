@@ -6,10 +6,10 @@
 | **Category** | `backend` |
 | **Status** | `Approved` |
 | **Owner** | Backend, Platform & Security Team |
-| **Last Updated** | 2026-09-28 |
-| **Summary (EN)** | Authoritative specification for IAM Entitlement Grants, machine-readable plan matrix, storage quotas, retention policies, over-quota lifecycle, team credit pooling, and gateway rate limiting. |
-| **Summary (FA)** | مشخصات مرجع مدل اعطای دسترسی IAM (Entitlement Grants)، ماتریس ماشین‌خوان پلن‌ها، سهمیه فضا، دوره نگهداری، چرخه اور-کوتا، تسهیم کردیت در تیم و ریت‌لیمیتینگ گیت‌وی. |
-| **Tags** | `backend`, `entitlements`, `iam`, `quotas`, `retention`, `team-sharing`, `rate-limiting` |
+| **Last Updated** | 2026-10-01 |
+| **Summary (EN)** | Authoritative specification for IAM Entitlement Grants, machine-readable plan matrix, storage quotas, retention policies, over-quota lifecycle, team credit pooling, gateway rate limiting, and promo/referral governance per ADR-011. |
+| **Summary (FA)** | مشخصات مرجع مدل اعطای دسترسی IAM (Entitlement Grants)، ماتریس ماشین‌خوان پلن‌ها، سهمیه فضا، دوره نگهداری، چرخه اور-کوتا، تسهیم کردیت در تیم، ریت‌لیمیتینگ گیت‌وی و حاکمیت پرومو و رفرال مصوب ADR-011. |
+| **Tags** | `backend`, `entitlements`, `iam`, `quotas`, `retention`, `team-sharing`, `rate-limiting`, `promo`, `referral` |
 
 ---
 
@@ -31,7 +31,7 @@
 | `subject_id` | `string` | شناسه کاربر یا فضای کاری |
 | `resource` | `string` | منبع هدف: `storage_bytes`، `credits`، `active_projects`، `concurrency` |
 | `amount` | `int64` | مقدار تخصیص‌یافته (مثلاً ۵۰ گیگابایت به بایت) |
-| `source` | `enum` | خاستگاه امتیاز: `PLAN`، `ADDON`، `MANUAL`، `PROMO` |
+| `source` | `enum` | خاستگاه امتیاز: `PLAN`، `ADDON`، `MANUAL`، `PROMO`، `REFERRAL` |
 | `valid_from` | `timestamp` | زمان آغاز اعتبار |
 | `valid_until`| `timestamp` | زمان انقضای امتیاز |
 | `status` | `enum` | وضعیت: `ACTIVE`، `EXPIRED`، `REVOKED` |
@@ -150,3 +150,18 @@ stateDiagram-v2
 - **`ports.PermissionManager`:** اینترفیس ارزیابی و انتساب نقش‌ها در لایه پورت‌ها.
 - **`LocalMembershipAdapter`:** آداپتور پیش‌فرض محلی که مستقیماً جداول `workspace_memberships` را در دیتابیس `lemmo_workspace` بررسی می‌کند و با هدرهای توسعه `X-Mock-Roles` یکپارچه است.
 - **`KetoPermissionAdapter`:** آداپتور متصل به کانتینر Ory Keto که در صورت تنظیم متغیر `KETO_ENDPOINT` روابط ReBAC را در Keto همگام می‌نماید.
+
+---
+
+## ۷. حاکمیت کدهای هدیه و امتیازهای معرفی (Promo & Referral Governance - مصوب ADR-011)
+
+### ۱. تفکیک معماری شارژ اعتبار از تخفیف سبد خرید
+1. **اعتبار توکنی (Token Grant):** از طریق `quota-service` مستقیماً به شکل یک سطل (Bucket) با `source = PROMO` یا `source = REFERRAL` با تاریخ انقضای صریح به کیف‌پول کاربر یا سازمان واریز می‌شود. این سطل‌ها طبق الگوریتم FEFO در اولویت مصرف قرار می‌گیرند.
+2. **تخفیف اشتراک (Checkout Plan Discount):** از طریق `billing-service` در مرحله نهایی خرید اشتراک اعمال شده و درصد یا مبلغ کسرشده را در فاکتور رسمی ثبت می‌نماید.
+
+### ۲. قوانین منع انباشت و رفتارهای ضدتقلب
+- **قانون تک‌بار مصرف (Single-Use per Account):** هر کد تبلیغاتی یا بن هدیه صرفاً یک‌بار توسط هر شناسه کاربری (`user_id`) قابل اعمال است.
+- **منع انباشت (Non-Stackable Policy):** اعمال همزمان دو کد تخفیف روی یک تراکنش خرید اشتراک غیرمجاز است.
+- **اعتبار زمانی بر مبنای UTC:** تمامی بازه‌های اعتبار، انقضا و مهلت استفاده در لایه توزیع‌شده با منطقه زمانی استاندارد `UTC` ارزیابی می‌شوند.
+- **تشخیص هویت تکراری (Anti-Sybil):** کدهای هدیه ثبت‌نام و معرفی کاربر (P2P Referral) بر اساس تطابق اثرانگشت دستگاه، شماره تلفن وریفای‌شده و IP جهت پیشگیری از ساخت اکانت‌های جعلی مانیتور می‌شوند.
+
