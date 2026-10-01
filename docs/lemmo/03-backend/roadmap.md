@@ -102,14 +102,14 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    S10A["مرحله 10A 📋<br>reference-data-registry<br>(RefData + RabbitMQ Events)"] --> S10B["مرحله 10B 📋<br>user-service + Live Auth<br>(Kratos + Risk State Machine)"]
+    S10A["مرحله 10A ✅<br>reference-data-registry<br>(RefData + RabbitMQ Events)"] --> S10B["مرحله 10B ✅<br>user-service + Live Auth<br>(Kratos + Risk State Machine)"]
     S10B --> S105["مرحله ۱۰.۵ 📋<br>infra/gateway<br>(Envoy Ingress + BFF)"]
     S105 --> S11["مرحله ۱۱ 📋<br>notification-service<br>(Novu Engine + In-App Inbox)"]
     S11 --> S12["مرحله ۱۲ 📋<br>billing-service<br>(Subscriptions + Gateways)"]
     S12 --> S13["مرحله ۱۳ 📋<br>promo-engine<br>(Campaigns + Quota Grants)"]
 ```
 
-### مرحله 10A: رجیستری داده‌های مرجع مشترک (`reference-data-registry` — مصوب ADR-012)
+### مرحله 10A: رجیستری داده‌های مرجع مشترک (`reference-data-registry` — مصوب ADR-012) ✅
 - **دامنه:**
   - استقرار سرویس اختصاصی با پورت‌های gRPC `50061` و HTTP `8090` با معماری Clean Architecture ذیل ADR-009.
   - پایگاه داده اختصاصی `lemmo_refdata` شامل جداول `reference_datasets` (اسکیما جنریک با JSONB و هش محتوا) و جدول حسابرسی `reference_data_audit_logs`.
@@ -118,7 +118,7 @@ flowchart LR
   - مکانیزم پاسخ «بدون تغییر»: کد ۳۰۴ در REST و فیلد `has_update = false` در پیام gRPC.
   - اعمال حاکمیت و لاگ ممیزی کامل روی تغییرات داده توسط نقش‌های مدیریتی معتبر.
 
-### مرحله 10B: سرویس هویت، پروفایل کاربران و موتور ریسک (`user-service` + Live Auth)
+### مرحله 10B: سرویس هویت، پروفایل کاربران و موتور ریسک (`user-service` + Live Auth) ✅
 - **دامنه:**
   - پیاده‌سازی کش دو سطحی (Dual-Tier Cache: حافظه + فایل دیسک محلی Last-Known-Good) برای مصرف داده‌های مرجع بدون وابستگی همگام روی مسیر حیاتی.
   - یکپارچگی زنده با Ory Kratos و وب‌هوک ایمن Post-Registration با استراتژی Fail-Closed (رول‌بک کامل در صورت شکست قطعی retryها).
@@ -126,7 +126,7 @@ flowchart LR
   - نگهداری اولویت‌ها و تنظیمات کاربری در ستون `preferences JSONB` با اعتبارسنجی در لایه دامنه.
   - پیاده‌سازی ماشین وضعیت آنبوردینگ (Onboarding State Machine: `REGISTERED` -> `PROFILE_COMPLETED` -> `WORKSPACE_ASSIGNED` -> `READY`).
   - **ماشین وضعیت امنیت و تعلیق حساب:** فیلدهای `status` (مقادیر `ACTIVE`, `SUSPENDED`, `BANNED`, `CHALLENGE_REQUIRED`) و زمان تعلیق موقت `suspended_until` (بر مبنای UTC).
-  - **موتور محاسبه امتیاز ریسک و فیلتر ایمیل‌های متفرقه:** پالایش دامنه‌های ایمیل موقت، ثبت جدول سوابق حسابرسی `user_risk_logs`، و اعمال خودکار تعلیق موقت ۲ ساعته با رسیدن امتیاز به ۱۰۰ و ثبت کلید `user:ban:{user_id}` در Redis.
+  - **موتور محاسبه امتیاز ریسک و فیلتر ایمیل‌های متفرقه:** پالایش دامنه‌های ایمیل موقت، ثبت جدول سوابق حسابرسی `user_risk_logs`، و اعمال خودکار تعلیق موقت ۲ ساعته با رسیدن امتیاز به ۱۰۰ و ثبت کلید `lemmo:user:suspended:{user_id}` در Redis.
   - قلاب‌های سیستمی معرفی کاربر (P2P Referral) و ساخت خودکار کد دعوت ۷ کاراکتری Base32.
 
 ### مرحله ۱۰.۵: استقرار درگاه ورودی و اتصال فرانت‌اند (`infra/gateway` + BFF Ingress)
