@@ -22,4 +22,5 @@ icon: "file-check"
 - **[ADR-009: الگوی استقرار مستقل هر سرویس و معماری دفترکل مالی](./ADR-009-service-owned-deployment-and-financial-ledger.md)** — استقرار سرویس‌محور با Compose include، نام‌گذاری نقش‌محور (financial-ledger) و تجرید لجر
 - **[ADR-010: معماری سرویس فضاهای کاری، مدل چندمستأجری و گیت ۵ فاز ۱](./ADR-010-workspace-service-and-phase1-completion.md)** — سرویس workspace-service، ستون on_wallet_empty، وضعیت provisioning والت، آداپتور IAM و آزمون ۹ مرحله‌ای E2E
 - **[ADR-011: معماری قابلیت‌های کسب‌وکار و نقشه فازهای ۲ و ۳](./ADR-011-business-capabilities-and-phase2-roadmap.md)** — موتور دوگانه پرومو کد، نوتیفیکیشن با Novu، تفکیک افیلیت از رفرال، فید اجتماعی یکپارچه (community-service) و مدل کاربر و آنبوردینگ
+- **[ADR-012: الگوی رجیستری داده‌های مرجع و کش محلی با اعلان بی‌اعتبارسازی](./ADR-012-reference-data-registry-and-client-cache.md)** — تثبیت سرویس reference-data-registry، کش دو سطحی (رم+دیسک)، رویدادهای RabbitMQ، ممیزی تغییرات و تفکیک استیج 10A و 10B
 - **[پروپوزال استخراج دیزاین سیستم](./proposal-design-system-extraction.md)** — طرح تفکیک پکیج دیزاین سیستم به عنوان پکیج مستقل
