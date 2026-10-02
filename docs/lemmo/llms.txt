@@ -67,6 +67,10 @@
 - [Lemmo Product Proposal & Functional Overview](proposal.md): Comprehensive functional product proposal describing what Lemmo is, its core capabilities, visual canvas workflow, specialized creative tool engine, and practical user journeys without technical jargon.
 - [Workspace Feature Modules & Domain Logic Overview](06-modules/index.md): Overview of domain modules in the Lemmo workspace including tool-engine, chat, canvas, gallery, assets, and billing.
 
+## Project Roadmap & Milestone Audits
+
+- [Roadmap Reprioritization: Core Identity, Client Integration, Tooling & IAM Engine First](01-architecture/decisions/ADR-014-roadmap-reprioritization-core-identity-and-client-integration.md): Strategic realignment of the backend roadmap: Prioritizing live user registration/login (auth-service/Kratos), automated OpenAPI tooling, full frontend SDK integration (app/ live adapter), and fine-grained authorization (iam-service) before peripheral monetization and notification modules.
+
 ## General Documentation & Guidelines
 
 - [ADR template](01-architecture/decisions/_template.md): Documentation file for ADR template.

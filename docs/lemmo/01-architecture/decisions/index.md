@@ -24,5 +24,7 @@ icon: "file-check"
 - **[ADR-011: معماری قابلیت‌های کسب‌وکار و نقشه فازهای ۲ و ۳](./ADR-011-business-capabilities-and-phase2-roadmap.md)** — موتور دوگانه پرومو کد، نوتیفیکیشن با Novu، تفکیک افیلیت از رفرال، فید اجتماعی یکپارچه (community-service) و مدل کاربر و آنبوردینگ
 - **[ADR-012: الگوی رجیستری داده‌های مرجع و کش محلی با اعلان بی‌اعتبارسازی](./ADR-012-reference-data-registry-and-client-cache.md)** — تثبیت سرویس reference-data-registry، کش دو سطحی (رم+دیسک)، رویدادهای RabbitMQ، ممیزی تغییرات و تفکیک استیج 10A و 10B
 - **[ADR-013: معماری سه‌لایه درگاه ورودی لبه و سرویس کانتکست (BFF)](./ADR-013-three-tier-edge-gateway-and-bff-architecture.md)** — استقرار درگاه لبه Kong (DB-less)، پروکسی هویت Ory Oathkeeper با صدور JWT و هیدراتور ورک‌اسپیس، و میکروسرویس Go کانتکست (context-service)
+- **[ADR-014: بازآرایی استراتژیک نقشه راه: اولویت‌بخشی به هویت زنده، اتصال فرانت‌اند، ابزارسازی و موتور IAM](./ADR-014-roadmap-reprioritization-core-identity-and-client-integration.md)** — اولویت‌بخشی قطعی به استقرار Kratos و لاگین زنده (auth-service)، ابزار خودکارسازی OpenAPI، اتصال کامل SDK فرانت‌اند (app/) و موتور دسترسی‌ها (iam-service) پیش از ماژول‌های پیرامونی
 - **[پروپوزال استخراج دیزاین سیستم](./proposal-design-system-extraction.md)** — طرح تفکیک پکیج دیزاین سیستم به عنوان پکیج مستقل
+
 
