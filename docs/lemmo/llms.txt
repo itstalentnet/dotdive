@@ -17,6 +17,7 @@
 - [Documentation Agent Rules & Zero-Contradiction Governance](09-governance/rules.md): Binding operational rules, strict zero-contradiction policy, and STOP protocol for AI agents modifying the Lemmo documentation repo.
 - [Lemmo Documentation Guidelines & Single Source of Truth (SSOT)](index.md): Central index, folder governance, authoring standards, and architectural blueprints for Lemmo.
 - [Lemmo Frontend Rules & Agent Constraints](01-architecture/AGENTS.md): Mandatory engineering constraints, import boundaries, token rules, and coding standards for developers and AI agents.
+- [Three-Tier Edge Gateway & BFF Architecture](01-architecture/decisions/ADR-013-three-tier-edge-gateway-and-bff-architecture.md): Architectural decision establishing a 3-tier perimeter ingress: Declarative Kong edge gateway, Ory Oathkeeper identity proxy translating Kratos sessions to short-lived JWTs, and a stateless Go context-service for UI-only aggregated context.
 
 ## Design System & Tokens
 
