@@ -141,12 +141,15 @@ flowchart TD
 
 ---
 
-### مرحله ۱۱: استقرار کامل سرویس هویت و فرآیند زنده ورود/ثبت‌نام (`auth-service` / Live Auth Flow — مصوب ADR-014) 🎯
+### مرحله ۱۱: استقرار کامل سرویس هویت و فرآیند زنده ورود/ثبت‌نام (`auth-service` / Live Auth Flow — مصوب ADR-014 و ADR-015) ✅
+- **وضعیت:** تکمیل و اعتبارسنجی کامل با موفقیت ۱۰۰٪ در آزمون‌های زنده ۹ گانه (`auth_flow_live_test.go`) در تاریخ ۲۰۲۶-۱۰-۰۲.
 - **دامنه:**
-  - **استقرار کانتینر Ory Kratos:** استقرار رسمی در استک داکر (`infra/auth/` با نام کانتینر `lemmo-infra-kratos`) با پیکربندی کامل، اتصال به پایگاه داده اختصاصی Postgres و اسکیماهای هویتی Lemmo (ایمیل، تلفن، نام).
-  - **سرور ایمیل توسعه (Mock Mailer):** استقرار Mailpit در داکر جهت دریافت و بررسی کدهای یکبارمصرف (OTP) و لینک‌های جادویی ورود (Magic Link).
-  - **اتصال وب‌هوک:** اتصال Kratos Post-Registration Webhook به سرویس `user-service` (`POST /internal/v1/users/sync-kratos`) جهت تولید خودکار رکورد کاربر، کد رفرال و تریگر ساخت ورک‌اسپیس شخصی در `workspace-service`.
-  - **یکپارچه‌سازی رابط کاربری فرانت‌اند ([`auth/`](../../../../auth)):** اتصال فرم‌های Next.js در پکیج `auth/` به API واقعی Kratos Flow، حذف داده‌های ماک `setTimeout`، دریافت کوکی رسمی نشست `ory_kratos_session`، و ریدایرکت خودکار به استودیو (`app/`).
+  - **استقرار کانتینر Ory Kratos:** استقرار رسمی در استک داکر (`lemmo-svc-kratos` بر پایه `oryd/kratos:v1.3.0`، پورت‌های داخلی `4433`/`4434`)، با دیتابیس اختصاصی `lemmo_kratos` در PostgreSQL، ماژول courier با پشتیبانی از SMTP بدون TLS در محیط لوکال، و اسکیمای مینیمال هویت `identity.schema.json` (صرفاً ایمیل و صفات احراز هویت).
+  - **سرور ایمیل توسعه (Mailpit):** استقرار کانتینر `lemmo-infra-mailpit` (`axllent/mailpit`) با پورت‌های `1025` (SMTP) و `8025` (Web UI و REST API) جهت دریافت و استخراج خودکار کدهای عددی ۶ رقمی OTP در تست‌های لایو.
+  - **میکروسرویس واسط ورود هوشمند (`services/auth-service`):** پیاده‌سازی سرویس Go روی پورت `8085`؛ اندپوینت یکپارچه `/api/v1/auth/entry` با استعلام قبلی از Kratos Admin API (`identityExistsByEmail`) جهت هدایت خودکار کاربر جدید به ثبت‌نام و کاربر موجود به لاگین (حذف خطای duplicate identifier)، اندپوینت `/api/v1/auth/verify` جهت اعتبارسنجی کد OTP و صدور کوکی نشست `ory_kratos_session`، و اندپوینت `/api/v1/auth/logout` جهت ابطال آنی با ثبت کلید در Redis (`lemmo:user:logout_at:{user_id}`).
+  - **پیکربندی گیت‌وی لبه (Kong):** تفکیک مسیرهای عمومی `/auth/kratos/*` (بدون forward-auth) و `/api/v1/auth/*`، پشتیبانی کامل از CORS با `credentials: true`، و ارتقای پلاگین Lua (`lemmo-access-enforcer`) با ارزیابی کلید `logout_at` در قالب دستور یکپارچه `MGET` ردیس.
+  - **اتصال وب‌هوک:** اتصال Post-Registration Webhook کراتوس به سرویس `user-service` (`POST /internal/v1/users/sync-kratos`) با هدر امنیتی `X-Kratos-Webhook-Secret` جهت ایجاد آنی رکورد کاربر و کد معرف.
+  - **یکپارچه‌سازی رابط کاربری فرانت‌اند ([`auth/`](../../../../auth)):** اتصال کامل کامپوننت `AuthCard.tsx` در Next.js به اندپوینت‌های زنده ورودی و فرم کد ۶ رقمی OTP، حذف تایمرهای ماک، و هدایت خودکار به استودیو بر اساس پارامتر `return_to`.
 
 ### مرحله ۱۲: ابزار تولید خودکار OpenAPI و نهایی‌سازی SDK کلاینت استودیو (`tooling & ts-sdk` — مصوب ADR-014) 📋
 - **دامنه:**
