@@ -152,6 +152,15 @@ type QuotaChecker interface {
    - تفکیک قطعی شناسه داخلی سیستم (`user_id` بر مبنای UUIDv4 محرمانه) از شناسه عمومی قابل اشتراک (`username` / `handle` مانند `@artist`).
    - ذخیره ترجیحات کاربر (زبان `fa`/`en`، تم، تنظیمات اعلان) و ماشین حالت آنبوردینگ (`onboarding_step` و لیست `features_seen`) در جدول پروفایل دیتابیس.
 
+### ۸. معماری یکپارچه هویت، جریان ورود بدون رمز و چرخه حیات نشست (`auth-service` — مصوب ADR-015)
+مطابق با [ADR-015](../01-architecture/decisions/ADR-015-unified-identity-auth-flow-and-session-lifecycle.md) و تجربیات اثبات‌شده پروژه NONS:
+1. **روش ورود انحصاری (Magic Code):** فقط ورود با ایمیل و کد ۶ رقمی OTP با طول عمر ۱۰ دقیقه. حذف قطعی Password، Passkey، TOTP و Magic Link جهت دستیابی به اصطکاک صفر در فرآیند ورود.
+2. **اسکیمای مینیمال Kratos:** Kratos منحصراً دو فیلد `email` (الزامی) و `onboarded` (پیش‌فرض false) را نگه می‌دارد. سایر مشخصات (نام، هندل یکتا، کد معرف) توسط تابع `SyncKratosUser` در `user-service` پس از دریافت وب‌هوک Post-Registration ایجاد می‌شوند.
+3. **جریان ورودی خودکار (`/api/v1/auth/entry`):** اندپوینت ورودی با استعلام از Kratos Admin API، وجود کاربر را بررسی می‌کند: در صورت وجود، Login Flow و در صورت عدم وجود، Registration Flow فعال می‌شود؛ بدین ترتیب از بروز خطای فاجعه‌بار `duplicate identifier` در مرحله تایید کد جلوگیری می‌گردد. پاسخ‌ها به هر دو صورت Form و Native JSON برای مصرف کلاینت ارسال می‌شوند.
+4. **توپولوژی لبه و تفکیک روت‌ها در Kong:** روت‌های `/auth/kratos/*` مستقیماً و بدون اعمال فیلتر Forward-Auth به Kratos فوروارد می‌شوند. تنظیمات صریح CORS در Kong با `Access-Control-Allow-Credentials: true` امکان برقراری ارتباط ایمن کلاینت با پورت ۸۰۰۰ را فراهم می‌سازد.
+5. **ابطال آنی نشست در خروج (Real-Time Logout Revocation):** در لحظه خروج، نشست Kratos لغو شده و کلید `lemmo:user:logout_at:{user_id}` با برچسب زمانی فعلی در ردیس (TTL ۲۰ دقیقه) ثبت می‌گردد. پلاگین `lemmo-access-enforcer` در گیت‌وی با یک دستور `MGET` تعلیق کاربر، زمان لاگ‌اوت (`iat < logout_at`) و نسخه عضویت را هم‌زمان ارزیابی می‌کند.
+6. **سرور ایمیل توسعه محلی:** استقرار کانتینر `axllent/mailpit` در `services/auth-service/deploy/` جهت تست خودکار دریافت کد OTP از طریق REST API بدون نیاز به پارس کردن لاگ کانتینر.
+
 ---
 
 ## ۴. ساختار داخلی استاندارد هر سرویس
@@ -183,10 +192,10 @@ services/<service-name>/
 ```mermaid
 flowchart TD
     P0["فاز ۰: اسکلت اولیه ✅<br/>(Contracts, Core, Infra Gateway, Service Stubs)"] --> P1["فاز ۱: مسیر حیاتی تولید AI و چندمستأجری ✅<br/>(Project, Orchestrator, Job, Image, Quota, Usage, Workspace)"]
-    P1 --> P2["فاز ۲: هویت زنده، تجاری‌سازی و تعاملات 📋<br/>(User, Novu Notification, Subscription, Billing, Promo)"]
-    P2 --> P25["فاز ۲.۵: تعاملات اجتماعی و گالری 📋<br/>(Community Service, Social Feed, Likes)"]
-    P25 --> P3["فاز ۳: اکوسیستم رشد و پلاگین‌ها 📋<br/>(Affiliate Service, Publish Endpoints, Plugin Registry/Runtime)"]
-    P3 --> P4["فاز ۴: توسعه پیشرفته<br/>(Audio Generation, Advanced Analytics, Semantic Search)"]
+    P1 --> P2["فاز ۲: هویت زنده، ابزارسازی و اتصال کلاینت 🎯<br/>(Stage 11: Auth + Mailer, Stage 12: OpenAPI + SDK, Stage 13: IAM)"]
+    P2 --> Gate6["🏁 گیت ۶: محصول زنده در مرورگر"]
+    Gate6 --> P3["فاز ۳: تجاری‌سازی و رشد 📋<br/>(Billing, Promo, Notification, Community, Affiliate)"]
+    P3 --> P4["فاز ۴: توسعه پیشرفته<br/>(Audio Generation, Advanced Analytics, Plugins)"]
 ```
 
 ### فاز ۰ — استقرار فونداسیون ✅
@@ -198,22 +207,24 @@ flowchart TD
 - تکمیل ۱۰ میکروسرویس اصلی: `project-service` ← `node-registry-service` ← `orchestrator-service` ← `job-service` ← `storage-service` ← `model-router-service` + `image-service` ← `quota-service` + `usage-service` ← `workspace-service`.
 - استقرار دیتابیس‌های مجزا، لجر اتمیک، خطای `WORKSPACE_WALLET_EMPTY`، و بسته شدن رسمی گیت‌های ۱ تا ۵.
 
-### فاز ۲ — هویت زنده، تجاری‌سازی و اعلانات (Commercial Foundation) 📋
-- **استیج ۱۰:** پیاده‌سازی `user-service`، اتصال زنده کلاینت به Ory Kratos، مدل کامل پروفایل و Handle، ترجیحات کاربری، ماشین حالت آنبوردینگ و سیستم رفرال کاربری.
-- **استیج ۱۱:** استقرار پلتفرم اعلانات چندکاناله Novu و پیاده‌سازی `notification-service` جهت ارسال پیام‌های درون‌برنامه‌ای و ایمیل‌ها.
-- **استیج ۱۲:** استقرار `subscription-service` و `billing-service` همراه با موتور پروموشن (پرومو کدها، فاکتورها، و درگاه‌های پرداخت).
+### فاز ۲ — هویت زنده، اتصال فرانت‌اند و موتور دسترسی (Core Client Foundation — مصوب ADR-014 و ADR-015) 🎯
+- **استیج ۱۰ (۱۰A و ۱۰B) ✅:** پیاده‌سازی `reference-data-registry` و `user-service` (پروفایل، هندل، ارزیابی ریسک ایمیل موقت و تعلیق).
+- **استیج ۱۰.۵ ✅:** استقرار درگاه سه‌لایه `infra/gateway` (Kong 3.6)، `identity-proxy` (Oathkeeper) و BFF کانتکست (`context-service`).
+- **استیج ۱۱ 🎯:** استقرار کامل `auth-service` (Ory Kratos + Mailpit)، اندپوینت ورود یکپارچه بدون رمز (`/api/v1/auth/entry`)، وب‌هوک Kratos به `user-service`، اتصال فرانت‌اند `auth/` و آزمون E2E با Mailpit.
+- **استیج ۱۲ 📋:** ابزار تولید خودکار OpenAPI و آداپتور زنده شبکه در `@/sdk` استودیو (`app/`).
+- **استیج ۱۳ 📋:** موتور مجوزهای دانه‌ریز `iam-service` (ReBAC Engine و ماتریس دسترسی به بوم و پروژه‌ها).
+- **🏁 گیت ۶:** اعتبارسنجی کامل ورود کاربر در مرورگر، ریدایرکت به استودیو، اجرای زنده گراف و کسر کردیت.
 
-### فاز ۲.۵ و ۳ — تعاملات اجتماعی، اکوسیستم رشد و پلاگین‌ها 📋
-- **استیج ۱۳:** گالری عمومی و فید اجتماعی بوم (`community-service`) متصل به تصاویر MinIO S3 و لایک‌ها.
-- **استیج ۱۴:** پلتفرم افیلیت مارکتینگ حرفه‌ای (`affiliate-service`) با رهگیری کوکی و کمیسیون‌ها.
-- **استیج ۱۵ به بعد:** استقرار `collaboration-service`، `version-service`، انتشار خارجی (`publish-service`) و اکوسیستم پلاگین‌ها.
+### فاز ۳ — تجاری‌سازی، تعاملات اجتماعی و رشد پلتفرم 📋
+- **استیج ۱۴:** استقرار سرویس صورت‌حساب و اشتراک‌ها (`billing-service`).
+- **استیج ۱۵:** موتور کدهای تخفیف و کمپین‌های پروموشن (`promo-engine`).
+- **استیج ۱۶:** پلتفرم اعلانات چندکاناله Novu و پیاده‌سازی `notification-service`.
+- **استیج ۱۷:** فید اجتماعی و گالری بوم (`community-service`).
+- **استیج ۱۸:** پلتفرم حرفه‌ای افیلیت مارکتینگ (`affiliate-service`).
+- **استیج ۱۹ به بعد:** استقرار `collaboration-service`، `version-service`، انتشار خارجی (`publish-service`) و اکوسیستم پلاگین‌ها.
 
 ### فاز ۴ — قابلیت‌های پیشرفته
 - پیاده‌سازی موتور پردازش و تولید صوت (`audio-service`).
 - جستجوی پیشرفته برداری روی پروژه‌ها و پایش بلادرنگ هوشمند (Analytics).
 - راه‌اندازی اکوسیستم پلاگین: `plugin-registry-service` و سندباکس امنیتی `plugin-runtime-service`.
-- انتشار بسته‌های بیرونی `plugin-sdk` و `embed-sdk` برای توسعه‌دهندگان مستقل.
 
-### فاز ۴ — قابلیت‌های پیشرفته
-- پیاده‌سازی موتور پردازش و تولید صوت (`audio-service`).
-- جستجوی پیشرفته برداری روی پروژه‌ها و پایش بلادرنگ هوشمند (Analytics).

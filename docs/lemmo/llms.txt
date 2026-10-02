@@ -18,6 +18,7 @@
 - [Lemmo Documentation Guidelines & Single Source of Truth (SSOT)](index.md): Central index, folder governance, authoring standards, and architectural blueprints for Lemmo.
 - [Lemmo Frontend Rules & Agent Constraints](01-architecture/AGENTS.md): Mandatory engineering constraints, import boundaries, token rules, and coding standards for developers and AI agents.
 - [Three-Tier Edge Gateway & BFF Architecture](01-architecture/decisions/ADR-013-three-tier-edge-gateway-and-bff-architecture.md): Architectural decision establishing a 3-tier perimeter ingress: Declarative Kong edge gateway, Ory Oathkeeper identity proxy translating Kratos sessions to short-lived JWTs, and a stateless Go context-service for UI-only aggregated context.
+- [Unified Identity Architecture, Automatic Registration/Login Flow & Zero-Trust Session Lifecycle](01-architecture/decisions/ADR-015-unified-identity-auth-flow-and-session-lifecycle.md): Ratification of the live identity architecture inspired by NONS: Passwordless 6-digit OTP (Magic Code), minimal Kratos identity schema (email-only), unified entry flow with Admin API pre-check preventing duplicate identifier crashes, Edge Gateway route partitioning without forward-auth on self-service, real-time logout revocation via Redis timestamp in lemmo-access-enforcer (single MGET pipeline), and deep-link return_to preservation.
 
 ## Design System & Tokens
 

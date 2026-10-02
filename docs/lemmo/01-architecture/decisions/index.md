@@ -25,6 +25,8 @@ icon: "file-check"
 - **[ADR-012: الگوی رجیستری داده‌های مرجع و کش محلی با اعلان بی‌اعتبارسازی](./ADR-012-reference-data-registry-and-client-cache.md)** — تثبیت سرویس reference-data-registry، کش دو سطحی (رم+دیسک)، رویدادهای RabbitMQ، ممیزی تغییرات و تفکیک استیج 10A و 10B
 - **[ADR-013: معماری سه‌لایه درگاه ورودی لبه و سرویس کانتکست (BFF)](./ADR-013-three-tier-edge-gateway-and-bff-architecture.md)** — استقرار درگاه لبه Kong (DB-less)، پروکسی هویت Ory Oathkeeper با صدور JWT و هیدراتور ورک‌اسپیس، و میکروسرویس Go کانتکست (context-service)
 - **[ADR-014: بازآرایی استراتژیک نقشه راه: اولویت‌بخشی به هویت زنده، اتصال فرانت‌اند، ابزارسازی و موتور IAM](./ADR-014-roadmap-reprioritization-core-identity-and-client-integration.md)** — اولویت‌بخشی قطعی به استقرار Kratos و لاگین زنده (auth-service)، ابزار خودکارسازی OpenAPI، اتصال کامل SDK فرانت‌اند (app/) و موتور دسترسی‌ها (iam-service) پیش از ماژول‌های پیرامونی
+- **[ADR-015: معماری یکپارچه هویت، جریان خودکار ثبت‌نام/ورود بدون رمز و چرخه حیات نشست امن](./ADR-015-unified-identity-auth-flow-and-session-lifecycle.md)** — تصویب ورود بدون رمز با کد ۶ رقمی OTP، اسکیمای مینیمال هویت Kratos، جریان خودکار entry با استعلام Admin API جهت جلوگیری از خطای duplicate identifier، تفکیک روت‌های Kong، ابطال بلادرنگ توکن‌ها هنگام خروج (MGET در lemmo-access-enforcer) و پروتکل return_to
 - **[پروپوزال استخراج دیزاین سیستم](./proposal-design-system-extraction.md)** — طرح تفکیک پکیج دیزاین سیستم به عنوان پکیج مستقل
+
 
 
