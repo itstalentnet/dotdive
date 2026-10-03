@@ -1,22 +1,22 @@
 | فیلد / Field | مقدار / Value |
 | :--- | :--- |
-| **Title (EN)** | Backend Phased Roadmap, Milestone Gates & Service Execution Plan |
-| **Title (FA)** | نقشه راه پیاده‌سازی گام‌به‌گام بک‌اند، گیت‌های کیفیت و برنامه اجرایی سرویس‌ها |
+| **Title (EN)** | Unified Backend Phased Roadmap, Milestone Gates & Service Execution Plan |
+| **Title (FA)** | نقشه راه جامع پیاده‌سازی گام‌به‌گام بک‌اند، گیت‌های کیفیت و برنامه اجرایی سرویس‌ها |
 | **ID** | DOC-BE-005 |
 | **Category** | `backend` |
 | **Status** | `Approved` |
-| **Owner** | Backend Team / @platform |
-| **Last Updated** | 2026-10-01 |
-| **Summary (EN)** | Authoritative backend roadmap defining Phase 1 MVP services (Stages 1-9, closed Gate 0-5), Phase 2 Commercialization & Communication (Stages 10-13), and Phase 3 Community & Growth (Stages 14-16) per ADR-011. |
-| **Summary (FA)** | نقشه راه مرجع پیاده‌سازی بک‌اند شامل ۱۰ سرویس فاز ۱ (مراحل ۱ تا ۹، گیت‌های بسته شده ۰ تا ۵)، فاز ۲ تجاری‌سازی و ارتباطات (مراحل ۱۰ تا ۱۳) و فاز ۳ شبکه اجتماعی و رشد (مراحل ۱۴ تا ۱۶) مصوب ADR-011. |
-| **Tags** | `backend`, `roadmap`, `milestones`, `architecture`, `services`, `mvp`, `phase2`, `phase3` |
+| **Owner** | Core Architecture & Backend Team / @platform |
+| **Last Updated** | 2026-10-03 |
+| **Summary (EN)** | Canonical, unified backend and platform engineering roadmap: consolidates granular Phase 0 skeleton, Phase 1 MVP services (Stages 1-9, closed Gates 0-5), Phase 2 Live Identity, Gateway & Studio SDK Integration (Stages 10A, 10B, 10.5, 11, and Stage 12A/12B per ADR-016), Phase 3 Commercialization (Stages 14-16), and Phase 4 Ecosystem (Stages 17-19) with explicit quality gates and development conventions. |
+| **Summary (FA)** | نقشه راه جامع، یگانه و مرجع مهندسی پلتفرم و بک‌اند لِمو: تجمیع گام‌های مهندسی اسکلت فاز ۰، ۱۰ سرویس فاز ۱ (مراحل ۱ تا ۹، بسته‌شدن گیت‌های ۰ تا ۵)، فاز ۲ هویت زنده، درگاه لبه و اتصال SDK استودیو (مراحل 10A، 10B، 10.5، 11 و تفکیک 12A/12B مصوب ADR-016)، فاز ۳ تجاری‌سازی (مراحل ۱۴ تا ۱۶)، و فاز ۴ اکوسیستم به همراه گیت‌های کنترل کیفیت و چک‌لیست‌های انطباق. |
+| **Tags** | `backend`, `roadmap`, `milestones`, `architecture`, `services`, `mvp`, `phase2`, `phase3`, `ssot` |
 
 ---
 
-# نقشه راه پیاده‌سازی گام‌به‌گام بک‌اند (Backend Roadmap & Quality Gates)
+# نقشه راه جامع پیاده‌سازی گام‌به‌گام بک‌اند (Unified Backend Roadmap & Quality Gates)
 
-> **اصل بنیادین حاکمیت معماری (Governance Invariant):**  
-> این سند، منبع واحد حقیقت (SSOT) برای گام‌های اجرایی، توالی تحویل سرویس‌ها و گیت‌های کنترل کیفیت در مخزن `api/` است. تمامی مراحل پیاده‌سازی باید دقیقاً با استانداردهای قراردادهای Proto ([DOC-BE-003](./contracts.md))، اصول کدنویسی Go Clean Architecture ([DOC-BE-004](./style-guide.md))، خط مشی رسانه‌ها ([DOC-BE-006](./media-and-model-pipeline.md)) و تصمیمات معماری مصوب ([ADR-011](../01-architecture/decisions/ADR-011-business-capabilities-and-phase2-roadmap.md)) همگام باشند.
+> **اصل بنیادین حاکمیت معماری (Governance & SSOT Invariant):**  
+> این سند، **تنها منبع واحد حقیقت (Sole Source of Truth)** برای تمامی گام‌های اجرایی، توالی تحویل سرویس‌ها، چک‌لیست‌های گام‌به‌گام مهندسی و گیت‌های کنترل کیفیت پلتفرم Lemmo است. هیچ فایل نقشه راه موازی در ریشه مخزن یا سایر دایرکتوری‌ها معتبر نبوده و تمامی ارجاعات باید منحصراً به این سند ارجاع داده شوند. تمامی مراحل پیاده‌سازی باید دقیقاً با قراردادهای Proto ([DOC-BE-003](./contracts.md))، اصول کدنویسی Go Clean Architecture ([DOC-BE-004](./style-guide.md))، خط‌مشی محرمانگی و کانفیگ ([DOC-ARCH-009](../01-architecture/configuration-and-secrets.md)) و تصمیمات مصوب معماری ([ADR-001 تا ADR-016](../01-architecture/decisions/)) همگام باشند.
 
 ---
 
@@ -39,178 +39,224 @@
 
 ---
 
-## ۲. توالی مهندسی مراحل ۵ تا ۹ (Execution Stages — Phase 1)
-
-به منظور جلوگیری از بن‌بست‌های وابستگی (به‌ویژه نیاز حیاتی ورکر تصویر به فضای ذخیره‌سازی S3 پیش از تولید اولین تصویر)، توالی مراحل فاز ۱ با موفقیت به پایان رسید:
+## ۲. توالی مهندسی مراحل فاز ۱ (Execution Progression Stages 0 to 9)
 
 ```mermaid
 flowchart LR
-    S5["مرحله ۵ ✅<br>orchestrator-service<br>(DAG Engine + QuotaChecker)"] --> S6["مرحله ۶ ✅<br>job-service + storage-service<br>(RabbitMQ Queue + MinIO S3)"]
-    S6 --> S7["مرحله ۷ ✅<br>model-router + image-service<br>(Generic REST Adapter + Cloud Worker)"]
-    S7 --> S8["مرحله ۸ ✅<br>quota-service + usage-service<br>(Credit Ledger + Payer Policy)"]
-    S8 --> S9["مرحله ۹ ✅<br>workspace-service<br>(Multi-Tenancy + Gate 5)"]
+    S0["مرحله ۰ تا ۲ ✅<br>اسکلت ریشه، قراردادها<br>و کتابخانه‌های Core"] --> S3["مرحله ۳ و ۴ ✅<br>project-service<br>و node-registry"]
+    S3 --> S5["مرحله ۵ ✅<br>orchestrator-service<br>(DAG + QuotaChecker)"]
+    S5 --> S6["مرحله ۶ ✅<br>job-service + storage<br>(RabbitMQ + MinIO)"]
+    S6 --> S7["مرحله ۷ ✅<br>model-router + image<br>(Cloud Worker)"]
+    S7 --> S8["مرحله ۸ ✅<br>quota-service + usage<br>(Financial Ledger)"]
+    S8 --> S9["مرحله ۹ ✅<br>workspace-service<br>(Gate 5 Passed)"]
 ```
 
-### مرحله ۵: موتور ارکستراسیون گراف (`orchestrator-service`) ✅
-- پیاده‌سازی معماری Clean Architecture در `services/orchestrator-service/`.
-- اعتبارسنجی گراف و کشف دورها با الگوریتم Kahn (Topological Sorting).
-- پیاده‌سازی اینترفیس `QuotaChecker` جهت بررسی اولیه سهمیه پیش از ثبت جاب.
-- پشتیبانی از پورت‌های پویا (`dynamic_prefix`) و تطبیق نوع داده‌ها (Type Coercion Allowlist).
-- تولید تسک‌های اجرایی نودها و ارسال به `job-service`.
-
-### مرحله ۶: مدیریت جاب‌ها و ذخیره‌سازی اشیاء (`job-service` + `storage-service`) ✅
-- **job-service:** استیت ماشین وضعیت‌های جاب (`PENDING`, `QUEUED`, `RUNNING`, `SUCCEEDED`, `FAILED`, `CANCELLED`)، توزیع در صف‌های RabbitMQ و استریم رویدادهای پیشرفت لحظه‌ای با SSE.
-- **storage-service:** راه‌اندازی کلاینت MinIO، اندپوینت آپلود، تولید Presigned URLs برای دانلود امن (TTL ۱۵ دقیقه) و اندپوینت تمدید امضا (`POST /assets/{id}/sign`) در خطای ۴۰۳.
-
-### مرحله ۷: مسیریابی ابری و ورکر تصویر (`model-router-service` + `image-service`) ✅
-- **model-router-service:** کاتالوگ مدل‌ها، رجیستری ۴ لایه‌ای (Provider, ProviderInstance, Model, RoutingGroup)، آداپتور عمومی اعلانی (Generic REST Adapter) بدون نیاز به کد برای پراویدرهای استاندارد، الگوریتم توکن‌باکت در Redis برای ریت‌لیمیت حساب پلتفرم، و فالبک ۳ سطحی (Instance -> Model -> Equivalence Group).
-- **image-service:** ورکر کلاینت ابری مستقل برای فراخوانی APIهای ابری (Fal.ai, Replicate)، شنود وب‌هوک با امضای HMAC یا Fallback به Polling در محیط محلی، دانلود خروجی و آپلود به `storage-service`.
-
-### مرحله ۸: اقتصاد و دفترکل کردیت (`quota-service` + `usage-service`) ✅
-- سیستم دفترکل تغییرناپذیر کردیت (Append-Only Credit Ledger) با مدل Bucket و تاریخ انقضا (`expires_at`).
-- الگوی دو فازی Reserve و Settle با بازگشت وجه در صورت شکست (Compensating Transaction) روی موتور `financial-ledger` (ADR-009).
-- سیاست پرداخت‌کننده (Payer Policy) بر اساس ورک‌اسپیس محل پروژه (`member_pays`, `workspace_pays`, `hybrid`).
-- توقف قطعی با خطای `WORKSPACE_WALLET_EMPTY` در صورت خالی بودن کیف‌پول سازمان و مدیریت حالت opt-in عضو.
-- اعمال کارمزد پلتفرم روی پراویدرهای کاستوم کاربر (`byo_fee`).
-- ردیابی هزینه دلاری پراویدرها (`provider_cost_micros`) و محاسبه حاشیه سود پلتفرم.
-
-### مرحله ۹: مدیریت فضاهای کاری و سازمان‌ها (`workspace-service`) ✅
-- راه‌اندازی سرویس دهم با پورت‌های gRPC `50060` و HTTP `8089` (کانتینر `lemmo-svc-workspace`).
-- پایگاه داده اختصاصی `lemmo_workspace` با ۴ جدول: `workspaces` (با ستون رسمی `on_wallet_empty` و وضعیت `provisioning`)، `workspace_memberships`، `workspace_invitations` و `workspace_settings`.
-- الگوی تاب‌آوری Provisioning والت در تعامل همگام gRPC با `quota-service` و انتشار رویدادهای `workspace.created` و `workspace.payer_policy_updated` به RabbitMQ.
-- تجرید کنترل دسترسی‌ها با اینترفیس انتزاعی `PermissionManager` (آداپتور محلی `LocalMembershipAdapter` با پشتیبانی از `X-Mock-Roles` و آداپتور ریموت `KetoPermissionAdapter`).
-- تفکیک کامل رفتار فضاهای کاری شخصی (`PERSONAL`) و سازمانی (`TEAM`).
-- چرخه حیات امن دعوت‌نامه‌ها با توکن‌های تصادفی رمزنگاری‌شده، هش SHA-256 و انقضای کانفیگ‌پذیر (`invitation_expiry_duration`).
-- استقرار مستقل سرویس در `services/workspace-service/deploy/compose.yaml` ذیل قوانین ADR-009.
+### خلاصه دستاوردهای بسته فاز ۱:
+- **مرحله ۰ (Day 0 Skeleton):** پیکربندی `go.work`، لینتر استوار `.golangci.yml`، ابزار پروتوباف `buf`، پکیج‌های پایه‌ای `core/{bootstrap, config, middleware, outbox, idempotency}`.
+- **مرحله ۱ و ۲ (Contracts & SDK):** پروتکل‌های باینری در `contracts/`، تولید کلاینت تایپ‌اسکریپت `@lemmo/sdk` و ابزار اسکافولدینگ `tools/lemmo-cli`.
+- **مرحله ۳ (Project Service):** مدیریت پروژه، انبارش گراف بوم در JSONB، قفل آپتیمیستیک با نسخه، و ثبت رویدادهای ایجاد/تغییر.
+- **مرحله ۴ (Node Registry Service):** کاتالوگ بومی و حافظه‌محور نودها، حل پورت‌های پویا (`var:`, `lora:`, `control:`) و بذر اولیه‌سازی نودها.
+- **مرحله ۵ (Orchestrator Service):** موتور مرتب‌سازی توپولوژیک Kahn، کشف دورها، زمان‌بندی موازی استیج‌ها و ادغام اینترفیس `QuotaChecker`.
+- **مرحله ۶ (Job & Storage Services):** صف‌های اولویت‌دار RabbitMQ، صف مرده DLQ، استریم SSE، کلاینت MinIO، باکت‌های ایزوله، و صدور لینک‌های موقت ۱۵ دقیقه‌ای با اندپوینت تجدید امضا.
+- **مرحله ۷ (Model Router & Cloud Image Worker):** رجیستری ۴ لایه‌ای پراویدرها، توکن باکت ریت‌لیمیتینگ، فالبک ۳ سطحی، و ورکر مستقل بدون وابستگی به GPU محلی با وب‌هوک HMAC.
+- **مرحله ۸ (Quota & Usage Services):** دفترکل تغییرناپذیر ۱۹ فیلدی، ادغام موتور `financial-ledger` (ADR-009)، سیاست‌های Payer Policy، الگوی دو فازی Reserve/Settle و مسدودسازی `WORKSPACE_WALLET_EMPTY`.
+- **مرحله ۹ (Workspace Service & Gate 5):** تفکیک سازمان‌ها و مستاجران، چرخه حیات امن دعوت‌نامه‌ها، ستون صریح `on_wallet_empty`، پاس شدن کامل سوئیت آزمون ۹ مرحله‌ای E2E در `tests/e2e/phase1_gate5_test.go`.
 
 ---
 
-## ۳. پنج قلاب حیاتی توسعه‌پذیری (Mandatory MVP Hooks)
+## ۳. پنج قلاب حیاتی توسعه‌پذیری (Mandatory MVP Hooks — تکمیل‌شده ✅)
 
-برای ممانعت از بازنویسی‌های پرهزینه در فازهای ۲ و ۳، این ۵ قلاب در کدهای فاز ۱ پیاده‌سازی و تثبیت شده‌اند:
 1. **مدل Bucket و `expires_at` در لجر:** ✅ پیاده‌سازی کامل سطل‌ها و کسر با الگوریتم FEFO در `quota-service` و `usage-service`. قلاب مستقیم برای جذب کدهای تخفیف و رفرال بدون تغییر اسکیما.
 2. **فیلد `actor_type` در لجر و گیت‌وی:** ✅ پشتیبانی از مقادیر `USER`، `API_KEY` و `SYSTEM` در اسکیما ۱۹ فیلدی دفترکل.
 3. **انتشار رویداد `provider.call.completed`:** ✅ ثبت هزینه هر فراخوانی پراویدر ابری به میکرو‌دلار (`provider_cost_micros`).
 4. **نگاشت خطای Content Policy و مرحله no-op:** ✅ نگاشت کدهای خطای پالیسی به `CONTENT_POLICY_VIOLATION_PROVIDER` و آزادسازی آنی اعتبار رزرو‌شده.
-5. **حداقل بک‌آپ به عنوان شرط انتشار MVP (E4.6):** ✅ اسکریپت پشتیبان‌گیری استاندارد `tools/backup/db_backup.sh` برای هر ۱۰ پایگاه داده با سوییچ اعتبارسنجی `--verify`.
+5. **حداقل بک‌آپ به عنوان شرط انتشار MVP (E4.6):** ✅ اسکریپت پشتیبان‌گیری استاندارد `tools/backup/db_backup.sh` برای هر ۱۲ پایگاه داده با سوییچ اعتبارسنجی `--verify`.
 
 ---
 
-## ۴. فاز ۲: هویت زنده، تجاری‌سازی و ارتباطات (Phase 2 Roadmap — مصوب ADR-011)
+## ۴. چک‌لیست گام‌به‌گام مهندسی فازهای ۰ و ۱ (Granular Implementation Checklists)
 
-فاز ۲ بر تبدیل موتور پایپ‌لاین فاز ۱ به یک پلتفرم زنده و یکپارچه با ورود و ثبت‌نام واقعی کاربر، ابزارسازی OpenAPI، اتصال کامل فرانت‌اند استودیو و موتور کنترل دسترسی‌ها (IAM) تمرکز دارد:
+### 4.1 Phase 0 — Day 0 Skeleton & Core Framework
+- [x] **0.1 ایجاد فایل‌های پیکربندی ریشه:**
+  - [x] ایجاد `api/go.work` با دایرکتیو تمام زیرماژول‌ها
+  - [x] ایجاد `api/.golangci.yml` (govet, staticcheck, gosec, gocyclo:15)
+  - [x] ایجاد `api/buf.yaml` و `api/buf.gen.yaml` برای تولید کد Go و TS
+  - [x] ایجاد `api/Makefile` با تارگت‌های اصلی build, lint, test, proto
+- [x] **0.2 ساختار متمرکز قراردادها (`contracts/`):**
+  - [x] قراردادهای پلتفرم: `envelope.proto`, `errors.proto` (AIP-193), `permissions.proto`, `registry.proto`
+  - [x] قراردادهای دامنه Lemmo: `node.proto`, `project.proto`, `workflow.proto`, `usage.proto`, `events.proto`
+  - [x] اسکیمای JSON گراف پروژه: `contracts/schemas/project-graph.json`
+- [x] **0.3 ساختار پکیج‌های مشترک (`core/`):**
+  - [x] پیاده‌سازی `core/config`: لودر امن YAML با اعتبارسنجی Fail-Fast و منع فال‌بک سکرت‌ها (DOC-ARCH-009)
+  - [x] پیاده‌سازی `core/bootstrap`: سرور استاندارد gRPC و HTTP با Graceful Shutdown
+  - [x] پیاده‌سازی `core/middleware`: تزریق TraceID (OpenTelemetry)، ریکاوری پنیک، و MockAuthMiddleware
+  - [x] پیاده‌سازی `core/outbox`: الگوی Outbox تراکنشی پایگاه داده
+  - [x] پیاده‌سازی `core/idempotency`: کلیدهای idempotency در Redis
+- [x] **0.4 و 0.5 ابزارها و پکیج‌های SDK:**
+  - [x] ابزار اسکافولدینگ مایکروسرویس‌ها: `tools/lemmo-cli`
+  - [x] ساخت پکیج کلاینت تایپ‌اسکریپت: `packages/ts-sdk` (@lemmo/sdk)
+- [x] **0.8 تا 0.11 زیرساخت داکر و پروتوباف:**
+  - [x] کامپایل قراردادها با `buf build` و `buf generate`
+  - [x] شبکه و استک پایه داکر (`infra/compose/dev.yml`) شامل PostgreSQL, Redis, RabbitMQ, MinIO با Healthcheck
+
+### 4.2 Phase 1 — Detailed Service Implementation Checklist
+- [x] **1.1 اسکلت و تنظیمات اختصاصی هر سرویس:** ایجاد Clean Architecture برای ۱۰ سرویس فاز ۱ همراه با `service.md`, `go.mod`, `Dockerfile`.
+- [x] **1.2 مایگریشن‌های پایگاه داده:** اسکریپت‌های متوالی `000001_*.up.sql` و `.down.sql` بدون کلید خارجی بین‌سرویسی.
+- [x] **1.4.1 node-registry-service:** اینتیتی نودها، پورت‌های ورودی/خروجی، کش داخلی، هندلرهای gRPC و تست‌های انطباق پورت.
+- [x] **1.4.2 project-service:** اینتیتی پروژه، نگهداری دیتای گراف در JSONB، قفل آپتیمیستیک با ورژن، و نگاشت خطاهای AIP-193.
+- [x] **1.4.3 orchestrator-service:** مرتب‌سازی توپولوژیک Kahn، باکت‌بندی استیج‌های موازی، کشف دورها، و ادغام `QuotaChecker`.
+- [x] **1.4.4 job-service:** ماشین حالت وضعیت جاب‌ها، صف‌های اولویت‌دار ۱ تا ۱۰، صف خطای DLQ، و برودکستر پیشرفت SSE.
+- [x] **1.4.5 model-router-service:** رجیستری ۴ لایه‌ای، آداپتور عمومی اعلانی JSON، فالبک ۳ سطحی، و توکن‌باکت ردیس با اسکریپت اتمیک Lua.
+- [x] **1.4.6 image-service:** ورکر کلاینت ابری Fal/Replicate، اعتبارسنجی وب‌هوک HMAC، استریم خروجی به MinIO و ثبت در `job-service`.
+- [x] **1.4.7 quota-service:** مدیریت کیف‌پول‌ها، الگوی ۲ فازی رزرو و تسویه، اتصال به `financial-ledger` و اعمال Payer Policy.
+- [x] **1.4.8 usage-service:** دفترکل تغییرناپذیر ۱۹ فیلدی، مصرف‌کننده رویدادهای RabbitMQ و رهگیری سود ناخالص پلتفرم.
+- [x] **1.4.9 workspace-service:** مدیریت فضاهای کاری `PERSONAL` و `TEAM`، لایف‌سایکل دعوت‌نامه‌ها، اتصال با `quota-service` و پاس شدن Gate 5.
+
+---
+
+## ۵. فاز ۲: هویت زنده، درگاه لبه، ابزارسازی و کلاینت استودیو (Phase 2 Roadmap)
+
+فاز ۲ بر فعال‌سازی هسته زنده هویت، استقرار درگاه ورودی لبه، خودکارسازی قراردادهای OpenAPI 3.1، اتصال کلاینت زنده استودیو (`app/`) و استقرار موتور کنترل دسترسی‌ها (`iam-service`) تمرکز دارد:
 
 ```mermaid
 flowchart TD
-    S10A["مرحله 10A ✅<br>reference-data-registry<br>(RefData + RabbitMQ Events)"] --> S10B["مرحله 10B ✅<br>user-service + Live Auth<br>(Kratos Webhook + Risk Engine)"]
-    S10B --> S105["مرحله ۱۰.۵ ✅<br>infra/gateway + BFF<br>(Kong + Oathkeeper + Context)"]
-    S105 --> S11["مرحله ۱۱ 🎯<br>auth-service (Ory Kratos)<br>(استقرار Kratos + لاگین زنده + اتصال auth/ UI)"]
-    S11 --> S12["مرحله ۱۲ 📋<br>ابزار OpenAPI + اتصال SDK استودیو<br>(app/ live adapter + Zero Leakage)"]
-    S12 --> S13["مرحله ۱۳ 📋<br>iam-service (موتور مجوزها)<br>(ReBAC + Entitlements + Canvas Access)"]
+    S10A["مرحله 10A ✅<br>reference-data-registry<br>(RefData + Cache)"] --> S10B["مرحله 10B ✅<br>user-service + Live Auth<br>(Kratos Sync + Risk Engine)"]
+    S10B --> S105["مرحله ۱۰.۵ ✅<br>Edge Gateway & BFF<br>(Kong + Oathkeeper + Context)"]
+    S105 --> S11["مرحله ۱۱ ✅<br>auth-service (Ory Kratos)<br>(ورود یکپارچه + ابطال سشن + اتصال auth/ UI)"]
+    S11 --> S12A["مرحله ۱۲A 📋<br>سیاست‌های قرارداد و گیت‌وی<br>(x-lemmo-workspace-policy + lemmo-openapi)"]
+    S12A --> S12B["مرحله ۱۲B 📋<br>آداپتور زنده فرانت‌اند استودیو<br>(Orval Fetch + Context Freezing + Cache Isolation)"]
+    S12B --> S13["مرحله ۱۳ 📋<br>iam-service (موتور مجوزها)<br>(ReBAC + Canvas ACLs + Edge Check)"]
     S13 --> Gate6["🏁 گیت کنترل کیفیت ۶<br>(محصول کاملاً زنده در مرورگر)"]
-    Gate6 --> S14["مرحله ۱۴ 📋<br>billing-service<br>(اشتراک + درگاه پرداخت)"]
-    S14 --> S15["مرحله ۱۵ 📋<br>promo-engine<br>(کمپین‌ها + سهمیه هدیه)"]
-    S15 --> S16["مرحله ۱۶ 📋<br>notification-service<br>(Novu Engine + In-App Inbox)"]
-    S16 --> Gate7["🏁 گیت کنترل کیفیت ۷<br>(کامل شدن زیرساخت درآمدزایی)"]
 ```
 
-### مرحله 10A: رجیستری داده‌های مرجع مشترک (`reference-data-registry` — مصوب ADR-012) ✅
+### مرحله 10A: رجیستری داده‌های مرجع مشترک (`reference-data-registry` — ADR-012) ✅
 - **وضعیت:** تکمیل و اعتبارسنجی کامل در تاریخ ۲۰۲۶-۱۰-۰۱.
-- **دامنه:**
-  - استقرار سرویس اختصاصی با پورت‌های gRPC `50061` و HTTP `8090` با معماری Clean Architecture ذیل ADR-009.
-  - پایگاه داده اختصاصی `lemmo_refdata` شامل جداول `reference_datasets` و `reference_data_audit_logs`.
-  - بذر اولیه داده‌ها: `disposable_emails` و `reserved_handles`.
-  - انتشار رویداد سبک `reference_data.dataset.updated.v1` روی تبادل `lemmo.events` در RabbitMQ با Outbox.
+- **دامنه:** سرویس اختصاصی روی پورت gRPC `50061` و HTTP `8090`؛ پایگاه داده `lemmo_refdata`؛ انتشار رویداد `reference_data.dataset.updated.v1` روی RabbitMQ؛ کلاینت کش دو سطحی (رم + دیسک) با مقاومت در برابر قطع شبکه؛ آزمون لایو ۸ مرحله‌ای `reference_data_live_test.go` پاس شد.
 
-### مرحله 10B: سرویس هویت، پروفایل کاربران و موتور ریسک (`user-service` + Live Auth) ✅
+### مرحله 10B: سرویس کاربران و موتور ریسک (`user-service` + Live Auth) ✅
 - **وضعیت:** تکمیل و اعتبارسنجی کامل در تاریخ ۲۰۲۶-۱۰-۰۲.
-- **دامنه:**
-  - کش دو سطحی (حافظه + فایل محلی) برای مصرف داده‌های مرجع بدون وابستگی همگام روی مسیر بحرانی.
-  - وب‌هوک ایمن Post-Registration کراتوس با استراتژی Fail-Closed (`POST /internal/v1/users/sync-kratos`).
-  - جداسازی قطعی شناسه غیرقابل تغییر داخلی (`id` UUID) از نام‌کاربری یکتا و عمومی کاربر (`handle`).
-  - نگهداری اولویت‌ها و تنظیمات کاربری در ستون `preferences JSONB` با اعتبارسنجی دامنه.
-  - موتور محاسبه امتیاز ریسک، ثبت لاگ‌های حسابرسی `user_risk_logs`، و اعمال خودکار تعلیق موقت ۲ ساعته با رسیدن امتیاز به ۱۰۰ در Redis.
-  - قلاب‌های رفرال P2P و ساخت خودکار کد دعوت ۷ کاراکتری Base32.
+- **دامنه:** وب‌هوک Post-Registration ایمن کراتوس (`POST /internal/v1/users/sync-kratos`)؛ تفکیک `id` از `handle`؛ فیلد `preferences`؛ موتور محاسبه امتیاز ریسک `user_risk_logs` با تعلیق خودکار در Redis؛ ایجاد کد رفرال Base32.
 
-### مرحله ۱۰.۵: استقرار معماری سه‌لایه درگاه ورودی، پروکسی هویت و کانتکست کلاینت (ADR-013) ✅
-- **وضعیت:** تکمیل و اعتبارسنجی کامل با موفقیت ۱۰۰٪ در آزمون‌های زنده ۹ گانه (`gateway_ingress_live_test.go`) در تاریخ ۲۰۲۶-۱۰-۰۲.
-- **دامنه:**
-  - **لایه ۱ (Edge Gateway / Kong DB-less):** پورت‌های بیرونی `8000` و `8001`؛ ریت‌لیمیتینگ با Redis، اعتبارسنجی بومی JWT با JWKS، هدایت استریم‌های زنده SSE بدون بافرینگ (`response_buffering: false`). پلاگین‌های کاستوم Lua شامل `lemmo-ip-guard`, `lemmo-honeypot-trap`, `lemmo-access-enforcer`.
-  - **لایه ۲ (Identity Decision Proxy / Ory Oathkeeper):** استقرار کانتینر `lemmo-identity-proxy`؛ احراز هویت اولیه سشن Kratos با `cookie_session`، تبدیل به JWT کوتاه‌مدت با `id_token` و امضای نامتقارن RS256 کلید اختصاصی `lemmo-key-1`، هیدراتور عضویت‌های ورک‌اسپیس درون JWT، و اعتبارسنجی ورک‌اسپیس فعال.
-  - **لایه ۳ (Context Aggregator / `context-service`):** میکروسرویس سیزدهم Go؛ اندپوینت `GET /api/v1/me/context` جهت تجمیع وضعیت کاربر، ورک‌اسپیس فعال، سوییچر ورک‌اسپیس‌ها، سهمیه‌ها و گام‌های آنبوردینگ (UI-only context)، همراه با قفل Single-Flight در `GET /api/v1/auth/refresh`.
+### مرحله ۱۰.۵: استقرار درگاه لبه، پروکسی هویت و کانتکست (ADR-013) ✅
+- **وضعیت:** تکمیل و اعتبارسنجی کامل در آزمون‌های زنده `gateway_ingress_live_test.go` در تاریخ ۲۰۲۶-۱۰-۰۲.
+- **دامنه:** Kong Gateway در حالت DB-less؛ پروکسی Ory Oathkeeper برای صدور JWT نامتقارن؛ سرویس BFF کانتکست (`context-service`) روی پورت `8091`؛ پلاگین‌های کاستوم Lua شامل `lemmo-ip-guard`, `lemmo-honeypot-trap`, `lemmo-access-enforcer`.
+
+### مرحله ۱۱: استقرار کامل ورود بدون رمز و لایف‌سایکل سشن (`auth-service` — ADR-014 و ADR-015) ✅
+- **وضعیت:** تکمیل و اعتبارسنجی کامل با موفقیت ۱۰۰٪ در آزمون‌های زنده ۹ گانه (`auth_flow_live_test.go`) در تاریخ ۲۰۲۶-۱۰-۰۲.
+- **دامنه:** استقرار Ory Kratos و Mailpit در داکر؛ وب‌سرویس `auth-service` با اندپوینت هوشمند `/api/v1/auth/entry` جهت حذف خطای Duplicate Identifier؛ اعتبارسنجی کد ۶ رقمی OTP؛ ابطال آنی نشست در خروج با ثبت برچسب زمانی در Redis و ارزیابی با دستور MGET پلاگین Lua؛ اتصال کامل رابط کاربری `auth/` در Next.js و انتقال خودکار به استودیو بر اساس پارامتر `return_to`.
 
 ---
 
-### مرحله ۱۱: استقرار کامل سرویس هویت و فرآیند زنده ورود/ثبت‌نام (`auth-service` / Live Auth Flow — مصوب ADR-014 و ADR-015) ✅
-- **وضعیت:** تکمیل و اعتبارسنجی کامل با موفقیت ۱۰۰٪ در آزمون‌های زنده ۹ گانه (`auth_flow_live_test.go`) در تاریخ ۲۰۲۶-۱۰-۰۲.
-- **دامنه:**
-  - **استقرار کانتینر Ory Kratos:** استقرار رسمی در استک داکر (`lemmo-svc-kratos` بر پایه `oryd/kratos:v1.3.0`، پورت‌های داخلی `4433`/`4434`)، با دیتابیس اختصاصی `lemmo_kratos` در PostgreSQL، ماژول courier با پشتیبانی از SMTP بدون TLS در محیط لوکال، و اسکیمای مینیمال هویت `identity.schema.json` (صرفاً ایمیل و صفات احراز هویت).
-  - **سرور ایمیل توسعه (Mailpit):** استقرار کانتینر `lemmo-infra-mailpit` (`axllent/mailpit`) با پورت‌های `1025` (SMTP) و `8025` (Web UI و REST API) جهت دریافت و استخراج خودکار کدهای عددی ۶ رقمی OTP در تست‌های لایو.
-  - **میکروسرویس واسط ورود هوشمند (`services/auth-service`):** پیاده‌سازی سرویس Go روی پورت `8085`؛ اندپوینت یکپارچه `/api/v1/auth/entry` با استعلام قبلی از Kratos Admin API (`identityExistsByEmail`) جهت هدایت خودکار کاربر جدید به ثبت‌نام و کاربر موجود به لاگین (حذف خطای duplicate identifier)، اندپوینت `/api/v1/auth/verify` جهت اعتبارسنجی کد OTP و صدور کوکی نشست `ory_kratos_session`، و اندپوینت `/api/v1/auth/logout` جهت ابطال آنی با ثبت کلید در Redis (`lemmo:user:logout_at:{user_id}`).
-  - **پیکربندی گیت‌وی لبه (Kong):** تفکیک مسیرهای عمومی `/auth/kratos/*` (بدون forward-auth) و `/api/v1/auth/*`، پشتیبانی کامل از CORS با `credentials: true`، و ارتقای پلاگین Lua (`lemmo-access-enforcer`) با ارزیابی کلید `logout_at` در قالب دستور یکپارچه `MGET` ردیس.
-  - **اتصال وب‌هوک:** اتصال Post-Registration Webhook کراتوس به سرویس `user-service` (`POST /internal/v1/users/sync-kratos`) با هدر امنیتی `X-Kratos-Webhook-Secret` جهت ایجاد آنی رکورد کاربر و کد معرف.
-  - **یکپارچه‌سازی رابط کاربری فرانت‌اند ([`auth/`](../../../../auth)):** اتصال کامل کامپوننت `AuthCard.tsx` در Next.js به اندپوینت‌های زنده ورودی و فرم کد ۶ رقمی OTP، حذف تایمرهای ماک، و هدایت خودکار به استودیو بر اساس پارامتر `return_to`.
+### مرحله ۱۲: ابزار خودکارسازی OpenAPI و اتصال آداپتور زنده استودیو (مصوب ADR-014 و ADR-016)
 
-### مرحله ۱۲: ابزار تولید خودکار OpenAPI و نهایی‌سازی SDK کلاینت استودیو (`tooling & ts-sdk` — مصوب ADR-014) 📋
-- **دامنه:**
-  - **ابزار تولید خودکار OpenAPI / Swagger:** ساخت اسکریپت و CLI در `tools/` جهت تبدیل خودکار تعاریف Protobuf به مستندات رسمی **OpenAPI 3.1 JSON/YAML** برای تمامی اندپوینت‌های گیت‌وی لبه.
-  - **پیاده‌سازی آداپتور زنده فرانت‌اند (`app/src/sdk/live/live-adapter.ts`):** پیاده‌سازی کامل اینترفیس `SdkClient` با استفاده از کلاینت‌های تایپ‌شده Fetch و پکیج `@/sdk`.
-  - **فعال‌سازی حالت زنده در استودیو:** تنظیم `NEXT_PUBLIC_API_MODE=live` در محیط استودیو (`app/`) و اتصال بدون درز با حفظ قانون Zero-Leakage (عدم تغییر در کامپوننت‌های بصری UI).
-  - **اعتبارسنجی جریان کامل کاری:** تست دریافت کانتکست در لود برنامه، ساخت پروژه، ذخیره نودها و دیاگرام، و استریم زنده وضعیت رندر نودها روی بوم در مرورگر.
+بر اساس ارزیابی‌های فنی و مصوبه **[ADR-016](../01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md)**، مرحله ۱۲ به دو بخش دقیق تفکیک شده است:
+
+#### مرحله ۱۲A: سیاست‌های قرارداد، تولید OpenAPI و سخت‌سازی گیت‌وی (`contracts/`, `tools/` & Gateway Ingress) 📋
+1. **منبع حقیقت سیاست‌های ورک‌اسپیس (`x-lemmo-workspace-policy`):** برچسب‌گذاری صریح تمامی اندپوینت‌های سیستم با مقادیر `required`، `optional` و `none` در قراردادهای منبع.
+2. **متدولوژی قرارداد-محور (Contract-First OpenAPI 3.1):** نگارش مستقیم تعاریف OpenAPI YAML در `contracts/` به عنوان منبع حقیقت سرویس‌های REST، استفاده از ابزارهای بالغ نظیر `oapi-codegen` و تجمیع مونو-اسپک در `infra/gateway/docs/openapi.yaml`.
+3. **اصلاح و سخت‌سازی پلاگین `lemmo-access-enforcer` در گیت‌وی:**
+   - لغو فال‌بک عمومی به `PERSONAL` روی روت‌های دامنه‌ای (اصلاحیه بند ۲.۳ در ADR-013).
+   - مسدودسازی قطعی درخواست‌های فاقد هدر `X-Workspace-ID` روی مسیرهای `required` با پاسخ ۴۰۰ یا ۴۰۳.
+   - محدودسازی انحصاری فال‌بک به مسیرهای `optional`.
+   - **رفتار بدون‌اغماض (Fail-Closed) در ردیس:** در صورت نبود کلید `lemmo:membership:version:{workspace_id}:{user_id}` در Redis، درخواست بلافاصله با ۴۰۳ مسدود می‌گردد.
+   - اعمال استراتژی Fail-Fast روی خطای اتصال به Redis طبق الزامات DOC-ARCH-009.
+4. **بسته مقاوم‌سازی امنیتی لایه اینگرس و هویت (Workstream S1 — مصوب [DOC-ARCH-010](../01-architecture/security-audit-and-remediation.md)):**
+   - **SEC-01 (P0):** جایگزینی `whoami` شبیه‌سازی‌شده در `context-service` با احراز هویت سشن رسمی از طریق Kratos Admin API؛ فعال‌سازی اعتبارسنجی رمزنگاری نامتقارن (RS256) JWT با کلید عمومی JWKS در درگاه Kong؛ حذف قطعی هدرهای تزریقی خام `X-User-ID` و `X-Workspace-*` در لایه لبه قبل از رسیدن به سرویس‌ها.
+   - **SEC-02 (P0):** رفع آسیب‌پذیری IDOR در روت‌های `/profile`, `/preferences`, `/risk` سرویس `user-service` با الزام انطباق شناسه درخواستی با کاربر احرازشده در کانتکست یا احراز نقش ادمین سیستم.
+   - **SEC-08 (P1):** اصلاح لاگ‌اوت در `auth-service` با ابطال واقعی سشن در Kratos، منع دریافت `userID` از بدنه و ثبت برچسب زمانی خروج در ردیس با TTL بیست دقیقه‌ای.
+   - **SEC-09 (P1):** اعمال رفتار Fail-Closed روی خطاهای ردیس در پلاگین گیت‌وی و منع عبور خام درخواست‌ها.
+   - **SEC-10 (P1):** حذف دستور `mc anonymous set public` از کانتینر init در Compose و بازگرداندن باکت‌های MinIO به وضعیت خصوصی (`private`).
+   - **SEC-11 (P1):** محدودسازی بایندینگ پورت‌های حساس (Postgres, Redis, MinIO, RabbitMQ, Kratos, Mailpit) در Compose منحصراً به لوپ‌بک محلی `127.0.0.1` جهت ممانعت از دسترسی عمومی هاست.
+   - **SEC-22 (P2):** تفکیک خطای زیرساخت در `context-service` و بازگرداندن خطای صریح ۵۰۳ یا ۵۰۰ به جای کانتکست جعلی یا خالی.
+5. **آزمون‌های لایو عبور از مرزها در گیت‌وی:** تدوین سوئیت تست لایو جهت اثبات مسدودسازی روت‌های `required` فاقد هدر و مسدودسازی کاربر غیرعضو در گیت‌وی برای روت‌های واقعی دامنه (مانند `/api/v1/projects`).
+
+#### مرحله ۱۲B: پیاده‌سازی آداپتور زنده، ترانسپورت و ایزولاسیون استودیو (`app/src/sdk/live/`) 📋
+1. **تولید کلاینت Fetch با Orval در مرز محصور:** تولید توابع کلاینت مستقل از هوک‌های React در پوشه ایزوله `app/src/sdk/live/generated/` با محافظت قواعد لینت از عدم دسترسی مستقیم از کدهای UI.
+2. **سخت‌سازی لایه ترانسپورت شبکه (`@/sdk/live/transport.ts`):**
+   - پالایش و حذف قطعی هرگونه تزریق دستی هدر خام `X-Workspace-ID` توسط کالرها.
+   - ثبت اسنپ‌شات منجمد کانتکست (Context Freezing شامل `workspaceId` و `sessionGenerationId`) در لحظه فراخوانی و تکرار منحصربه‌فرد همان کانتکست در Retry.
+   - لغو خودکار و بلافاصله تلاش‌های مجدد در صورت لاگ‌اوت یا تعویض کاربر.
+   - ارسال تمامی درخواست‌ها با `credentials: 'include'` برای مدیریت دو کوکی سشن Kratos و توکن امضاشده `lemmo_jwt` (HttpOnly).
+3. **پیاده‌سازی آداپتور زنده (`live-adapter.ts`):** پیاده‌سازی کامل اینترفیس پایدار `SdkClient`، نرمال‌سازی پاسخ‌ها و کدهای خطای RFC 7807 در قالب ساختار استاندارد `PlatformErrorEnvelope`.
+4. **ماشین حالت ۶‌گانه کانتکست (`StudioContextProvider`):** پیاده‌سازی تفکیک صریح حالت‌های `uninitialized`, `loading`, `ready`, `no-workspace`, `error`, `signed-out` با امکان بازتلاش غیرمخرب شبکه.
+5. **ایزولاسیون کلیدهای کش React Query و لایف‌سایکل جهش‌ها:**
+   - مقیدسازی کوئری‌ها با پیش‌وند `['workspace', activeWsId, ...]`.
+   - مهار جهش‌های در حال پرواز (In-flight Mutations) به ورک‌اسپیس مبدا و ابطال کش ایزوله همان ورک‌اسپیس.
+   - منع ریترای خودکار جهش‌های بدون `idempotency_key` و تعریف وضعیت صریح `uncertain` برای جهش‌های با نتیجه نامعلوم.
+   - تخلیه کامل کش با `queryClient.clear()` هنگام خروج و انزوای کلاینت‌ها در رندر سمت سرور (SSR).
+6. **استریم پیشرفت جاب‌ها با Server-Sent Events (`jobs.subscribe`):**
+   - پیاده‌سازی استریم زنده نودها با `EventSource` با تنظیم `{ withCredentials: true }` بدون ارسال هدر ورک‌اسپیس (اعتبارسنجی سمت سرور در `job-service`).
+   - فراخوانی خودکار متد cleanup و بستن اتصال `EventSource` در زمان تغییر سشن یا تغییر ورک‌اسپیس.
+7. **آزمون‌های لایو استودیو:** تست اعتبارسنجی کلاینت زنده با `NEXT_PUBLIC_API_MODE=live` در محیط واقعی مرورگر.
+
+---
+
+### برنامه مقاوم‌سازی امنیتی چندمستأجری و مالی (مراحل S2 و S3 — مصوب DOC-ARCH-010) 📋
+*(پیش‌نیاز قطعی عبور از گیت کنترل کیفیت ۶)*
+
+#### جریان کاری S2: ایزولاسیون چندمستاجری، احراز هویت RPC و امنیت مدیا
+1. **SEC-03 (P1):** استقرار gRPC Server Interceptor احراز هویت در تمامی سرویس‌های داخلی، حذف دائمی فال‌بک MockAuth، و اعتبارسنجی تطابق تننت درخواست با کانتکست احرازشده.
+2. **SEC-04 (P1):** مسدودسازی درخواست‌های با `callerID` خالی در متدهای حساس `workspace-service` با خطای ۴۰۱، و حذف پذیرش هدرهای تستی `X-Mock-Roles`.
+3. **SEC-05 (P1):** الزام انطباق پیش‌وند کلید فایل با شناسه تننت (`tenants/{tenantID}/*`) و بررسی رکورد دیتابیس در متدهای `SignAssetURL` و `BatchSignAssetURLs` در `storage-service`.
+4. **SEC-06 (P1):** حذف کامل هدرهای احراز هویت پراویدرها (`AdaptedHeaders`) از خروجی‌های RPC در `model-router-service` و تعریف Allowlist رسمی برای سکرت‌های مجاز محیطی.
+5. **SEC-07 (P1):** اجباری‌سازی امضای HMAC روی وب‌هوک‌های `image-service` و پیاده‌سازی گارد ضدنفوذ SSRF بر روی کلاینت دانلود تصویر (مسدودسازی رنج‌های IP خصوصی، محلی و متادیتا).
+6. **SEC-12 (P1):** پالایش هویت و نقش در `reference-data-registry` منحصراً از توکن امنیتی تاییدشده گیت‌وی (`X-User-Roles`).
+7. **SEC-13 (P1):** اتمیک‌سازی پذیرش دعوت‌نامه‌ها در `workspace-service` در یک تراکنش دیتابیس واحد، منع پذیرش وضعیت‌های `rejected` و تطبیق ایمیل کاربر فعلی.
+
+#### جریان کاری S3: همزمانی، دفترکل مالی و Idempotency
+1. **SEC-14 (P1):** مقیدسازی دامنه کلیدهای Idempotency در `quota-service` به محدوده مستاجر (`lemmo:idempotency:{workspace_id}:{operation}:{key}`) و اعتبارسنجی هش SHA-256 پارامترها جهت جلوگیری از نشت میان مستاجران.
+2. **SEC-15 (P1):** پیاده‌سازی الگوی تراکنش جبرانی (Compensating Transaction) در `quota-service`؛ ارسال خودکار دستور Void به دفترکل مالی در صورت شکست ذخیره‌سازی محلی دیتابیس، و اعتبارسنجی اکید ورودی‌ها برای جلوگیری از تبدیل مقادیر منفی اعتبارات.
+
+---
 
 ### مرحله ۱۳: میکروسرویس مدیریت دسترسی‌ها و مجوزهای دانه‌ریز (`iam-service` — مصوب ADR-014) 📋
+- **وضعیت:** در انتظار تکمیل مرحله ۱۲ (پیش‌نیاز گیت کنترل کیفیت ۶).
 - **دامنه:**
-  - **استقرار سرویس اختصاصی `services/iam-service/`:** پیاده‌سازی معماری تمیز Go با پورت‌های gRPC و HTTP.
-  - **مدل اعطای امتیازات (Entitlement Grants per DOC-BE-008):** مدیریت ساختار امتیازات زمانی و سهمیه‌ای برای منابع بوم، تعداد مجاز پروژه‌ها و سهمیه فایل‌ها.
-  - **ماتریس مجوزهای اسناد و نودها (Canvas ACLs):** مدیریت دسترسی‌های دانه‌ریز به پروژه‌ها و بوم‌های اشتراکی خارج از محدوده صرفِ نقش‌های ورک‌اسپیس.
-  - **اینترفیس اعتبارسنجی لبه:** استعلام پرسرعت با کش لبه جهت تایید مجوز ویرایش، اجرا، یا مشاهده گراف توسط سایر سرویس‌ها (`project-service`, `orchestrator-service`).
+  - استقرار سرویس اختصاصی `services/iam-service/` با معماری Clean Architecture در Go.
+  - مدل اعطای امتیازات و سهمیه‌های بوم (Entitlement Grants per DOC-BE-008).
+  - ماتریس مجوزهای اسناد و نودها (Canvas ACLs: دسترسی‌های دانه‌ریز به بوم‌های اشتراکی).
+  - اینترفیس اعتبارسنجی لبه با کش جهت استعلام پرسرعت پروژه‌ها و ورک‌فلوها.
 
 ---
 
-## ۵. فاز ۳: صورت‌حساب، مانیتایزیشن و سیستم اعلان‌ها (Phase 3 Roadmap)
+## ۶. فاز ۳: صورت‌حساب، مانیتایزیشن و سیستم اعلان‌ها (Phase 3 Roadmap)
 
-پس از اطمینان از عملکرد ۱۰۰٪ زنده و یکپارچه محصول در مرورگر، قابلیت‌های تجاری و مانیتایزیشن فعال می‌گردند:
+پس از عبور موفقیت‌آمیز از گیت کنترل کیفیت ۶ و تکمیل **جریان مقاوم‌سازی S4 (استحکام‌بخشی عملیاتی و ایمنی لبه)** شامل:
+- **SEC-16 (P2):** استعلام اندازه فایل از متادیتای واقعی شیء در S3/MinIO (`storage-service`).
+- **SEC-17 (P2):** اعتبارسنجی امن پارامتر `return_to` در فرانت‌اند `auth/` و ممانعت از Open Redirect.
+- **SEC-18 و SEC-19 (P2):** ابطال خودکار کش توکن و رفع باگ ترانسپورت سرور MCP در `dotdive/mcp`.
+- **SEC-20 (P2):** خاموش کردن `leak_sensitive_values` در Oathkeeper و اعمال فلگ‌های امنیتی روی کوکی‌ها.
+- **SEC-21 (P2):** محدودسازی حافظه در پردازش وب‌هوک تصویر با `http.MaxBytesReader` در `image-service`.
 
-### مرحله ۱۴: سرویس اشتراک و صورت‌حساب (`billing-service`)
-- موتور مدیریت پلن‌ها و چرخه‌های اشتراک (`monthly`, `yearly`).
-- درگاه‌های پرداخت چندگانه (ارزی Stripe/NowPayments و ریالی زرین‌پال/زیبال).
-- صدور فاکتور رسمی تجاری و ذخیره فایل PDF در `storage-service`.
-- اعمال تخفیف‌های سبد خرید (`checkout discount`) و تمدید خودکار دوره‌ای (Dunning).
+زیرساخت‌های درآمدزایی فعال می‌شوند:
 
-### مرحله ۱۵: موتور کوپن و کمپین‌های تبلیغاتی (`promo-engine`)
-- مدیریت چرخه حیات کدهای پرومو با محدودیت سقف مصرف و سیاست‌های ضدتقلب.
-- اتصال مستقیم به `quota-service` برای شارژ مستقیم اعتبارات هدیه در باکت‌های `PROMO`.
-- قانون منع انباشت (Non-Stackable Policy) و مصرف تک‌بار به ازای هر کاربر.
-
-### مرحله ۱۶: سرویس جامع اعلان‌ها (`notification-service`)
-- استقرار سلف‌هاستد موتور منبع‌باز **Novu** در استک داکر.
-- اتصال به صف رویدادهای `lemmo.events` در RabbitMQ (`job.completed`, `wallet.low_balance`, `workspace.invitation`).
-- مدیریت صندوق پیام‌های درون‌برنامه‌ای (In-App Inbox Feed) با نشانگرهای `read/unread` در هدر فرانت‌اند.
-- یکپارچگی چندکاناله با ارائه‌دهندگان ایمیل و پیامک.
+- **مرحله ۱۴: سرویس اشتراک و صورت‌حساب (`billing-service`):** موتور پلن‌ها و چرخه‌های اشتراک، درگاه‌های پرداخت چندگانه (ارزی و ریالی)، صدور فاکتور رسمی تجاری در MinIO، و تمدید خودکار دوره‌ای.
+- **مرحله ۱۵: موتور کوپن و کمپین‌های تبلیغاتی (`promo-engine`):** مدیریت چرخه‌حیات کدهای تخفیف و پروموشن، اتصال مستقیم به `quota-service` برای شارژ اعتبارات هدیه، و قانون منع انباشت (Non-Stackable).
+- **مرحله ۱۶: سرویس جامع اعلان‌ها (`notification-service`):** استقرار سلف‌هاستد موتور منبع‌باز Novu در داکر، اتصال به صف رویدادهای RabbitMQ، و مدیریت صندوق پیام‌های درون‌برنامه‌ای (In-App Inbox Feed) در هدر فرانت‌اند.
 
 ---
 
-## ۶. فاز ۴: شبکه اجتماعی، همیاری و اکوسیستم (Phase 4 Roadmap)
+## ۷. فاز ۴: شبکه اجتماعی، همیاری و اکوسیستم (Phase 4 Roadmap)
 
 - **مرحله ۱۷: سرویس جامع فید و کامیونیتی (`community-service`):** ویترین عمومی (Showcase Gallery)، لایک، کامنت، بوک‌مارک و بازنشر گراف‌ها (Remix).
 - **مرحله ۱۸: پلتفرم بازاریابی و همکاری در فروش (`affiliate-service`):** رهگیری کلیک‌های تبلیغاتی ۳۰/۶۰/۹۰ روزه، سیستم کشف تقلب، و دفترکل پرداخت کارمزد بازاریابان (Payout Ledger).
-- **مرحله ۱۹ به بعد: قابلیت‌های تکمیلی سازمانی:** تاریخچه گراف‌ها (`version-service`)، سندباکس پلاگین‌ها (`plugin-runtime-service`)، چت تیمی بوم (`chat-service`) و لاگ ممیزی (`audit-service`).
+- **مرحله ۱۹ به بعد: قابلیت‌های تکمیلی سازمانی:** تاریخچه نسخه‌های گراف (`version-service`)، همیاری بلادرنگ بوم (`collaboration-service` با CRDT/WebSocket)، سندباکس پلاگین‌ها (`plugin-runtime-service`)، چت تیمی بوم (`chat-service`)، و لاگ‌های ممیزی انطباق (`audit-service`).
 
 ---
 
-## ۷. گیت‌های کنترل کیفیت تحویل (Milestone Quality Gates)
+## ۸. گیت‌های کنترل کیفیت تحویل (Milestone Quality Gates)
 
 ```
-[Gate 0: اسکلت Day 0] ✅ بسته شد
+[Gate 0: اسکلت Day 0 و قراردادها] ✅ بسته شد
        │
        ▼
-[Gate 1: پایداری پروژه و اعتبارسنجی MockAuth] ✅ بسته شد
+[Gate 1: پایداری پروژه‌ها و اعتبارسنجی MockAuth] ✅ بسته شد
        │
        ▼
 [Gate 2: ارکستراسیون گراف و تفکیک تسک‌ها] ✅ بسته شد (پایان مرحله ۵)
        │
        ▼
-[Gate 3: ایجاد صف جاب، ذخیره شیء و تولید تصویر نهایی] ✅ بسته شد (پایان مرحله ۷)
+[Gate 3: ایجاد صف جاب، ذخیره شیء و تولید تصویر ابری] ✅ بسته شد (پایان مرحله ۷)
        │
        ▼
 [Gate 4: چرخه کامل مالی، لجر اتمیک و آماده‌سازی انتشار MVP] ✅ بسته شد (پایان مرحله ۸)
@@ -219,7 +265,7 @@ flowchart TD
 [Gate 5: استقرار چندمستأجری، فضاهای کاری و بسته شدن نهایی فاز ۱] ✅ بسته شد (پایان مرحله ۹)
        │
        ▼
-[Gate 6: محصول کاملاً زنده در مرورگر — Kratos + Auth UI + Studio SDK + IAM] 🎯 در نوبت (پایان مرحله ۱۳)
+[Gate 6: محصول کاملاً زنده در مرورگر — Kratos + Auth UI + Studio SDK + IAM + Security S1-S3] 🎯 مرحله فعال (پایان مرحله ۱۳)
        │
        ▼
 [Gate 7: صورت‌حساب، درگاه‌های پرداخت، سیستم پرومو و اعلان‌ها] 📋 در نوبت (پایان مرحله ۱۶)
@@ -228,12 +274,48 @@ flowchart TD
 [Gate 8: جامعه کاربری، ویترین عمومی و موتور افیلیت مارکتینگ] 📋 در نوبت (پایان مرحله ۱۸)
 ```
 
-- **معیار پذیرش Gate 6 (پایان مرحله ۱۳ — تست ۱۰۰٪ زنده در مرورگر):**  
-  1. **ثبت‌نام و ورود زنده:** کاربر در رابط کاربری `auth/` ایمیل خود را وارد کرده، کد OTP را از سرور ایمیل دریافت و لاگین موفق می‌کند.
-  2. **همگام‌سازی کاربر و ورک‌اسپیس:** وب‌هوک به `user-service` ارسال شده، پروفایل و کد رفرال ایجاد شده و `workspace-service` فضای کاری شخصی اولیه را خودکار می‌سازد.
-  3. **انتقال به استودیو و لود کانتکست:** کاربر با کوکی سشن معتبر به استودیو (`app/`) منتقل می‌شود؛ استودیو در حالت `live` اندپوینت `GET /api/v1/me/context` را فراخوانی کرده و استور Zustand را مقداردهی می‌کند.
-  4. **اجرای بوم و استریم بلادرنگ:** کاربر یک پروژه ساخته، نودهای هوش مصنوعی را اضافه و اجرا می‌کند؛ استریم وضعیت نودها از طریق SSE به صورت روان در بوم نمایش داده می‌شود.
-  5. **اعتبارسنجی دسترسی و کسر مالی:** درخواست‌های پروژه توسط `iam-service` اعتبارسنجی شده و هزینه کسرشده در `usage-service` ثبت می‌گردد.
-  6. **قراردادهای خودکار:** فایل‌های OpenAPI برای کلیه سرویس‌ها به صورت خودکار تولید و در دسترس کلاینت‌ها قرار دارند.
+### معیارهای دقیق پذیرش Gate 6 (پایان مرحله ۱۳ — آزمون ۱۰۰٪ زنده در مرورگر):
+1. **ثبت‌نام و ورود زنده:** کاربر در رابط کاربری `auth/` ایمیل خود را وارد کرده، کد OTP را از سرور ایمیل دریافت و با کوکی سشن معتبر لاگین می‌کند.
+2. **همگام‌سازی کاربر و ورک‌اسپیس:** وب‌هوک به `user-service` ارسال شده، پروفایل و کد رفرال ایجاد شده و `workspace-service` فضای کاری شخصی اولیه را خودکار می‌سازد.
+3. **انتقال به استودیو و تثبیت کانتکست:** کاربر با ریدایرکت خودکار به استودیو (`app/`) منتقل شده؛ استودیو در حالت `live` اندپوینت `GET /api/v1/me/context` را با ماشین حالت ۶‌گانه فراخوانی و وضعیت را بارگذاری می‌کند.
+4. **پالایش هدر و انزوای کش:** ترانسپورت کلاینت هرگونه هدر خام را پالایش کرده، کانتکست را در ریترای منجمد نگه می‌دارد، و کش‌های React Query با سوییچ ورک‌اسپیس ایزوله می‌مانند.
+5. **اجرای بوم و استریم بلادرنگ:** کاربر یک پروژه ساخته، نودهای هوش مصنوعی را متصل و اجرا می‌کند؛ استریم وضعیت نودها از طریق SSE بدون بافرینگ روی بوم نمایش داده می‌شود.
+6. **اعتبارسنجی دسترسی و کسر مالی:** درخواست‌های پروژه توسط `iam-service` و `quota-service` اعتبارسنجی شده و هزینه کسرشده در `usage-service` ثبت می‌گردد.
+7. **قراردادهای خودکار:** مونو-اسپک OpenAPI 3.1 با برچسب‌های `x-lemmo-workspace-policy` به صورت خودکار تولید و در دسترس کلاینت‌ها قرار دارد.
+8. **انسداد کامل حفره‌های امنیتی (Security Gate — مصوب [DOC-ARCH-010](../01-architecture/security-audit-and-remediation.md)):**
+   - اثبات مسدودسازی جعل هویت در گیت‌وی و `whoami` (SEC-01).
+   - اعتبارسنجی اکید دسترسی به پروفایل کاربران و ممانعت قطعی از آسیب‌پذیری IDOR (SEC-02).
+   - ایزولاسیون کامل باکت‌های ذخیره‌سازی MinIO و عدم انتشار پورت‌های حساس دیتابیس روی هاست (SEC-10, SEC-11).
+   - حذف کامل فال‌بک به MockAuth و اعمال احراز هویت در تمامی فراخوانی‌های داخلی gRPC (SEC-03).
+   - انزوای کامل کلیدهای Idempotency مالی و تضمین یکپارچگی تراکنش‌های دفترکل مالی (SEC-14, SEC-15).
 
+---
 
+## ۹. قواعد توسعه و چک‌لیست استقرار سرویس جدید (Development Conventions)
+
+### قواعد حاکمیتی کد و مهندسی:
+1. **زبان کدنویسی و کامیت‌ها:** کدهای منبع، کامنت‌ها و پیام‌های کامیت (Conventional Commits) منحصراً به زبان انگلیسی نگارش می‌شوند.
+2. **فرمت کد Go:** فرمت‌بندی با `gofmt` و `goimports` و رعایت استاندارد `.golangci.yml` (شامل govet, staticcheck, gosec و حداقل پیچیدگی gocyclo: 15).
+3. **فرمت قراردادها:** پروتوباف استاندارد با اعتبارسنجی `buf lint` و محافظت در برابر تغییرات مخرب با `buf breaking`.
+4. **لایه‌بندی Clean Architecture:** تفکیک قطعی لایه‌های دامنه، اپلیکیشن، پورت‌ها و آداپتورها در پوشه `internal/`.
+5. **مدیریت خطاها:** استفاده از استاندارد گوگل `google.rpc.Status` (AIP-193) و کاتالوگ متمرکز `ErrorInfo.reason`.
+6. **مایگریشن‌ها:** ابزار `golang-migrate` با شماره‌گذاری متوالی ۶ رقمی به صورت جفت‌های up/down.
+7. **کانفیگ و سکرت‌ها:** ممنوعیت مطلق مقادیر ثابت در کد، منع فال‌بک برای کلمات عبور و سکرت‌ها، و خاتمه فوری سرویس (`Fail-Fast`) در غیاب مقادیر حساس (DOC-ARCH-009).
+8. **ایزولاسیون دیتابیس:** هر سرویس مالک پایگاه داده و جداول خود است؛ اتصال مستقیم بین سرویس‌ها به دیتابیس یکدیگر یا تعریف کلید خارجی متقاطع اکیداً ممنوع است.
+
+### چک‌لیست استاندارد پیاده‌سازی هر سرویس جدید:
+- [ ] اجرای دستور اسکافولد: `go run ./tools/lemmo-cli service <name>`
+- [ ] تکمیل شناسنامه سرویس در `services/<name>/service.md` (مسئولیت‌ها، APIها، رویدادها، وابستگی‌ها)
+- [ ] تعریف موجودیت‌های دامنه در `internal/domain/` (بدون وابستگی خارجی)
+- [ ] پیاده‌سازی موردکاربردها در `internal/app/`
+- [ ] تعریف اینترفیس پورت‌ها در `internal/ports/`
+- [ ] پیاده‌سازی آداپتورها در `internal/adapters/` (دیتابیس، بروکر، کلاینت‌های خارجی)
+- [ ] پیاده‌سازی هندلرهای gRPC در `internal/adapters/grpc/`
+- [ ] نگارش مایگریشن‌های دیتابیس در `migrations/` (`000001_*.up/down.sql`)
+- [ ] تدوین تست‌های واحد لایه دامنه (`*_test.go`) با زمان اجرای زیر ۵ ثانیه
+- [ ] تدوین تست‌های یکپارچگی لایو در `tests/live/` با تگ ساخت `//go:build live`
+- [ ] نگارش Dockerfile چندمرحله‌ای (Build + Distroless/Alpine Runtime)
+- [ ] استقرار مستقل سرویس در `services/<name>/deploy/compose.yaml` ذیل ADR-009
+- [ ] اینسترومنت تریس‌های OpenTelemetry و لاگ‌های ساختاریافته JSON
+- [ ] پیاده‌سازی اندپوینت‌های سلامت (`/healthz`) و متریک‌ها (`/metrics`)
+- [ ] تدوین `README.md` سرویس با دستورالعمل‌های تست و توسعه محلی
