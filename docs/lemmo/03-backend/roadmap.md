@@ -6,9 +6,9 @@
 | **Category** | `backend` |
 | **Status** | `Approved` |
 | **Owner** | Core Architecture & Backend Team / @platform |
-| **Last Updated** | 2026-10-03 |
-| **Summary (EN)** | Canonical, unified backend and platform engineering roadmap: consolidates granular Phase 0 skeleton, Phase 1 MVP services (Stages 1-9, closed Gates 0-5), Phase 2 Live Identity, Gateway & Studio SDK Integration (Stages 10A, 10B, 10.5, 11, and Stage 12A/12B per ADR-016), Phase 3 Commercialization (Stages 14-16), and Phase 4 Ecosystem (Stages 17-19) with explicit quality gates and development conventions. |
-| **Summary (FA)** | نقشه راه جامع، یگانه و مرجع مهندسی پلتفرم و بک‌اند لِمو: تجمیع گام‌های مهندسی اسکلت فاز ۰، ۱۰ سرویس فاز ۱ (مراحل ۱ تا ۹، بسته‌شدن گیت‌های ۰ تا ۵)، فاز ۲ هویت زنده، درگاه لبه و اتصال SDK استودیو (مراحل 10A، 10B، 10.5، 11 و تفکیک 12A/12B مصوب ADR-016)، فاز ۳ تجاری‌سازی (مراحل ۱۴ تا ۱۶)، و فاز ۴ اکوسیستم به همراه گیت‌های کنترل کیفیت و چک‌لیست‌های انطباق. |
+| **Last Updated** | 2026-10-06 |
+| **Summary (EN)** | Canonical, unified backend and platform engineering roadmap: consolidates granular Phase 0 skeleton, Phase 1 MVP services (Stages 1-9, closed Gates 0-5), Phase 2 Live Identity, Gateway & Studio SDK Integration (Stages 10A, 10B, 10.5, 11, completed Stage 12A/12B/12C), intermediate security hardening workstream (S2/S3 per DOC-ARCH-010), Stage 13 IAM, Phase 3 Commercialization (Stages 14-16), and Phase 4 Ecosystem (Stages 17-19) with explicit quality gates and development conventions. |
+| **Summary (FA)** | نقشه راه جامع، یگانه و مرجع مهندسی پلتفرم و بک‌اند لِمو: تجمیع گام‌های مهندسی اسکلت فاز ۰، ۱۰ سرویس فاز ۱ (مراحل ۱ تا ۹، بسته‌شدن گیت‌های ۰ تا ۵)، فاز ۲ هویت زنده، درگاه لبه و اتصال SDK استودیو (مراحل 10A، 10B، 10.5، 11 و تکمیل قطعی مراحل 12A، 12B و 12C)، تسک میانی مقاوم‌سازی امنیتی چندمستأجری و مالی (جریان‌های S2 و S3 مصوب DOC-ARCH-010)، مرحله ۱۳ سرویس دسترسی‌ها (iam-service)، فاز ۳ تجاری‌سازی (مراحل ۱۴ تا ۱۶)، و فاز ۴ اکوسیستم به همراه گیت‌های کنترل کیفیت و چک‌لیست‌های انطباق. |
 | **Tags** | `backend`, `roadmap`, `milestones`, `architecture`, `services`, `mvp`, `phase2`, `phase3`, `ssot` |
 
 ---
@@ -123,10 +123,11 @@ flowchart TD
     S10A["مرحله 10A ✅<br>reference-data-registry<br>(RefData + Cache)"] --> S10B["مرحله 10B ✅<br>user-service + Live Auth<br>(Kratos Sync + Risk Engine)"]
     S10B --> S105["مرحله ۱۰.۵ ✅<br>Edge Gateway & BFF<br>(Kong + Oathkeeper + Context)"]
     S105 --> S11["مرحله ۱۱ ✅<br>auth-service (Ory Kratos)<br>(ورود یکپارچه + ابطال سشن + اتصال auth/ UI)"]
-    S11 --> S12A["مرحله ۱۲A 📋<br>سیاست‌های قرارداد و گیت‌وی<br>(x-lemmo-workspace-policy + lemmo-openapi)"]
+    S11 --> S12A["مرحله ۱۲A ✅<br>سیاست‌های قرارداد و گیت‌وی<br>(x-lemmo-workspace-policy + lemmo-openapi)"]
     S12A --> S12B["مرحله ۱۲B ✅<br>آداپتور زنده فرانت‌اند استودیو<br>(Orval Fetch + Context Freezing + Cache Isolation)"]
-    S12B --> S12C["مرحله ۱۲C 📋<br>مهاجرت UI به SDK و حذف دارایی‌های ماک<br>(UI Zero-Leakage + Prism Feed + Asset Eviction)"]
-    S12C --> S13["مرحله ۱۳ 📋<br>iam-service (موتور مجوزها)<br>(ReBAC + Canvas ACLs + Edge Check)"]
+    S12B --> S12C["مرحله ۱۲C ✅<br>مهاجرت UI به SDK و حذف دارایی‌های ماک<br>(UI Zero-Leakage + Prism Feed + Asset Eviction)"]
+    S12C --> S_SEC["تسک میانی امنیتی S2 و S3 📋<br>ایزولاسیون چندمستأجری، RPC و لجر مالی<br>(Workstreams S2 & S3 per DOC-ARCH-010)"]
+    S_SEC --> S13["مرحله ۱۳ 📋<br>iam-service (موتور مجوزها)<br>(ReBAC + Canvas ACLs + Edge Check)"]
     S13 --> Gate6["🏁 گیت کنترل کیفیت ۶<br>(محصول کاملاً زنده در مرورگر)"]
 ```
 
@@ -152,7 +153,9 @@ flowchart TD
 
 بر اساس ارزیابی‌های فنی و مصوبه **[ADR-016](../01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md)**، مرحله ۱۲ به دو بخش دقیق تفکیک شده است:
 
-#### مرحله ۱۲A: سیاست‌های قرارداد، تولید OpenAPI و سخت‌سازی گیت‌وی (`contracts/`, `tools/` & Gateway Ingress) 📋
+#### مرحله ۱۲A: سیاست‌های قرارداد، تولید OpenAPI و سخت‌سازی گیت‌وی (`contracts/`, `tools/` & Gateway Ingress) ✅
+- **وضعیت:** تکمیل و اعتبارسنجی ۱۰۰٪ با موفقیت در تاریخ ۲۰۲۶-۱۰-۰۳.
+- **گزارش نهایی و مستندات اجرایی:** [`REPORT_BACKEND_STAGE12A.md`](../../../.task/stage12/REPORT_BACKEND_STAGE12A.md)
 1. **منبع حقیقت سیاست‌های ورک‌اسپیس (`x-lemmo-workspace-policy`):** برچسب‌گذاری صریح تمامی اندپوینت‌های سیستم با مقادیر `required`، `optional` و `none` در قراردادهای منبع.
 2. **متدولوژی قرارداد-محور (Contract-First OpenAPI 3.1):** نگارش مستقیم تعاریف OpenAPI YAML در `contracts/` به عنوان منبع حقیقت سرویس‌های REST، استفاده از ابزارهای بالغ نظیر `oapi-codegen` و تجمیع مونو-اسپک در `infra/gateway/docs/openapi.yaml`.
 3. **اصلاح و سخت‌سازی پلاگین `lemmo-access-enforcer` در گیت‌وی:**
@@ -171,7 +174,9 @@ flowchart TD
    - **SEC-22 (P2):** تفکیک خطای زیرساخت در `context-service` و بازگرداندن خطای صریح ۵۰۳ یا ۵۰۰ به جای کانتکست جعلی یا خالی.
 5. **آزمون‌های لایو عبور از مرزها در گیت‌وی:** تدوین سوئیت تست لایو جهت اثبات مسدودسازی روت‌های `required` فاقد هدر و مسدودسازی کاربر غیرعضو در گیت‌وی برای روت‌های واقعی دامنه (مانند `/api/v1/projects`).
 
-#### مرحله ۱۲B: پیاده‌سازی آداپتور زنده، ترانسپورت و ایزولاسیون استودیو (`app/src/sdk/live/`) 📋
+#### مرحله ۱۲B: پیاده‌سازی آداپتور زنده، ترانسپورت و ایزولاسیون استودیو (`app/src/sdk/live/`) ✅
+- **وضعیت:** تکمیل و اعتبارسنجی ۱۰۰٪ با موفقیت در تاریخ ۲۰۲۶-۱۰-۰۳.
+- **گزارش نهایی و مستندات اجرایی:** [`REPORT_FRONTEND_STAGE12B.md`](../../../.task/stage12/REPORT_FRONTEND_STAGE12B.md)
 1. **تولید کلاینت Fetch با Orval در مرز محصور از نسخه پین‌شده (مصوب OQ-035):** تولید توابع کلاینت مستقل از هوک‌های React در پوشه ایزوله `app/src/sdk/live/generated/` با استفاده از ارجاع تغییرناپذیر به مونو-اسپک، با محافظت قواعد لینت از عدم دسترسی مستقیم از کدهای UI.
 2. **معماری شبکه Same-Origin با پروکسی معکوس Next.js (مصوب OQ-034):**
    - پیکربندی `rewrites` در `next.config.ts` برای هدایت مسیرهای `/api/v1/:path*` به درگاه Kong (`http://localhost:8000` در dev و آدرس کانتینر در prod).
@@ -201,29 +206,33 @@ flowchart TD
    - پشتیبانی از پروتکل رویداد پایانی `event: job.terminal`، بستن فعال اتصال و فراخوانی متد cleanup در زمان تغییر سشن یا ورک‌اسپیس.
 8. **آزمون‌های لایو استودیو:** تست اعتبارسنجی کلاینت زنده با `NEXT_PUBLIC_API_MODE=live` در محیط واقعی مرورگر.
 
-#### مرحله ۱۲C: مهاجرت کامل ماژول‌های UI، کانتینر ماک Feed در Prism و اخراج استاتیک‌ها (مصوب ADR-016 بند ۲.۲۳) 📋
+#### مرحله ۱۲C: مهاجرت کامل ماژول‌های UI، کانتینر ماک Feed در Prism و اخراج استاتیک‌ها (مصوب ADR-016 بند ۲.۲۳) ✅
+- **وضعیت:** تکمیل قطعی، اصلاح نهایی و قبولی ۱۰۰٪ آزمون‌ها در تاریخ ۲۰۲۶-۱۰-۰۳ (کامیت `424ef7c`).
+- **گزارش نهایی و مستندات اجرایی:** [`REPORT_FRONTEND_STAGE12C_REMEDY.md`](../../../.task/stage12/REPORT_FRONTEND_STAGE12C_REMEDY.md)
 1. **اصلاح کسری‌های استیج ۱۲B:**
-   - ایزولاسیون کامل تست `live_sse_proxy.test.ts` با راه‌اندازی سرور آزمایشی موقت در حافظه یا انتقال به `test:e2e` جهت تضمین پاس شدن تمیز `pnpm test`.
+   - ایزولاسیون کامل تست `live_sse_proxy.test.ts` با راه‌اندازی سرور آزمایشی موقت در حافظه و پاس شدن کامل ۷ آزمون با Vitest.
    - رفع هشدار لینتر React 19 / Next 16 (`react-hooks/set-state-in-effect`) در `StudioContextProvider.tsx`.
 2. **مهاجرت ۱۰۰٪ ماژول‌های بوم و ابزارها به گلوگاه `@/sdk`:**
    - بازنویسی کامل `CanvasManager.tsx` و `CanvasWorkspaceEditor.tsx` جهت اتصال مستقیم به متدهای `sdk.projects.list()`، `sdk.projects.create()` و `sdk.projects.get()` به جای آرایه‌های محلی.
    - بازنویسی `ToolsManager.tsx` جهت فراخوانی متد `sdk.tools.list()` (ارتباط مستقیم با ماک Prism ابزارها).
-   - حذف قطعی فایل‌های `mockCanvasProjects.ts`، `mockTools.ts` و `mockAgentData.ts`.
+   - مهاجرت ماژول `assets` و چت ایجنت `agent` به SDK و حذف کامل پوشه‌های `data/` از ماژول‌ها.
 3. **پایپ‌لاین شبیه‌سازی Prism برای ماژول فید (`feed`):**
    - تدوین قرارداد استاندارد `contracts/openapi/feed/v1/openapi.yaml` و ادغام در مونو-اسپک OpenAPI گیت‌وی.
    - استقرار کانتینر اختصاصی `lemmo-mock-feed` با ایمیج `stoplight/prism:5` در داکر شبکه داخلی (`dev.yml`) و ایجاد روت متناظر در `kong.yml`.
    - بازنویسی کامپوننت‌های فید (`MasonryFeed` و `QuickToolsSection`) جهت مصرف داده از `sdk.feed.list()`.
    - حذف کامل فایل `feedData.ts`.
 4. **اخراج کامل دارایی‌های استاتیک از فرانت‌اند (`Asset Eviction`):**
-   - حذف کلیه تصاویر `.webp` آزمایشی از دایرکتوری `app/public/images/feed/` جهت جلوگیری از اتلاف حجم باندل کلاینت.
-   - جایگزینی آدرس‌های محلی با URLهای ریموت امن یا شناسه باکت‌های سرویس استوریج.
+   - حذف کلیه تصاویر آزمایشی از دایرکتوری `app/public/images/feed/` جهت جلوگیری از اتلاف حجم باندل کلاینت.
+   - جایگزینی آدرس‌های محلی با URLهای ریموت امن و استوریج.
 5. **استقرار گارد خودکار در CI و ESLint:**
-   - افزودن قاعده قطعی در ESLint برای ممنوعیت کامل هرگونه `import` حاوی رشته `mock` در تمامی پوشه‌های `src/modules/` و `src/app/`، به گونه‌ای که هرگونه بازگشت نشت داده‌های مصنوعی بیلد را فوراً متوقف کند.
+   - افزودن قاعده قطعی در ESLint برای ممنوعیت کامل هرگونه `import` حاوی رشته `mock` یا `data/` در تمامی پوشه‌های `src/modules/` و `src/app/`، با نتیجه `0 errors, 0 warnings` در اجرای CI.
 
 ---
 
-### برنامه مقاوم‌سازی امنیتی چندمستأجری و مالی (مراحل S2 و S3 — مصوب DOC-ARCH-010) 📋
-*(پیش‌نیاز قطعی عبور از گیت کنترل کیفیت ۶)*
+### تسک میانی مهندسی: برنامه مقاوم‌سازی امنیتی چندمستأجری و مالی (مراحل S2 و S3 — مصوب DOC-ARCH-010) 📋
+> **هدف معماری:** اجرای فوری به عنوان یک تسک میانی قبل از ورود به مرحله ۱۳؛ تضمین ایزولاسیون کامل داده‌های چندمستأجری در لایه RPC، ایمنی وب‌هوک‌های رسانه و مصونیت دفترکل مالی از نشت میان تننت‌ها و خطاهای ذخیره‌سازی.  
+> **سند تسک اجرایی:** [`TASK_BACKEND_SECURITY_S2_S3.md`](../../../.task/others/TASK_BACKEND_SECURITY_S2_S3.md)  
+> **وضعیت:** تسک فعال میانی (پیش‌نیاز قطعی ورود به مرحله ۱۳ و عبور از گیت کنترل کیفیت ۶).
 
 #### جریان کاری S2: ایزولاسیون چندمستاجری، احراز هویت RPC و امنیت مدیا
 1. **SEC-03 (P1):** استقرار gRPC Server Interceptor احراز هویت در تمامی سرویس‌های داخلی، حذف دائمی فال‌بک MockAuth، و اعتبارسنجی تطابق تننت درخواست با کانتکست احرازشده.
@@ -241,7 +250,7 @@ flowchart TD
 ---
 
 ### مرحله ۱۳: میکروسرویس مدیریت دسترسی‌ها و مجوزهای دانه‌ریز (`iam-service` — مصوب ADR-014) 📋
-- **وضعیت:** در انتظار تکمیل مرحله ۱۲ (پیش‌نیاز گیت کنترل کیفیت ۶).
+- **وضعیت:** در نوبت پس از تکمیل تسک میانی امنیتی S2 و S3 (پیش‌نیاز نهایی گیت کنترل کیفیت ۶).
 - **دامنه:**
   - استقرار سرویس اختصاصی `services/iam-service/` با معماری Clean Architecture در Go.
   - مدل اعطای امتیازات و سهمیه‌های بوم (Entitlement Grants per DOC-BE-008).
