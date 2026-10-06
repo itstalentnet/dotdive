@@ -11,11 +11,6 @@ export async function createHttpServer(): Promise<ReturnType<typeof createServer
   const config = loadConfig();
   const index = await buildIndex(config.docsRoot, []);
 
-  const server = new McpServer({
-    name: "dotdive-mcp",
-    version: "0.1.0",
-  });
-
   const httpServer = createServer(async (req, res) => {
     const authHeader = req.headers.authorization;
     let allowedProjects: string[] = [];
@@ -36,14 +31,20 @@ export async function createHttpServer(): Promise<ReturnType<typeof createServer
       return;
     }
 
-    registerTools(server, { index, allowedProjects });
-    registerResources(server, { index, allowedProjects });
+    // SEC-19: Instantiate McpServer per session to prevent duplicate tool registration errors
+    const sessionServer = new McpServer({
+      name: "dotdive-mcp",
+      version: "0.1.0",
+    });
+
+    registerTools(sessionServer, { index, allowedProjects });
+    registerResources(sessionServer, { index, allowedProjects });
 
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: () => crypto.randomUUID(),
     });
 
-    await server.connect(transport);
+    await sessionServer.connect(transport);
     await transport.handleRequest(req, res);
   });
 
