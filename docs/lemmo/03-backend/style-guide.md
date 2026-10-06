@@ -6,10 +6,10 @@
 | **Category** | `backend` |
 | **Status** | `Approved` |
 | **Owner** | Backend & Platform Team |
-| **Last Updated** | 2026-09-26 |
-| **Summary (EN)** | Authoritative Go source formatting, golangci-lint, package layout, error envelope, protobuf, and migration rules. |
-| **Summary (FA)** | استانداردهای الزامی فرمت Go، تنظیمات golangci-lint، ساختار پکیج‌ها، پروتوباف و مایگریشن‌ها. |
-| **Tags** | `backend`, `go`, `styleguide`, `lint`, `proto`, `migrations` |
+| **Last Updated** | 2026-10-06 |
+| **Summary (EN)** | Authoritative Go source formatting, golangci-lint, package layout, error envelope, protobuf, migration rules, and Zero-Trust secure system design invariants per DOC-ARCH-011. |
+| **Summary (FA)** | استانداردهای الزامی فرمت Go، تنظیمات golangci-lint، ساختار پکیج‌ها، پروتوباف، مایگریشن‌ها و اصول تغییرناپذیر سیستم‌دیزاین امنیتی و کدنویسی بدون‌اعتماد بر اساس DOC-ARCH-011. |
+| **Tags** | `backend`, `go`, `styleguide`, `lint`, `proto`, `migrations`, `security`, `zero-trust` |
 
 ---
 
@@ -276,7 +276,19 @@ To streamline automated changelog generation and SemVer bumping, commits should 
 
 ---
 
-## 8. Summary of Engineering Standards
+## 8. Secure System Design & Zero-Trust Architecture Standards
+
+All Go services in `api/` must strictly implement the security invariants defined in **[DOC-ARCH-011: Zero-Trust Secure System Design & Engineering Standards](../01-architecture/secure-system-design.md)** prior to implementation:
+
+1. **Mandatory gRPC Auth Interceptor:** Every gRPC server must register `core/middleware.UnaryServerAuthInterceptor()` and `StreamServerAuthInterceptor()`. Direct reliance on mock auth in non-test binaries is forbidden.
+2. **Subject vs Caller Invariant (IDOR Prevention):** Handlers and application services must never trust a `userID` or `workspaceID` passed in the request body/URL without matching it against the authenticated `Principal` in `context.Context` (unless caller holds verified `SYSTEM_ADMIN` role).
+3. **Multi-Tenant Storage Scoping:** Object keys must strictly start with `tenants/{workspaceID}/*`. Presigned URLs for read or write must verify database tenant ownership before signing. File upload sizes must be verified server-side via S3 metadata (`StatObject`), never trusting client payload claims.
+4. **Webhook HMAC & SSRF Defense:** Incoming webhooks must require HMAC-SHA256 signatures with service startup Fail-Fast on missing secrets. All outbound HTTP clients fetching external URLs must use `core/security.NewSSRFSafeHTTPClient` which blocks private, loopback, and cloud metadata IP ranges.
+5. **Financial Concurrency & Tenant Idempotency:** Distributed locks and idempotency keys in Redis must be workspace-scoped (`lemmo:idempotency:{workspace_id}:{operation}:{key}`) and validate request payload SHA-256 hashes. Database unique constraints must be composite (`UNIQUE(workspace_id, idempotency_key)`). Database failures after ledger reservation must trigger immediate compensating void transactions.
+
+---
+
+## 9. Summary of Engineering Standards
 
 | Area | Mandated Standard | Enforcement Mechanism |
 | :--- | :--- | :--- |
@@ -290,4 +302,5 @@ To streamline automated changelog generation and SemVer bumping, commits should 
 | **Error Handling** | `google.rpc.Status` (AIP-193) + RFC 7807 at REST boundary | Central error middleware & SDK generation |
 | **Proto & RPC** | Google Protobuf Style + Buf CLI | CI gates (`buf lint`, `buf breaking`) |
 | **Migrations** | `golang-migrate` with sequential 6-digit numbers (`up`/`down` pairs) | Migration lint and CI test runs |
+| **Security & Zero-Trust** | Pre-coding invariants per [DOC-ARCH-011](../01-architecture/secure-system-design.md) | Security test suite & Architecture PR Gate |
 
