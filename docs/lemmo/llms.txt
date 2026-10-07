@@ -74,6 +74,7 @@
 
 ## Project Roadmap & Milestone Audits
 
+- [Phase 2 Strategic Realignment: Feed, Tools, Agent Chat, Local Polish and Production Server Release](01-architecture/decisions/ADR-017-phase2-realignment-feed-tools-agent-server-deployment.md): Formally supersedes ADR-014 Section 2.1 and 2.3 regarding Phase 2 culmination and post-Gate 6 progression. Establishes a product-first, zero-mock roadmap: prioritizes feed-service (Stage 14), tools-service & base AI tool (Stage 15), agent-service (Stage 16), iterative local integration, sync & polish (Stage 17A-17D), and production server deployment & release (Stage 18A-18D) to achieve Gate 6. Defers monetization, billing, subscriptions, promos, and notifications to Phase 3 (Stages 19-21), and community/affiliate ecosystem to Phase 4 (Stages 22-24).
 - [Roadmap Reprioritization: Core Identity, Client Integration, Tooling & IAM Engine First](01-architecture/decisions/ADR-014-roadmap-reprioritization-core-identity-and-client-integration.md): Strategic realignment of the backend roadmap: Prioritizing live user registration/login (auth-service/Kratos), automated OpenAPI tooling, full frontend SDK integration (app/ live adapter), and fine-grained authorization (iam-service) before peripheral monetization and notification modules.
 
 ## General Documentation & Guidelines
