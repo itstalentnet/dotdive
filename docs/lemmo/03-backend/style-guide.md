@@ -288,7 +288,150 @@ All Go services in `api/` must strictly implement the security invariants define
 
 ---
 
-## 9. Summary of Engineering Standards
+---
+
+## 9. Secure Service Blueprint & Pre-Implementation Patterns (الگوهای طلایی راه‌اندازی سرویس امن)
+
+To completely eliminate security regressions during the development of new microservices (such as `iam-service`, `billing-service`, `notification-service`), developers must adhere strictly to these 5 standard implementation blueprints. **No custom or ad-hoc security logic is permitted.**
+
+### Blueprint 9.1: Mandatory gRPC Server Bootstrap
+Every new gRPC service in `api/services/<name>/cmd/` must wire authentication and health check interceptors. Unauthenticated traffic must never reach business logic:
+
+```go
+// Standard gRPC Server Bootstrap Pattern (AIP-193 & Zero-Trust)
+s := grpcServer.NewServer(
+    grpcServer.UnaryInterceptor(middleware.UnaryServerAuthInterceptor()),
+    grpcServer.StreamInterceptor(middleware.StreamServerAuthInterceptor()),
+)
+lemmov1.Register<ServiceName>Server(s, handler)
+reflection.Register(s) // Automatically exempted in middleware.isExemptMethod
+```
+
+### Blueprint 9.2: Outgoing gRPC Client Identity Propagation
+When a microservice calls another internal gRPC service, it **must never send a naked context**. The authenticated caller's identity must be explicitly propagated to downstream RPCs:
+
+```go
+// In api/services/<name>/internal/adapters/clients/<target>_client.go
+func (c *TargetGRPCClient) ExecuteOperation(ctx context.Context, req *lemmov1.Request) (*lemmov1.Response, error) {
+    // MANDATORY: Propagate caller AuthContext into outgoing gRPC metadata
+    outCtx := middleware.PropagateAuthMetadata(ctx)
+    
+    resp, err := c.client.ExecuteOperation(outCtx, req)
+    if err != nil {
+        return nil, fmt.Errorf("failed downstream call to target-service: %w", err)
+    }
+    return resp, nil
+}
+```
+
+### Blueprint 9.3: Anti-IDOR Resource Authorization (Zero-Trust Actor Check)
+Every HTTP/REST endpoint and gRPC method operating on a user-owned or workspace-owned resource must verify ownership using the authenticated `Principal` from context:
+
+```go
+// In HTTP Router or gRPC Handler
+func (r *Router) authorizeResourceAccess(req *http.Request, targetOwnerID string) error {
+    callerID := req.Header.Get("X-User-ID")
+    if callerID == "" {
+        return domain.ErrUnauthorized // 401 Unauthorized
+    }
+
+    // 1. Direct match: Principal owns the requested resource
+    if callerID == targetOwnerID {
+        return nil
+    }
+
+    // 2. Administrative override: Only verified roles injected by Gateway
+    rolesHeader := req.Header.Get("X-User-Roles")
+    for _, role := range strings.Split(rolesHeader, ",") {
+        cleanRole := strings.ToLower(strings.TrimSpace(role))
+        if cleanRole == "admin" || cleanRole == "system" || cleanRole == "superadmin" {
+            return nil
+        }
+    }
+
+    // 3. Deny cross-tenant / foreign access by default (Fail-Closed)
+    return domain.ErrPermissionDenied // 403 Forbidden
+}
+```
+
+### Blueprint 9.4: Multi-Tenant Boundary Enforcement (`ValidateTenant`)
+Every service dealing with tenant or workspace resources must invoke `middleware.ValidateTenant`:
+
+```go
+// In gRPC Handler or Application Service
+func (s *Service) HandleWorkspaceAction(ctx context.Context, requestedTenant string) error {
+    // Validates that requestedTenant matches context tenant.
+    // If context tenant is empty, returns codes.Unauthenticated (SEC-03).
+    // If mismatch occurs, returns codes.PermissionDenied.
+    tenantID, err := middleware.ValidateTenant(ctx, requestedTenant)
+    if err != nil {
+        return err
+    }
+
+    // Proceed with verified tenantID
+    return s.repo.ExecuteInTenant(ctx, tenantID)
+}
+```
+
+### Blueprint 9.5: Mandatory Security Regression Test Template
+Every service handling identity, tenant, or protected resources **must include automated tests** covering the 4 canonical adversarial scenarios in its test suite:
+
+```go
+func TestService_SecurityAdversarialMatrix(t *testing.T) {
+    handler := setupTestHandler()
+
+    t.Run("Scenario 1: Authenticated caller accesses own resource (PASS)", func(t *testing.T) {
+        req := httptest.NewRequest("GET", "/api/v1/resource/user-A", nil)
+        req.Header.Set("X-User-ID", "user-A")
+        rec := httptest.NewRecorder()
+        handler.ServeHTTP(rec, req)
+        assert.Equal(t, http.StatusOK, rec.Code)
+    })
+
+    t.Run("Scenario 2: Authenticated caller accesses foreign resource (DENY 403)", func(t *testing.T) {
+        req := httptest.NewRequest("GET", "/api/v1/resource/user-B", nil)
+        req.Header.Set("X-User-ID", "user-A")
+        rec := httptest.NewRecorder()
+        handler.ServeHTTP(rec, req)
+        assert.Equal(t, http.StatusForbidden, rec.Code)
+    })
+
+    t.Run("Scenario 3: Unauthenticated caller accesses resource (DENY 401)", func(t *testing.T) {
+        req := httptest.NewRequest("GET", "/api/v1/resource/user-A", nil)
+        // No caller ID set (headers stripped at edge)
+        rec := httptest.NewRecorder()
+        handler.ServeHTTP(rec, req)
+        assert.Equal(t, http.StatusUnauthorized, rec.Code)
+    })
+
+    t.Run("Scenario 4: Unauthorized caller attempts role spoofing (DENY 403)", func(t *testing.T) {
+        req := httptest.NewRequest("GET", "/api/v1/resource/user-B", nil)
+        req.Header.Set("X-User-ID", "user-A")
+        req.Header.Set("X-User-Roles", "member,developer") // Non-admin spoofing
+        rec := httptest.NewRecorder()
+        handler.ServeHTTP(rec, req)
+        assert.Equal(t, http.StatusForbidden, rec.Code)
+    })
+}
+```
+
+---
+
+## 10. Pre-PR Security Checklist & Acceptance Invariants (چک‌لیست الزامی پیش از تایید PR)
+
+Before any backend Pull Request or task is submitted for review, the developer must verify and sign off on this 7-point checklist:
+
+- [ ] **SEC-CHK-1 (Interceptors):** `middleware.UnaryServerAuthInterceptor()` is registered on all gRPC servers.
+- [ ] **SEC-CHK-2 (RPC Propagation):** All internal downstream gRPC clients wrap context with `middleware.PropagateAuthMetadata(ctx)`.
+- [ ] **SEC-CHK-3 (Anti-IDOR):** No handler trusts raw request path/body identifiers without asserting `callerID == targetID` or checking administrative role.
+- [ ] **SEC-CHK-4 (Tenant Boundary):** `middleware.ValidateTenant(ctx, tenantID)` is invoked on all workspace-scoped mutations.
+- [ ] **SEC-CHK-5 (Fail-Fast Secrets):** All required secrets and connection strings cause immediate process abort (`os.Exit(1)`) if absent at startup per [DOC-ARCH-009](../01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md).
+- [ ] **SEC-CHK-6 (Composite Idempotency):** Database unique constraints for idempotent operations are scoped to tenant `(workspace_id, idempotency_key)`.
+- [ ] **SEC-CHK-7 (Adversarial Tests):** Unit test suite includes regression tests verifying HTTP 401 on unauthenticated calls, HTTP 403 on foreign resource access, and rejection of spoofed headers.
+
+---
+
+## 11. Summary of Engineering Standards
 
 | Area | Mandated Standard | Enforcement Mechanism |
 | :--- | :--- | :--- |
@@ -302,5 +445,6 @@ All Go services in `api/` must strictly implement the security invariants define
 | **Error Handling** | `google.rpc.Status` (AIP-193) + RFC 7807 at REST boundary | Central error middleware & SDK generation |
 | **Proto & RPC** | Google Protobuf Style + Buf CLI | CI gates (`buf lint`, `buf breaking`) |
 | **Migrations** | `golang-migrate` with sequential 6-digit numbers (`up`/`down` pairs) | Migration lint and CI test runs |
-| **Security & Zero-Trust** | Pre-coding invariants per [DOC-ARCH-011](../01-architecture/secure-system-design.md) | Security test suite & Architecture PR Gate |
+| **Security & Zero-Trust** | Pre-coding invariants per [DOC-ARCH-011](../01-architecture/secure-system-design.md) & Blueprints in Sec 9 | Security test suite & Architecture PR Gate (Sec 10) |
+
 
