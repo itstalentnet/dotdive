@@ -310,23 +310,19 @@ flowchart TD
 
 ---
 
-### مرحله ۱۵: رجیستری ابزارها بر پایه تعریف داده‌محور و اولین ابزار پایه تولید تصویر (`tools-service` & Base Tool) 🎯
-- **زیرمرحله 15A — تفکیک قراردادها، ارتقای سرویس دارایی‌ها و جاب‌ها و تنظیمات Kong Gateway:** ✅ تکمیل شد
-  - تفکیک ماژولار قراردادهای OpenAPI به `tools/v1`, `assets/v1`, `jobs/v1` با حفظ ثبات مسیرها و `operationId`ها.
-  - ارتقای `storage-service` به DualServer (HTTP `8084` + gRPC `50054`) جهت ارائه دارایی‌های ورک‌اسپیس با Presigned URL امن.
-  - ارتقای `job-service` به DualServer (HTTP `8095` + gRPC `50055`) جهت مدیریت جاب‌ها و استریم بلادرنگ رویدادهای SSE.
-  - پاکسازی کدهای موقت `context-service` و اتصال روت‌های Kong به سرویس‌های واقعی.
-  - همگام‌سازی کلاینت Orval در فرانت‌اند `app/` با پاس شدن ۱۰۰٪ آزمون‌های رگرسیون `stage15a_live_test.go` و بیلد موفق Next.js.
-- **زیرمرحله 15B — استقرار مایکروسرویس ابزارها (`tools-service`)، کاتالوگ و اتصال پایپ‌لاین اجرای پایه:** 🎯 فعال (مرحله اجرایی جاری)
-  - استقرار سرویس اختصاصی `services/tools-service/` با پایگاه داده `lemmo_tools` جهت مدیریت کاتالوگ ابزارها بر پایه فایل‌های تعریف نسخه‌دار (`tool-definition` در ریپو با Seeder idempotent) و کش ردیس نسخه‌دار.
-  - پیوند هر ابزار به شناسه نود متناظر در `node-registry-service` (`node_type_id`) و پرهیز از بازتعریف پورت‌ها و منطق بوم.
-  - پیاده‌سازی پایپ‌لاین اجرای ابزار پایه (`text-to-image` با مدل `fal-ai/flux-dev`) از طریق مسیر مشترک پلتفرم (Single Execution Path با منشأ `WorkflowOrigin = MENU`): اعتبارسنجی ورودی‌ها، رزرو اعتبار در `quota-service`، ایجاد جاب در `job-service`، پردازش در ورکر `image-service`، ذخیره فایل در `storage-service` و تسویه کردیت در Ledger.
-  - حذف کانتینر ماک `lemmo-mock-tools` و مسیریابی زنده روت‌های `/api/v1/tools` در Kong Gateway به سرویس واقعی.
-  - اتصال کامپوننت `ToolsManager.tsx` در فرانت‌اند به کاتالوگ زنده و اجرای ابزار با حفظ سیاست‌های امنیتی و اعتبارسنجی ورک‌اسپیس.
+### مرحله ۱۵: رجیستری ابزارها بر پایه تعریف داده‌محور و اولین ابزار پایه تولید تصویر (`tools-service` & Base Tool) ✅
+- **وضعیت:** ✅ تکمیل شد (مرحله مصوب فاز ۲)
+- **دستاوردها:**
+  - تفکیک ماژولار قراردادهای OpenAPI به `tools/v1`, `assets/v1`, `jobs/v1` و هدایت موفق ترافیک به مایکروسرویس‌های متولی در Kong Gateway.
+  - ارتقای `storage-service` (HTTP `8084`) و `job-service` (HTTP `8095`) به DualServer با صدور Presigned URL امن و استریم بلادرنگ SSE.
+  - استقرار مایکروسرویس پاک `tools-service` (HTTP `8094` + gRPC `50065`) در Go با دیتابیس `lemmo_tools` و Seeder تغییرناپذیر کاتالوگ با Advisory Lock و کش نسخه‌دار ردیس.
+  - اتصال موفق پایپ‌لاین اجرای مشترک (Single Unified Execution Path) برای ابزار پایه `text-to-image` با مدل `fal-ai/flux-dev`: اعتبارسنجی ورودی‌ها، رد URLهای خام خارجی، رزرو اعتبار دوفازی در `quota-service`، درج در `job-service`، انتشار به RabbitMQ، پردازش در ورکر `image-service`، ذخیره فایل در S3 و تسویه کردیت در Ledger.
+  - حذف ۱۰۰٪ کانتینر ماک `lemmo-mock-tools` از Compose و پاس شدن کامل تست‌های واحد و ۸ آزمون یکپارچگی زنده سرتاسری (`tools_live_test.go`).
 
 ---
 
-### مرحله ۱۶: سرویس گفتگوی هوشمند ایجنت استودیو (`agent-service` — Agent Chat Pipeline) 📋
+### مرحله ۱۶: سرویس گفتگوی هوشمند ایجنت استودیو (`agent-service` — Agent Chat Pipeline) 🎯
+- **وضعیت:** آماده اجرا (مرحله فعال بعدی)
 - **هدف و نقش:** جایگزینی کانتینر ماک `lemmo-mock-chat` با سرویس زنده مدیریت گفتگو و اجرای جریان‌های ایجنت بر بستر قرارداد `contracts/openapi/chat/v1/openapi.yaml`.
 - **دامنه:**
   - استقرار سرویس اختصاصی `services/agent-service/` در Go.
