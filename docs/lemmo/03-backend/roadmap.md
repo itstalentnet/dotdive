@@ -321,15 +321,17 @@ flowchart TD
 
 ---
 
-### مرحله ۱۶: سرویس گفتگوی هوشمند ایجنت استودیو (`agent-service` — Agent Chat Pipeline) 🎯
+### مرحله ۱۶: سرویس گفتگوی هوشمند ایجنت استودیو (`agent-service` — Agent Chat Pipeline — مصوب ADR-019) 🎯
 - **وضعیت:** آماده اجرا (مرحله فعال بعدی)
-- **هدف و نقش:** جایگزینی کانتینر ماک `lemmo-mock-chat` با سرویس زنده مدیریت گفتگو و اجرای جریان‌های ایجنت بر بستر قرارداد `contracts/openapi/chat/v1/openapi.yaml`.
-- **دامنه:**
-  - استقرار سرویس اختصاصی `services/agent-service/` در Go.
+- **هدف و نقش:** جایگزینی کانتینر ماک `lemmo-mock-chat` با سرویس زنده مدیریت گفتگو و اجرای جریان‌های ایجنت بر بستر قرارداد `contracts/openapi/chat/v1/openapi.yaml` و معماری اجرای واحد (ADR-019).
+- **دامنه و مرزهای مصوب:**
+  - استقرار سرویس اختصاصی `services/agent-service/` در Go به عنوان یک Content Creation Agent متمرکز (بدون multi-agent یا قابلیت‌های خودمختار).
   - ذخیره‌سازی تاریخچه رشته‌های گفتگو (Threads) و پیام‌ها (Messages) در دیتابیس `lemmo_agent`.
-  - پایپ‌لاین تعاملی ایجنت: تفسیر پرامپت کاربر، انتخاب مدل هوشمند از طریق `model-router-service`، ارجاع فایل‌های ضمیمه و ایجاد تسک تولید در `orchestrator-service` و `job-service`.
-  - استریم بلادرنگ پاسخ متنی و وضعیت پیشرفت تولید تصویر در محیط چت با SSE.
-  - حذف کانتینر ماک `lemmo-mock-chat` و اتصال نهایی کامپوننت `AgentChatView.tsx` در استودیو به سرویس زنده.
+  - پایپ‌لاین تشخیص نیت دوسطحی: بررسی کامندهای صریح (`/image`) و حالت UI بدون نیاز به LLM؛ و تفسیر زبان طبیعی با LLM از طریق `model-router-service`.
+  - تبدیل نیت به ساختار استاندارد `ToolInvocation` با `input_kind` و ارسال به `tools-service` با هویت و دسترسی کاربر (`origin=CHAT`).
+  - عدم تغییر مستقیم بوم در مرحله ۱۶: پیشنهاد گراف‌ها در قالب استاندارد بوم به عنوان پیش‌نمایش.
+  - استریم بلادرنگ توکن‌های پاسخ متنی و اتصال کارت پیشرفت جاب به `jobs.subscribe` با SSE در کامپوننت `AgentChatView.tsx`.
+  - حذف کامل کانتینر ماک `lemmo-mock-chat`.
 
 ---
 
@@ -340,19 +342,28 @@ flowchart TD
     - پایداری جریان ورود زنده Kratos OTP، پاس‌کاری امن کوکی‌های `lemmo_jwt` و `ory_kratos_session` از طریق پروکسی داخلی Next.js بدون تداخل پورت یا دامنه.
     - تطبیق ماشین حالت ۶‌گانه `StudioContextProvider` با پاسخ‌های زنده `context-service`.
     - تثبیت بازنشانی استورهای Zustand و پاکسازی امن کش‌های React Query در تغییر سشن یا تعویض ورک‌اسپیس.
-  - **مرحله 17B — رفع خطاهای پایپ‌لاین بوم و رویدادهای زنده (`Canvas Live Pipeline, SSE Buffering & Node State`):**
+  - **مرحله 17B — مهاجرت بوم به مسیر اجرای مشترک و رفع خطاهای پایپ‌لاین زنده (`Canvas Execution Migration, SSE Buffering & Node State`):**
+    - **حل بدهی فنی رسمی بوم (DEBT-CANVAS-01):** جایگزینی شبیه‌سازی ماک فرانت‌اند (`setTimeout`) در `CanvasWorkspaceEditor.tsx` و متد موقت `executeStage` در `orchestrator-service` با اتصال واقعی به مسیر اجرای مشترک (`tools-service`).
+    - پیاده‌سازی رزرو متمرکز در سطح ران (Run-level Reservation مصوب D6 در ADR-019) با ارسال `run_id` و `parent_reservation_id` برای نودهای داخلی بدون رزرو مضاعف.
     - تست چرخه کامل ذخیره و لود گراف‌های بوم با `project-service` و حل تعارضات Optimistic Locking.
     - تضمین قطعی عدم بافرینگ رویدادهای SSE (`jobs.subscribe`) در لایه پروکسی فرانت‌اند و نمایش روان وضعیت پیشرفت نودها.
     - دریافت Presigned URLهای تصاویر نهایی از `storage-service`، نمایش موفق در بوم و ذخیره در ماژول Assets.
   - **مرحله 17C — تثبیت چت ایجنت، اجرای ابزار پایه و تسویه سهمیه‌ها (`Agent Chat, Tool Execution & Quota Settlement`):**
     - تست تعامل زنده با ایجنت در `AgentChatView.tsx`، اعتبارسنجی پرامپت‌ها و استریم پاسخ‌ها.
     - اجرای موفق ابزار پایه از طریق پنل ابزارها یا دراپ روی بوم و ارسال به `tools-service`.
-    - بررسی دقیق کسر و تسویه اعتبارات در `quota-service` و `usage-service` بدون کسر مضاعف یا قفل دیتابیس.
+    - بررسی دقیق کسر و تسویه اعتبارات در `quota-service` و `usage-service` بدون کسر مضاعف یا قفل دیتابیس و کنترل سقف محافظتی `expected_cost`.
+    - فعال‌سازی پشتیبانی از ابزارهای نوع `workflow` (گراف‌های ذخیره‌شده به عنوان ابزار — مصوب D7 در ADR-019).
   - **مرحله 17D — تست‌های جامع یکپارچگی لوکال و فریز پایداری (`Local E2E Regression & Stability Freeze`):**
     - اجرای کامل تمامی کانتینرها در Docker Compose محلی بدون پرتاب خطای کنسول یا Unhandled Rejection.
     - اجرای تست‌های رگرسیون یکپارچه در سطح کلاینت و سرور و اثبات کارکرد ۱۰۰٪ چرخه محصول پیش از استقرار سرور.
 
 ---
+
+### ۸. ثبت بدهی‌های فنی رسمی پلتفرم (Technical Debt Registry)
+| شناسه | عنوان بدهی فنی | سرویس‌ها / فایل‌ها | وضعیت فعلی | معیار خروج و حل قطعی (Exit Criteria) |
+|---|---|---|---|---|
+| `DEBT-CANVAS-01` | شبیه‌سازی ماک اجرای نودهای بوم در فرانت و ارکستریتور | `app/src/modules/canvas/components/CanvasWorkspaceEditor.tsx`<br>`api/services/orchestrator-service/internal/app/service.go` | در فرانت‌اند با `setTimeout(..., 1800)` تصاویر تصادفی تولید می‌شود و در `orchestrator-service` متد `executeStage` جاب واقعی ایجاد نمی‌کند. | مهاجرت کامل به مسیر اجرای مشترک `tools-service` با رزرو در سطح ران (`run_id` و `parent_reservation_id`) در مرحله 17B. |
+
 
 ### مرحله ۱۸: آماده‌سازی استقرار ابری، کانفیگ سرور، دامنه، SSL و راه‌اندازی زنده در محیط واقعی سرور (`Production Server Deployment & Release`) 🌐
 - **هدف و نقش:** استقرار محصول تست‌شده در سرور پروداکشن عملیاتی، پیکربندی شبکه امن، راه‌اندازی دامنه‌ها و SSL، و فراهم‌آوری دسترسی عمومی آنلاین پایدار. این مرحله به دلیل حساسیت‌های زیرساختی به صورت گام‌به‌گام اجرا می‌شود.

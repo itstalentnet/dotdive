@@ -104,6 +104,7 @@ icon: "file-check"
    | ابزار موقتاً غیرفعال (Kill Switch) | 503 | `TOOL_DISABLED` (+ Retry-After) |
    | اعتبار ناکافی یا کیف‌پول خالی | 402 | `INSUFFICIENT_CREDITS` / `WORKSPACE_WALLET_EMPTY` |
    | پارامترهای نامعتبر | 400 | `INVALID_ARGUMENT` |
+   | تغییر قیمت حین نمایش تا اجرا | 409 | `PRICE_CHANGED` (مصوب ADR-019) |
    | نقض ریت‌لیمیت یا سقف همزمانی | 429 | `RATE_LIMITED` |
 
 ---
@@ -114,6 +115,15 @@ icon: "file-check"
    - `contracts/openapi/assets/v1/openapi.yaml`: مدیریت دارایی‌ها (`storage-service`).
    - `contracts/openapi/jobs/v1/openapi.yaml`: مدیریت جاب‌ها و استریم رویدادها (`job-service`).
 2. **پایداری کلاینت فرانت‌اند:** مسیرها (`paths`) و `operationId`ها در تفکیک قرارداد بدون تغییر باقی می‌مانند تا کلاینت تولیدی Orval در `app/` دچار شکست نگردد.
+
+---
+
+### ۲.۷. الحاقیه مصوبات ADR-019 (Unified Capability Invocation)
+پیرو تصویب **[ADR-019](./ADR-019-unified-capability-invocation-and-agent-boundaries.md)**، اصلاحات و قواعد زیر به این سند ملحق می‌گردد:
+1. **حذف `cost_hint`:** فیلد `cost_hint` از اسکیما تعریف ابزارها و جدول `tool_definitions` حذف شده و انحصاراً با استعلام نرخ‌نامه `rate-card` در `quota-service` جایگزین می‌شود.
+2. **قرارداد `ToolInvocation` یکپارچه:** افزودن فیلدهای `input_kind` (مقادیر `structured`, `command`, `natural_language`)، سقف محافظتی `expected_cost`، و فیلدهای اجرای سطح ران (`run_id` و `parent_reservation_id`).
+3. **متادیتای ابزارها برای ایجنت:** افزودن فیلدهای `capability`, `chat_alias`, `agent_visible`, `llm_description` و فیلد نوع `type` (`generator`, `template`, `workflow`).
+4. **مسیر همگرایی بوم:** اجرای نودهای بوم از طریق همین پایپ‌لاین و با رزرو متمرکز ران در `orchestrator-service` همگرا خواهد شد.
 
 ---
 
