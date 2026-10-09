@@ -321,8 +321,23 @@ flowchart TD
 
 ---
 
-### مرحله ۱۶: سرویس گفتگوی هوشمند ایجنت استودیو (`agent-service` — Agent Chat Pipeline — مصوب ADR-019) 🎯
-- **وضعیت:** آماده اجرا (مرحله فعال بعدی)
+### مرحله ۱۶: سرویس گفتگوی هوشمند ایجنت استودیو (`agent-service` — مصوب ADR-019) 🎯
+
+پیرو مصوبات رسمی **[ADR-019](../01-architecture/decisions/ADR-019-unified-capability-invocation-and-agent-boundaries.md)**، مرحله ۱۶ به دو زیرمرحله متوالی و مهندسی‌شده تفکیک گردید:
+
+#### مرحله 16A: ارتقای قراردادهای اجرای قابلیت، قیمت‌گذاری تک‌نقطه‌ای و همگام‌سازی متادیتای ایجنت ✅
+- **وضعیت:** **تکمیل و اعتبارسنجی ۱۰۰٪ با موفقیت در تاریخ ۲۰۲۶-۱۰-۰۹** (کامیت‌های `07aa5a7` در `api/` و `1c893bb` در `app/`).
+- **گزارش نهایی و مستندات اجرایی:** [`REPORT_BACKEND_STAGE16A.md`](../../../.task/stage16/REPORT_BACKEND_STAGE16A.md)
+- **دستاوردها:**
+  1. **اجباری‌سازی `input_kind` (CAP-CHK-1):** افزودن فیلد صریح `input_kind` با مقادیر `structured`, `command`, `natural_language` در قراردادهای OpenAPI، Proto و هندلرهای `tools-service`، با رد قاطع هرگونه استنباط حدسی در گیت‌وی.
+  2. **کنترل سقف قیمت و حفاظت مالی (CAP-CHK-2):** پیاده‌سازی سقف محافظتی `expected_cost`؛ در صورت تجاوز هزینه واقعی، سرویس بدون کسر اعتبار با خطای استاندارد `409 PRICE_CHANGED` پاسخ می‌دهد.
+  3. **رزرو در سطح ران برای بوم (CAP-CHK-3):** افزودن پیش‌دستانه فیلدهای اختیاری `run_id` و `parent_reservation_id` به قرارداد اجرا و بای‌پس رزرو در صورت وجود رزرو والد.
+  4. **متادیتای ابزارها برای مدل‌های زبانی (CAP-CHK-4):** افزودن فیلدهای `type: generator`, `capability: image.generate`, `chat_alias`, `agent_visible`, `llm_description` به کاتالوگ و اسکیما، حذف کامل `cost_hint`، ارتقای نسخه بذر به ۲ با قفل Advisory Lock (`746193`) و مایگریشن دیتابیس `lemmo_tools`.
+  5. **انتشار نرخ‌نامه عمومی (CAP-CHK-5):** پیاده‌سازی اندپوینت `GET /api/v1/quota/pricing` در `quota-service` با هدرهای ETag و Cache-Control و هدایت روت در Kong Gateway.
+  6. **همگام‌سازی کلاینت استودیو (CAP-CHK-6):** بازتولید کدهای Orval در `app/`، تنظیم `input_kind: 'structured'`، پاس شدن ۱۰۰٪ آزمون‌های Vitest، ESLint و بیلد پروداکشن Turbopack. قبولی کامل تمامی آزمون‌های ۶‌گانه در `api/tests/live/stage16a_capability_test.go`.
+
+#### مرحله 16B: پیاده‌سازی و استقرار سرویس زنده چت ایجنت (`agent-service` — Agent Chat Pipeline) 🤖🎯
+- **وضعیت:** آماده اجرا (مرحله فعال جاری)
 - **هدف و نقش:** جایگزینی کانتینر ماک `lemmo-mock-chat` با سرویس زنده مدیریت گفتگو و اجرای جریان‌های ایجنت بر بستر قرارداد `contracts/openapi/chat/v1/openapi.yaml` و معماری اجرای واحد (ADR-019).
 - **دامنه و مرزهای مصوب:**
   - استقرار سرویس اختصاصی `services/agent-service/` در Go به عنوان یک Content Creation Agent متمرکز (بدون multi-agent یا قابلیت‌های خودمختار).
