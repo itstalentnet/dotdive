@@ -6,7 +6,7 @@
 | **Category** | `backend` |
 | **Status** | `Approved` |
 | **Owner** | Core Architecture & Backend Team / @platform |
-| **Last Updated** | 2026-10-06 |
+| **Last Updated** | 2026-10-11 |
 | **Summary (EN)** | Canonical, unified backend and platform engineering roadmap: consolidates granular Phase 0 skeleton, Phase 1 MVP services (Stages 1-9, closed Gates 0-5), Phase 2 Live Identity, Gateway & Studio SDK Integration (Stages 10A, 10B, 10.5, 11, completed Stage 12A/12B/12C), Stage 12.5 Comprehensive Platform Security Hardening (4 waves resolving 25 findings from October 6 re-audit), Stage 13 IAM, Phase 3 Commercialization (Stages 14-16), and Phase 4 Ecosystem (Stages 17-19) with explicit quality gates and development conventions. |
 | **Summary (FA)** | نقشه راه جامع، یگانه و مرجع مهندسی پلتفرم و بک‌اند لِمو: تجمیع گام‌های مهندسی اسکلت فاز ۰، ۱۰ سرویس فاز ۱ (مراحل ۱ تا ۹، بسته‌شدن گیت‌های ۰ تا ۵)، فاز ۲ هویت زنده، درگاه لبه و اتصال SDK استودیو (مراحل 10A، 10B، 10.5، 11 و تکمیل قطعی مراحل 12A، 12B و 12C)، مرحله ۱۲.۵ بازسازی و استحکام جامع امنیتی پلتفرم (۴ موج اجرایی برای رفع ۲۵ یافته بازآزمایی رسمی ۶ اکتبر)، مرحله ۱۳ سرویس دسترسی‌ها (iam-service)، فاز ۳ تجاری‌سازی (مراحل ۱۴ تا ۱۶)، و فاز ۴ اکوسیستم به همراه گیت‌های کنترل کیفیت و چک‌لیست‌های انطباق. |
 | **Tags** | `backend`, `roadmap`, `milestones`, `architecture`, `services`, `mvp`, `phase2`, `stage12.5`, `security`, `ssot` |
@@ -354,24 +354,25 @@ flowchart TD
 ### مرحله ۱۷: اتصال کامل، دیباگ، رفع جزییات و همگام‌سازی بک‌اند و فرانت‌اند در محیط لوکال (`Local E2E Integration, Sync & Polish`) 🔄
 - **هدف و نقش:** به دلیل پیچیدگی بالای اتصال زنده فرانت‌اند React 19 / Next.js به میکروسرویس‌های Go، پس از پیاده‌سازی سرویس‌ها، بروز مغایرت‌ها، رفتارهای پیش‌بینی‌نشده در هیدریشن، تاخیرهای استریم SSE، مدیریت کوکی‌ها و گوشه‌های پنهان (Edge Cases) اجتناب‌ناپذیر است. این مرحله با رویکردی چندمرحله‌ای و گام‌به‌گام به رفع کامل این جزییات در محیط لوکال اختصاص دارد.
 - **زیرمراحل تفکیکی مهندسی:**
-  - **مرحله 17A — همگام‌سازی هویت، نشست‌ها و ماشین حالت استودیو (`Identity, Session & Context Hydration Sync`):**
+  - **مرحله 17A — پایه‌ها، هویت، کانتکست و ممیزی تنظیمات (`Foundations, Identity & Settings Audit` — تکمیل و ممیزی شد ✅):**
     - پایداری جریان ورود زنده Kratos OTP، پاس‌کاری امن کوکی‌های `lemmo_jwt` و `ory_kratos_session` از طریق پروکسی داخلی Next.js بدون تداخل پورت یا دامنه.
     - تطبیق ماشین حالت ۶‌گانه `StudioContextProvider` با پاسخ‌های زنده `context-service`.
-    - تثبیت بازنشانی استورهای Zustand و پاکسازی امن کش‌های React Query در تغییر سشن یا تعویض ورک‌اسپیس.
-  - **مرحله 17B — مهاجرت بوم به مسیر اجرای مشترک و رفع خطاهای پایپ‌لاین زنده (`Canvas Execution Migration, SSE Buffering & Node State`):**
-    - **حل بدهی فنی رسمی بوم (DEBT-CANVAS-01):** جایگزینی شبیه‌سازی ماک فرانت‌اند (`setTimeout`) در `CanvasWorkspaceEditor.tsx` و متد موقت `executeStage` در `orchestrator-service` با اتصال واقعی به مسیر اجرای مشترک (`tools-service`).
+    - اتصال فید عمومی و شوکیس محتوا با صفحه‌بندی Keyset به `feed-service` و تدوین گزارش رسمی ممیزی تطبیق سرتاسری فرانت و بک‌اند (`REPORT_STAGE17_FULLSTACK_PARITY_AND_GAP_AUDIT.md`).
+  - **مرحله 17B — محیط کاری استودیو چت، دستورات و فراخوانی ابزارها (`Agent Chat Workspace, Commands & Capability Invocation` — تسک فعال جاری 🎯):**
+    - ورود به نخستین محیط کاری محاسباتی استودیو (چت ایجنت) پیش از ورود به بوم کانواس.
+    - پشتیبانی از دستورات اسلش مستقیم (`/image`, `/flux`, `/remove_background`) و اجرای قابلیت‌ها با کلید API مدل تصویر و تفکیک مسیر اجرای کامند از مدل NLU فهم نیت (Intent AI) که در دست توسعه است.
+    - استریم بلادرنگ رویدادهای چت با SSE و بافرینگ در Redis بر روی روت `/api/v1/chat/messages/{id}/events`.
+    - صدور رویداد `job_dispatched` و نمایش کارت ابزار در حین پاسخ ایجنت با اتصال به `sdk.jobs.subscribe(jobId)`.
+    - مدیریت قفل همزمانی `409 THREAD_BUSY`، اکشن لغو پیام و اعتبارسنجی تسویه‌حساب سهمیه در `usage-service`.
+  - **مرحله 17C — بوم طراحی نامحدود و موتور ارکستراسیون گراف (`Infinite Canvas Workspace, DAG Pipeline & DEBT-CANVAS-01`):**
+    - حل قطعی بدهی فنی رسمی بوم (**`DEBT-CANVAS-01`**): جایگزینی شبیه‌سازی ماک فرانت‌اند (`setTimeout`) در `CanvasWorkspaceEditor.tsx` و متد موقت `executeStage` در `orchestrator-service` با اتصال واقعی به مسیر اجرای مشترک (`tools-service`).
     - پیاده‌سازی رزرو متمرکز در سطح ران (Run-level Reservation مصوب D6 در ADR-019) با ارسال `run_id` و `parent_reservation_id` برای نودهای داخلی بدون رزرو مضاعف.
     - تست چرخه کامل ذخیره و لود گراف‌های بوم با `project-service` و حل تعارضات Optimistic Locking.
     - تضمین قطعی عدم بافرینگ رویدادهای SSE (`jobs.subscribe`) در لایه پروکسی فرانت‌اند و نمایش روان وضعیت پیشرفت نودها.
     - دریافت Presigned URLهای تصاویر نهایی از `storage-service`، نمایش موفق در بوم و ذخیره در ماژول Assets.
-  - **مرحله 17C — تثبیت چت ایجنت، اجرای ابزار پایه و تسویه سهمیه‌ها (`Agent Chat, Tool Execution & Quota Settlement`):**
-    - تست تعامل زنده با ایجنت در `AgentChatView.tsx`، اعتبارسنجی پرامپت‌ها و استریم پاسخ‌ها.
-    - اجرای موفق ابزار پایه از طریق پنل ابزارها یا دراپ روی بوم و ارسال به `tools-service`.
-    - بررسی دقیق کسر و تسویه اعتبارات در `quota-service` و `usage-service` بدون کسر مضاعف یا قفل دیتابیس و کنترل سقف محافظتی `expected_cost`.
-    - فعال‌سازی پشتیبانی از ابزارهای نوع `workflow` (گراف‌های ذخیره‌شده به عنوان ابزار — مصوب D7 در ADR-019).
   - **مرحله 17D — تست‌های جامع یکپارچگی لوکال و فریز پایداری (`Local E2E Regression & Stability Freeze`):**
     - اجرای کامل تمامی کانتینرها در Docker Compose محلی بدون پرتاب خطای کنسول یا Unhandled Rejection.
-    - اجرای تست‌های رگرسیون یکپارچه در سطح کلاینت و سرور و اثبات کارکرد ۱۰۰٪ چرخه محصول پیش از استقرار سرور.
+    - اجرای تست‌های رگرسیون یکپارچه در سطح کلاینت و سرور و اثبات کارکرد ۱۰۰٪ چرخه محصول پیش از استقرار سرور در مرحله ۱۸.
 
 ---
 

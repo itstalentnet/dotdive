@@ -31,6 +31,7 @@ icon: "file-check"
 - **[ADR-018: معماری پلتفرم ابزارها، مدل داده ابزار=تعریف، مسیر اجرای مشترک و تفکیک دامنه‌های قرارداد](./ADR-018-tools-platform-architecture-unified-execution-and-domain-decoupling.md)** — تصویب مدل داده ابزار=تعریف، مسیر اجرای مشترک سرتاسری، تفکیک مالکیت دارایی‌ها به storage-service و جاب‌ها به job-service، و استانداردهای Idempotency و امنیت کاتالوگ
 - **[ADR-019: معماری اجرای قابلیت‌های واحد (Unified Capability Invocation)، قیمت‌گذاری تک‌نقطه‌ای و مرزهای ایجنت](./ADR-019-unified-capability-invocation-and-agent-boundaries.md)** — قرارداد اجرای یکپارچه ToolInvocation برای بوم، ایجنت و API، تفکیک صریح input_kind، قیمت‌گذاری تک‌نقطه‌ای در rate-card، رزرو در سطح ران، انواع ابزارها و مرزبندی قطعی ایجنت
 - **[ADR-020: معماری میکروسرویس چت ایجنت استودیو (agent-service)، تفکیک استریم رویدادها و چرخه حیات پیام‌ها](./ADR-020-studio-agent-chat-service-architecture.md)** — استقرار agent-service (پورت HTTP 8096 و gRPC 50066)، مدل داده lemmo_agent، تفکیک اندپوینت‌های ارسال و استریم SSE، کانتینر شبیه‌ساز LLM و حذف ماک چت
+- **[ADR-021: معماری فرم تولید محتوای داده‌محور، اتصال ابزار-مدل و واژگان پارامترهای استاندارد](./ADR-021-dynamic-generation-form-and-tool-model-binding.md)** — فرم سرور-محور تولید، اتصال مدل‌ها به تعاریف ابزار (models[])، واژگان پارامترهای استاندارد، حذف کامل ماک‌های فرانت‌اند (presets.ts) و استعلام زنده قیمت
 - **[پروپوزال استخراج دیزاین سیستم](./proposal-design-system-extraction.md)** — طرح تفکیک پکیج دیزاین سیستم به عنوان پکیج مستقل
 
 
