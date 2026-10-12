@@ -4,7 +4,7 @@
 | **Title (FA)** | راهنمای سبک کدنویسی و استانداردهای مهندسی فرانت‌اند |
 | **ID** | DOC-FE-005 |
 | **Category** | `frontend` |
-| **Status** | `Draft` |
+| **Status** | `Approved` |
 | **Owner** | Frontend Team / Architecture Guild |
 | **Last Updated** | 2026-10-12 |
 | **Summary (EN)** | Comprehensive frontend engineering guide: Zero-Endpoint Awareness, SDK Facade, multi-tier state management, strict TypeScript, logical CSS, and error handling. |
@@ -15,8 +15,8 @@
 
 # راهنمای جامع سبک کدنویسی و استانداردهای مهندسی فرانت‌اند (DOC-FE-005)
 
-> **وضعیت سند:** `پیش‌نویس حاکمیتی (Draft — Conditionally Approved)`  
-> **مرجع تصمیم:** بررسی حاکمیت معماری مورخ ۲۰۲۶-۱۰-۱۲  
+> **وضعیت سند:** `تصویب‌شده حاکمیتی (Approved — Ratified)`  
+> **مرجع تصمیم:** ابلاغ تصویب نهایی حاکمیت مهندسی مورخ ۲۰۲۶-۱۰-۱۲  
 > **دامنه کاربرد:** کلیه ماژول‌ها، صفحات، هوک‌ها و کامپوننت‌های مخزن فرانت‌اند (`app/`)  
 > **مراجع مصوب مادر:** [DOC-FE-001](./workspace-architecture.md)، [DOC-FE-002](./workspace-decisions.md)، [DOC-FE-004](./agent-chat-state-and-sse-lifecycle.md)، [ADR-013](../01-architecture/decisions/ADR-013-three-tier-edge-gateway-and-bff-architecture.md)، [ADR-016](../01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md)، [ADR-021](../01-architecture/decisions/ADR-021-dynamic-generation-form-and-tool-model-binding.md)، [DOC-DS-001](../04-design-system/STYLEGUIDE.md) و [RULES.md](../../../../RULES.md)
 
