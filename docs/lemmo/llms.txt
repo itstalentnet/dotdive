@@ -47,6 +47,7 @@
 
 ## Frontend Engineering
 
+- [Agent Execution Lifecycle & State Remediation Guide](02-frontend/troubleshooting-agent-execution-and-state-handling.md): Product and engineering guide detailing the root causes, frontend state machine fixes, quota wallet fallback resolutions, and diagnostic playbooks for agent tool execution issues in Studio.
 - [Frontend Architecture & Engineering Guidelines](02-frontend/index.md): Central index for frontend architecture, state management, routing, and coding conventions.
 - [Workspace Architectural Decisions: Plugin System, SDK Gateway & Job Manager](02-frontend/workspace-decisions.md): Detailed architectural decisions for the Lemmo Workspace covering schema-driven tool plugins, central SDK gateway, and global AI job management.
 - [Workspace Frontend Architecture — Next.js](02-frontend/workspace-architecture.md): Finalized dependency rules, directory structure, and modular boundaries for the Lemmo Next.js workspace.
