@@ -48,6 +48,7 @@
 ## Frontend Engineering
 
 - [Frontend Architecture & Engineering Guidelines](02-frontend/index.md): Central index for frontend architecture, state management, routing, and coding conventions.
+- [Frontend Engineering Style Guide & Architecture Standards](02-frontend/style-guide.md): Comprehensive frontend engineering guide: Zero-Endpoint Awareness, SDK Facade, multi-tier state management, strict TypeScript, logical CSS, and error handling.
 - [Studio Agent Chat State Machine & SSE Lifecycle Specification](02-frontend/agent-chat-state-and-sse-lifecycle.md): Technical specification governing the Next.js Studio Agent Chat state machine, Server-Sent Events (SSE) streaming lifecycle, error parsing protocol, and timeout safeguards.
 - [Workspace Architectural Decisions: Plugin System, SDK Gateway & Job Manager](02-frontend/workspace-decisions.md): Detailed architectural decisions for the Lemmo Workspace covering schema-driven tool plugins, central SDK gateway, and global AI job management.
 - [Workspace Frontend Architecture — Next.js](02-frontend/workspace-architecture.md): Finalized dependency rules, directory structure, and modular boundaries for the Lemmo Next.js workspace.
