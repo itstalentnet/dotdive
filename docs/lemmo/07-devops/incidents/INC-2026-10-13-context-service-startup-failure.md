@@ -41,7 +41,7 @@
 - **04:05:28:** کانتینر `context-service` آغاز به کار کرد.
 - **04:05:33:** مهلت ۵ ثانیه‌ای اتصال gRPC به `user-service` به پایان رسید و خطای `context deadline exceeded` ثبت شد:
   ```text
-  WARN could not connect to user-service on start; running with non-blocking client endpoint=lemmo-svc-user:50051 error="failed to connect to user-service on lemmo-svc-user:50051: context deadline exceeded"
+  WARN could not connect to user-service on start; running with non-blocking client endpoint=lemmo-svc-user:50062 error="failed to connect to user-service on lemmo-svc-user:50062: context deadline exceeded"
   ```
 - **04:05:34:** کانتینر `user-service` آماده پاسخ‌دهی شد (تنها ۱ ثانیه پس از انقضای تایم‌اوت کانتکست).
 - **04:05:35 تا 04:27:14:** تمام درخواست‌های فرانت‌اند به `/api/v1/me/context` برای همه کاربران لاگین‌شده با پاسخ زیر ریجکت شدند:
@@ -51,7 +51,7 @@
   ```
 - **04:27:15:** با اجرای ری‌استارت دستی روی `context-service`، اتصال به `user-service` برقرار شد و سرویس به حالت عادی برگشت:
   ```text
-  INFO connected to user-service endpoint=lemmo-svc-user:50051
+  INFO connected to user-service endpoint=lemmo-svc-user:50062
   ```
 
 ---
