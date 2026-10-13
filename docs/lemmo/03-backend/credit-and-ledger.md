@@ -119,3 +119,10 @@ $$\text{Credits} = \left\lceil \text{Base}(\text{Tool}, \text{Model Tier}) \time
 3. **استقرار مستقل (Service-Owned Deployment):**
    - زیرساخت اختصاصی `financial-ledger` منحصراً در `services/quota-service/deploy/compose.yaml` تعریف شده و فایل کامپوز ریشه صرفاً با دستور `include:` آن را فراخوانی می‌کند.
 
+
+
+### خواندن موجودی ورک‌اسپیس در Context — TASK-CTX-002
+
+شناسه کیف پول مستقل از شناسه ورک‌اسپیس است. Context نباید workspace_id را در فیلد wallet_id ارسال کند. قرارداد داخلی `GetWalletBalanceRequest` فیلد اختیاری `workspace_id = 3` را برای خواندن کیف پول موجودِ مالک WORKSPACE دارد؛ ارسال همزمان wallet_id و workspace_id نامعتبر است. در مسیر workspace، tenant احرازشده و tenant_id درخواست باید برابر workspace_id باشند و owner_type/owner_id کیف پول دقیقاً WORKSPACE/همان ورک‌اسپیس باشند. برخی رکوردهای قدیمی در wallets.tenant_id شناسه کاربر ثبت‌نام‌کننده دارند؛ در selector جدید این مقدار قدیمی مبنای مجوز نیست و مالکیت ورک‌اسپیس با tenant احرازشده کنترل می‌شود.
+
+این عملیات فقط‌خواندنی است: کیف پول، bucket یا اعتبار ایجاد نمی‌کند و در نبود رکورد خطا می‌دهد. Context پس از انتخاب ورک‌اسپیس از عضویت‌های کاربر، همان ورک‌اسپیس را در metadata احرازشده RPC منتقل می‌کند. مسیر قدیمی wallet_id برای مصرف‌کنندگان موجود حفظ می‌شود. Quota جدید باید پیش از Context جدید نصب شود. اصلاح از اشتباه‌گرفتن خطای lookup با اختلال اتصال جلوگیری می‌کند؛ جایگزین provisioning حساب‌های واقعاً ناقص نیست.

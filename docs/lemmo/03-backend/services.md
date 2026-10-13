@@ -6,7 +6,7 @@
 | **Category** | `backend` |
 | **Status** | `Approved` |
 | **Owner** | Backend & Platform Team |
-| **Last Updated** | 2026-09-30 |
+| **Last Updated** | 2026-10-13 |
 | **Summary (EN)** | Complete breakdown of nons reused services, Lemmo specific microservices, service anatomy, and phased delivery roadmap. |
 | **Summary (FA)** | فهرست کامل سرویس‌های اشتراکی، میکروسرویس‌های اختصاصی Lemmo، ساختار داخلی هر سرویس و نقشه فازبندی. |
 | **Tags** | `backend`, `services`, `catalog`, `roadmap`, `microservices` |
@@ -228,3 +228,21 @@ flowchart TD
 - جستجوی پیشرفته برداری روی پروژه‌ها و پایش بلادرنگ هوشمند (Analytics).
 - راه‌اندازی اکوسیستم پلاگین: `plugin-registry-service` و سندباکس امنیتی `plugin-runtime-service`.
 
+
+
+### سیاست اجرایی تاب‌آوری Context — TASK-CTX-001
+
+کلاینت‌های User، Workspace، Quota و Project با `grpc.NewClient` به صورت غیرمسدودکننده ساخته می‌شوند؛ اتصال با `Connect()` آغاز و بازیابی توسط gRPC انجام می‌شود. مهلت هر RPC و Backoff از `services/context-service/config/default.yaml` خوانده می‌شود؛ نبود فایل، مقادیر نامعتبر یا خطای ساخت کلاینت راه‌اندازی را متوقف می‌کند، ولی آفلاین بودن مقصد مانع ساخت کلاینت نیست.
+
+`/livez` و `/healthz` زنده‌بودن پردازش را نشان می‌دهند. `/readyz` فقط وقتی ۲۰۰ است که اتصال User و Workspace در وضعیت `Ready` باشد؛ Project اختیاری است و وضعیت آن در فیلد `degraded` و لاگ پروب ثبت می‌شود. قطعی Project شمارش پروژه را صفر نگه می‌دارد. Quota برای محاسبه سهمیه هنگام وجود ورک‌اسپیس لازم است و شکست درخواست آن پاسخ Context را ۵۰۳ می‌کند؛ مطابق تسک، در شرط پروب آمادگی لحاظ نشده است. این پروب تشخیص سلامت اتصال است، نه تضمین سلامت داده‌های حساب یا قطع خودکار ترافیک در Kong.
+
+در مسیر `/api/v1/me/context` خطای زیرساخت با HTTP 503 و `ERROR_REASON_SERVICE_UNAVAILABLE` بازگردانده می‌شود. نبود رکورد کاربر نیز HTTP 503 با `ERROR_REASON_USER_RECORD_NOT_FOUND` است و هرگز ۴۰۴ نیست. هر دو مورد در gRPC کد `Unavailable` دارند. Kong پاسخ HTTP هندلر REST روی 8092 را عبور می‌دهد. استودیو خطای ۵۰۳ را با متن بومی‌سازی‌شده و دکمه تلاش مجدد نمایش می‌دهد و نشست را باطل نمی‌کند.
+
+آزمون `tests/live/downstream_resilience_live_test.go` اتصال دیرهنگام، قطع و بازیابی همان کلاینت و وابستگی اختیاری را با سرورهای محلی آزمایشی بررسی می‌کند. پیاده‌سازی محلی انجام شده؛ بسته‌شدن بدهی منوط به CI و بازبینی مستقل است. ترمیم ورک‌اسپیس و کیف پول خارج از این اصلاح است.
+
+
+### خواندن موجودی ورک‌اسپیس در Context — TASK-CTX-002
+
+شناسه کیف پول مستقل از شناسه ورک‌اسپیس است. Context نباید workspace_id را در فیلد wallet_id ارسال کند. قرارداد داخلی `GetWalletBalanceRequest` فیلد اختیاری `workspace_id = 3` را برای خواندن کیف پول موجودِ مالک WORKSPACE دارد؛ ارسال همزمان wallet_id و workspace_id نامعتبر است. در مسیر workspace، tenant احرازشده و tenant_id درخواست باید برابر workspace_id باشند و owner_type/owner_id کیف پول دقیقاً WORKSPACE/همان ورک‌اسپیس باشند. برخی رکوردهای قدیمی در wallets.tenant_id شناسه کاربر ثبت‌نام‌کننده دارند؛ در selector جدید این مقدار قدیمی مبنای مجوز نیست و مالکیت ورک‌اسپیس با tenant احرازشده کنترل می‌شود.
+
+این عملیات فقط‌خواندنی است: کیف پول، bucket یا اعتبار ایجاد نمی‌کند و در نبود رکورد خطا می‌دهد. Context پس از انتخاب ورک‌اسپیس از عضویت‌های کاربر، همان ورک‌اسپیس را در metadata احرازشده RPC منتقل می‌کند. مسیر قدیمی wallet_id برای مصرف‌کنندگان موجود حفظ می‌شود. Quota جدید باید پیش از Context جدید نصب شود. اصلاح از اشتباه‌گرفتن خطای lookup با اختلال اتصال جلوگیری می‌کند؛ جایگزین provisioning حساب‌های واقعاً ناقص نیست.

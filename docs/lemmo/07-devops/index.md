@@ -96,5 +96,8 @@
 2. **[کالبدشکافی رخدادها (Incidents Post-Mortem — DOC-OPS-INC-000)](./incidents/index.md):**  
    آرشیو رسمی تحلیل ریشه‌ای (RCA)، شواهد لاگ و اقدامات پیشگیرانه رخدادهای سیستم.
    - [گزارش رخداد INC-2026-10-12: توقف ایجنت در وضعیت Generating (DOC-OPS-INC-001)](./incidents/INC-2026-10-12-agent-perpetual-loading.md)
-   - [گزارش رخداد INC-2026-10-13: خرابی پایدار context-service پس از شکست اتصال اولیه (DOC-OPS-INC-002)](./incidents/INC-2026-10-13-context-service-startup-failure.md)
+   - [گزارش رخداد INC-2026-10-13: اختلال ورود به استودیو بر اثر اتصال اولیهٔ ناموفق و جست‌وجوی نادرست کیف پول (DOC-OPS-INC-002)](./incidents/INC-2026-10-13-context-service-startup-failure.md)
+
+3. **[عیب‌یابی، مشکلات و راه‌حل‌های پلتفرم (Troubleshooting — DOC-OPS-002)](./troubleshooting.md):**  
+   کاتالوگ متمرکز مشکلات و راه‌حل‌های عملیاتی، نشانه‌ها، خطاهای شناخته‌شده و رویه‌های تاییدشده رفع اختلال در استودیو و سرویس‌های پشتیبان.
 
