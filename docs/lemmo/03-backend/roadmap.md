@@ -6,7 +6,7 @@
 | **Category** | `backend` |
 | **Status** | `Approved` |
 | **Owner** | Core Architecture & Backend Team / @platform |
-| **Last Updated** | 2026-10-11 |
+| **Last Updated** | 2026-10-13 |
 | **Summary (EN)** | Canonical, unified backend and platform engineering roadmap: consolidates granular Phase 0 skeleton, Phase 1 MVP services (Stages 1-9, closed Gates 0-5), Phase 2 Live Identity, Gateway & Studio SDK Integration (Stages 10A, 10B, 10.5, 11, completed Stage 12A/12B/12C), Stage 12.5 Comprehensive Platform Security Hardening (4 waves resolving 25 findings from October 6 re-audit), Stage 13 IAM, Phase 3 Commercialization (Stages 14-16), and Phase 4 Ecosystem (Stages 17-19) with explicit quality gates and development conventions. |
 | **Summary (FA)** | نقشه راه جامع، یگانه و مرجع مهندسی پلتفرم و بک‌اند لِمو: تجمیع گام‌های مهندسی اسکلت فاز ۰، ۱۰ سرویس فاز ۱ (مراحل ۱ تا ۹، بسته‌شدن گیت‌های ۰ تا ۵)، فاز ۲ هویت زنده، درگاه لبه و اتصال SDK استودیو (مراحل 10A، 10B، 10.5، 11 و تکمیل قطعی مراحل 12A، 12B و 12C)، مرحله ۱۲.۵ بازسازی و استحکام جامع امنیتی پلتفرم (۴ موج اجرایی برای رفع ۲۵ یافته بازآزمایی رسمی ۶ اکتبر)، مرحله ۱۳ سرویس دسترسی‌ها (iam-service)، فاز ۳ تجاری‌سازی (مراحل ۱۴ تا ۱۶)، و فاز ۴ اکوسیستم به همراه گیت‌های کنترل کیفیت و چک‌لیست‌های انطباق. |
 | **Tags** | `backend`, `roadmap`, `milestones`, `architecture`, `services`, `mvp`, `phase2`, `stage12.5`, `security`, `ssot` |
@@ -373,6 +373,12 @@ flowchart TD
   - **مرحله 17D — تست‌های جامع یکپارچگی لوکال و فریز پایداری (`Local E2E Regression & Stability Freeze`):**
     - اجرای کامل تمامی کانتینرها در Docker Compose محلی بدون پرتاب خطای کنسول یا Unhandled Rejection.
     - اجرای تست‌های رگرسیون یکپارچه در سطح کلاینت و سرور و اثبات کارکرد ۱۰۰٪ چرخه محصول پیش از استقرار سرور در مرحله ۱۸.
+  - **اصلاح فوری و پایدار تاب‌آوری راه‌اندازی کانتکست (بدهی فنی `DEBT-CTX-01` — اولویت بحرانی P0 پیرو رخداد INC-2026-10-13-CONTEXT-01):**
+    - حذف دیال مسدودکننده `grpc.WithBlock()` با مهلت ۵ ثانیه‌ای در سازنده کلاینت‌ها (`*_client.go`)؛ پیاده‌سازی اتصال غیرمسدودکننده با تلاش مجدد خودکار در پس‌زمینه (Exponential Backoff Reconnect Loop) جهت حذف قطعی شرط رقابت در زمان راه‌اندازی کانتینرها (Startup Race Condition).
+    - اصلاح معناشناسی خطاها: تفکیک قطعی خطای زیرساخت از کسب‌وکار؛ در صورت عدم دسترسی یا `nil` بودن کلاینت، بازگرداندن قطعی `domain.ErrServiceUnavailable` (کد ۵۰۳ در HTTP و Unavailable در gRPC) و منع اکید بازگرداندن کاذب `domain.ErrUserNotFound` (۴۰۴).
+    - تفکیک قطعی پروب‌های سلامت: جداسازی `/livez` از `/readyz` به گونه‌ای که کانتینر `context-service` صرفاً با باز شدن پورت HTTP آماده تلقی نگردد تا زمانی که وابستگی‌های حیاتی مقداردهی شوند.
+    - پیام‌رسانی خطای ۵۰۳ در فرانت‌اند استودیو با بنر کاربرپسند «سرویس موقتاً در دسترس نیست».
+    - تدوین تست یکپارچگی زنده (`tests/live/downstream_resilience_live_test.go`) برای اثبات بالا آمدن با تاخیر `user-service` و بازیابی خودکار پس از قطع موقت شبکه بدون ری‌استارت پردازش.
 
 ---
 
@@ -380,6 +386,7 @@ flowchart TD
 | شناسه | عنوان بدهی فنی | سرویس‌ها / فایل‌ها | وضعیت فعلی | معیار خروج و حل قطعی (Exit Criteria) |
 |---|---|---|---|---|
 | `DEBT-CANVAS-01` | شبیه‌سازی ماک اجرای نودهای بوم در فرانت و ارکستریتور | `app/src/modules/canvas/components/CanvasWorkspaceEditor.tsx`<br>`api/services/orchestrator-service/internal/app/service.go` | در فرانت‌اند با `setTimeout(..., 1800)` تصاویر تصادفی تولید می‌شود و در `orchestrator-service` متد `executeStage` جاب واقعی ایجاد نمی‌کند. | مهاجرت کامل به مسیر اجرای مشترک `tools-service` با رزرو در سطح ران (`run_id` و `parent_reservation_id`) در مرحله 17B. |
+| `DEBT-CTX-01` | خرابی پایدار context-service پس از شکست اتصال اولیه و نگاشت کاذب ۴۰۴ به جای ۵۰۳ | `api/services/context-service/internal/adapters/clients/*_client.go`<br>`api/services/context-service/cmd/server/main.go`<br>`api/services/context-service/internal/adapters/grpc/handler.go` | کلاینت در صورت تاخیر وابستگی `nil` مانده و خطای کاذب ۴۰۴ صادر می‌کند؛ با ری‌استارت دستی کانتینر موقتاً برطرف شد (INC-2026-10-13-CONTEXT-01). | استقرار اتصال غیرمسدودکننده با تلاش مجدد خودکار، بازگرداندن ۵۰۳ در زمان اختلال، بازیابی خودکار پس از وصل سرویس بدون ری‌استارت، و تست‌های رگرسیون CI (طبق DOC-OPS-INC-002). |
 
 
 ### مرحله ۱۸: آماده‌سازی استقرار ابری، کانفیگ سرور، دامنه، SSL و راه‌اندازی زنده در محیط واقعی سرور (`Production Server Deployment & Release`) 🌐
@@ -495,4 +502,5 @@ flowchart TD
 | شناسه | موضوع بدهی فنی | استراتژی موقت فعلی | معیار و زمان استخراج قطعی | سند مرجع |
 | :--- | :--- | :--- | :--- | :--- |
 | **TD-001** | استخراج ابزارهای مشترک میان‌پروژه‌ای و قراردادها | مصرف مستقیم مونو-اسپک OpenAPI و بایندینگ‌های تایپ‌اسکریپت Proto از مخزن `api/` با نسخه و Commit SHA پین‌شده در Orval. | ظهور سومین ریپوی مصرف‌کننده در اکوسیستم لیمو، یا افزایش نامتعارف هزینه هماهنگی دستی تغییرات؛ استخراج به یک پکیج مستقل و نسخه‌دار در رجیستری خصوصی npm. | OQ-035 / ADR-016 |
+| **DEBT-CTX-01** | خرابی پایدار context-service پس از شکست اتصال اولیه و نگاشت کاذب ۴۰۴ به جای ۵۰۳ | ری‌استارت دستی کانتینر context-service پس از آماده‌شدن user-service. | اتصال غیرمسدودکننده با Backoff Reconnect در پس‌زمینه، بازگرداندن خطای صریح ۵۰۳ به جای ۴۰۴، و تست رگرسیون تاخیر بالا آمدن وابستگی‌ها. | DOC-OPS-INC-002 / pending-01.md |
 

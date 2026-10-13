@@ -6,7 +6,7 @@
 | **Category** | `devops` |
 | **Status** | `Active` |
 | **Owner** | SRE / Core Engineering Team |
-| **Last Updated** | 2026-10-12 |
+| **Last Updated** | 2026-10-13 |
 | **Summary (EN)** | Authoritative registry of system incidents, post-mortems, root cause analyses, and permanent remediation playbooks for Lemmo platform. |
 | **Summary (FA)** | نمایه رسمی گزارش‌های کالبدشکافی رخدادها، تحلیل علل ریشه‌ای (RCA)، شواهد و راهکارهای پیشگیرانه ثبت‌شده در پلتفرم لِمو. |
 | **Tags** | `devops`, `incidents`, `post-mortem`, `sre`, `rca`, `reliability` |
@@ -24,6 +24,7 @@
 | شناسه رخداد | تاریخ | سطح بحران | حوزه و مؤلفه‌های متاثر | وضعیت | مستند تفصیلی |
 |---|---|---|---|---|---|
 | **INC-2026-10-12-AGENT-01** | ۲۰۲۶-۱۰-۱۲ | `SEV-2` | استودیو، ایجنت چت، سهمیه و لجر، استریم SSE | برطرف‌شده | [کالبدشکافی گیر کردن اجرای ایجنت و ناهماهنگی استیت (DOC-OPS-INC-001)](./INC-2026-10-12-agent-perpetual-loading.md) |
+| **INC-2026-10-13-CONTEXT-01** | ۲۰۲۶-۱۰-۱۳ | `SEV-1` | دسترسی استودیو، `context-service`، اتصال `user-service`، کلاینت‌های gRPC | در صف اصلاح (برنامه در رودمپ) | [خرابی پایدار context-service پس از شکست اتصال اولیه (DOC-OPS-INC-002)](./INC-2026-10-13-context-service-startup-failure.md) |
 
 ---
 
