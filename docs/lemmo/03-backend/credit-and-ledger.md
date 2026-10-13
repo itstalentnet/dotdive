@@ -139,3 +139,200 @@ $$\text{Credits} = \left\lceil \text{Base}(\text{Tool}, \text{Model Tier}) \time
 - اختلال مالی تولید جدید را متوقف کند؛ مشاهده تاریخچه و دارایی مجاز تا حد امکان برقرار باشد. موجودی نامعلوم به صفر یا اعتبار نامحدود تبدیل نشود.
 - بودجه آزمون API پولی این دور ۲ دلار و قابل تنظیم است؛ مبنای برنامه‌ریزی سقف تجمعی شامل Retry با ثبت ماندگار و رزرو قبل از فراخوانی است. بودجه دلاری Provider از واحد کردیت و نرخ‌نامه کاربر جداست.
 - Timeout معادل شکست قطعی Provider نیست؛ پیش از اجرای مجدد یا آزادسازی، وضعیت نامشخص تعیین تکلیف شود. تسویه، آزادسازی و Reaper باید در برابر تکرار و رقابت مقاوم باشند؛ UNIQUE(job_id) به‌تنهایی تضمین عدم اجرای مضاعف Provider نیست.
+
+---
+
+## ۷. معماری تعرفه دلاری Provider و چرخه هزینه (Provider Cost Management & Lifecycle)
+
+### ۱. اصل مالکیت واحد تعرفه و حذف محاسبه از ورکرها (Single Ownership Invariants):
+1. **مالک واحد و انحصاری تعرفه و نرخ‌نامه‌ها:**  
+   سرویس `quota-service` تنها مرجع حقیقت (Single Source of Truth) برای هر دو سند مالی است:
+   - `services/quota-service/deploy/config/rate-card-v1.json` برای نرخ کردیت کاربر (Customer Pricing).
+   - `services/quota-service/deploy/config/provider-tariff-v1.json` برای تعرفه دلاری ارائه‌دهندگان ابری (Platform Dollar Tariff).  
+   سرویس‌های دیگر (شامل `model-router-service`، `image-service` و ورکرها) به هیچ عنوان نسخه محلی، کپی یا فرمول نرخ‌گذاری درون‌برنامه‌ای نخواهند داشت.
+2. **حذف قطعی محاسبه مالی از ورکرها (Zero Financial Calculation in Workers):**  
+   ورکرها (`image-service` و غیره) صرفاً مجری عملیات و ناظر متریک‌های فنی هستند و **هیچ محاسبه مالی، تبدیل ارزی، یا حدس کردیت/دلار در ورکرها انجام نمی‌شود**. ورکر در پایان اجرا متد `SettleQuota` را صرفاً با پارامترهای خام اجرایی فراخوانی می‌کند:
+   - `reservation_id`: شناسه رزرو اولیه
+   - `job_id`: شناسه یکتای جاب ارکستراسیون
+   - `execution_status`: `COMPLETED` یا `FAILED`
+   - `actual_model_id`: مدل نهایی استفاده‌شده
+   - `provider_instance_id`: اینستنس ارائه‌دهنده اجراکننده
+   - `num_outputs`: تعداد تصاویر خروجی واقعی تولیدشده  
+   محاسبه مبالغ نهایی تسویه کردیت (`settled_credits`) و هزینه دلاری ارائه‌دهنده (`provider_cost_micros`) منحصراً و درون‌سرویسی توسط `quota-service` بر مبنای تعرفه رسمی انجام می‌شود.
+
+### ۲. منبع واحد حقیقت بودجه پلتفرم (Platform Budget SSOT):
+کنترل سقف آزمون پلتفرم ($2.00 = 2,000,000 micros) در پایگاه‌داده پایدار PostgreSQL (`lemmo_quota`) در جدول `platform_budget_ledgers` با ردیف واحد و قفل ردیفی اتمیک (`SELECT ... FOR UPDATE`) نگهداری می‌شود:
+- `budget_id`: کلید پایدار `platform_test_budget_v1`
+- `total_limit_micros`: ۲,۰۰۰,۰۰۰ میکرو دلار ثابت
+- `committed_micros`: مجموع هزینه‌های قطعی تسویه‌شده به ارائه‌دهندگان
+- `active_reserved_micros`: مجموع هزینه‌های رزرو فعال در حال اجرا  
+ری‌استارت کانتینرها، بازنشانی پادها و خطاهای گذرا وضعیت این جدول را ریست نمی‌کند و همواره در راه‌اندازی ملاک کنترل ظرفیت است.
+
+### ۳. هماهنگی اتمیک دو رزرو (Dual-Reservation Atomic Coordination):
+در زمان فراخوانی `CheckAndReserveQuota`، سیستم ملزم به هماهنگی اتمیک میان دو مخزن مالی است:
+1. **گام اول (رزرو بودجه دلاری پلتفرم):** بررسی و افزایش اتمیک `active_reserved_micros` در جدول `platform_budget_ledgers`:
+   $$\text{committed\_micros} + \text{active\_reserved\_micros} + \text{max\_provider\_cost\_micros} \le \text{total\_limit\_micros}$$
+   در صورت عبور از سقف، درخواست فوراً با خطای `ERR_PLATFORM_BUDGET_EXCEEDED` متوقف می‌شود.
+2. **گام دوم (رزرو کردیت کاربر):** ثبت Two-Phase Transfer در TigerBeetle و کسر FEFO از سطل‌های `wallet_buckets`.
+3. **تراکنش جبرانی (Compensating Void Invariant):** چنانچه گام دوم به دلیل کسری موجودی یا خطای لجر با شکست مواجه شود، بلافاصله در همان تراکنش رزرو بودجه دلاری پلتفرم در گام اول رول‌بک (Void) می‌شود تا هیچ نشتی بودجه رخ ندهد. در صورت Crash میان دو رزرو، جاب آشتی‌دهنده سیستم در راه‌اندازی، رکوردهای رزرو یتیم (Orphan Reservations) را تطبیق داده و خنثی می‌کند.
+
+### ۴. ساختار تعرفه نسخه‌دار Provider و قاعده Fail-Closed:
+```json
+{
+  "tariff_version": "v1.0",
+  "currency": "USD",
+  "effective_from": "2026-10-13T00:00:00Z",
+  "effective_to": "2026-12-31T23:59:59Z",
+  "providers": {
+    "fal-ai": {
+      "official_source_url": "https://fal.ai/pricing",
+      "models": {
+        "fal-ai/flux/dev": {
+          "unit": "per_image",
+          "unit_cost_micros": 25000,
+          "multipliers": {
+            "megapixels": [
+              { "max_mp": 1.0, "multiplier": 1.0 },
+              { "max_mp": 2.0, "multiplier": 1.25 }
+            ]
+          }
+        },
+        "fal-ai/flux/schnell": {
+          "unit": "per_image",
+          "unit_cost_micros": 3000,
+          "multipliers": {
+            "megapixels": [{ "max_mp": 1.0, "multiplier": 1.0 }]
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+> [!CRITICAL] **قاعده Fail-Closed در غیاب تعرفه یا سقف نامعلوم**  
+> در صورتی که برای مدلی در تعرفه فعال ردیف قیمتی وجود نداشته باشد، یا به دلیل پارامترهای نامشخص تعیین سقف هزینه حداکثری ممکن نباشد، **ارسال درخواست پولی به ارائه‌دهنده ابری فوراً مسدود شده** و خطای استاندارد `ERR_PROVIDER_TARIFF_UNAVAILABLE` صادر می‌گردد.
+
+### ۵. قرارداد چرخه پنج‌مرحله‌ای هزینه (Cost Lifecycle Contract):
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as کاربر / کلاینت
+    participant Router as Tools / Quota Service
+    participant Ledger as Quota (Ledger & Budget SSOT)
+    participant Worker as Image Worker
+    participant Cloud as Cloud Provider (Fal/OpenAI)
+    participant Usage as Usage Service (Audit)
+
+    User->>Router: ۱. درخواست تولید (با برآورد سقف هزینه)
+    Router->>Ledger: ۲. رزرو اتمیک هم‌زمان (کردیت کاربر + میکرو دلار پلتفرم)
+    Note over Ledger: بررسی سقف بودجه پلتفرم:<br/>Committed + Active Reserved <= $2.00
+    Ledger-->>Router: صدور Reservation ID (وضعیت PENDING)
+    Router->>Worker: ارسال Task به همراه reservation_id و job_id
+    Worker->>Cloud: ۳. ارسال به ابر (با کلید هرزپذیر dispatch_id)
+    Cloud-->>Worker: پاسخ موفق یا خطای ابر
+    Worker->>Worker: ۴. استخراج متریک‌های خام (status, actual_model, outputs)
+    Worker->>Ledger: ۵. تسویه با کلید قطعی settle:{job_id} و متریک‌های خام
+    Note over Ledger: محاسبه خودکار مبالغ قطعی بر اساس تعرفه،<br/>کسر قطعی کردیت و تبدیل رزرو دلار به مصرف قطعی
+    Ledger-->>Usage: ثبت رویداد تغییرناپذیر در لجر ۱۹ فیلدی
+    Ledger-->>User: اعلام موفقیت و آزادسازی مازاد رزرو
+```
+
+### ۶. حفظ تعهد UNKNOWN و کلید قطعی تسویه:
+1. **قانون تغییرناپذیر حفظ تعهد UNKNOWN (Preservation of UNKNOWN Commitment):**  
+   در صورت دریافت ۵۰۴ یا قطع ارتباط با ارائه‌دهنده، وضعیت جاب به `UNKNOWN` تغییر می‌یابد. **گذر زمان هرگز مجوزی برای آزادسازی خودکار سهمیه یا ارسال مجدد نابینا نیست!** رزرو کاربر و سهمیه دلاری پلتفرم مسدود می‌مانند تا زمانی که:
+   - پاسخ قطعی یا وب‌هوک ارائه‌دهنده دریافت شود، یا
+   - مکانیزم تطبیق فعال لاگ ارائه‌دهنده را بررسی و قطعی کند، یا
+   - مداخله رسمی اپراتور وضعیت را تعیین تکلیف کند.
+2. **قالب قطعی و انحصاری کلید تسویه (Pinned Idempotency Key):**  
+   هیچ انتخابی میان `job_id` و `task_id` وجود ندارد. کلید هرزپذیری تسویه اجباراً و منحصراً منطبق بر الگوی زیر است:
+   $$\text{idempotency\_key} = \text{"settle:"} + \text{job\_id}$$
+   ارسال چندباره این کلید اثر یکسان داشته و مانع از ثبت مضاعف در دفترکل یا کسر مکرر سهمیه می‌شود.
+
+---
+
+### ۷. جدول جامع قراردادهای مالی، انتقال حالات و رفتار Crash (Core Financial Contract Table):
+
+| موجودیت و شناسه | وضعیت‌ها (States) | انتقال‌های مجاز (Valid Transitions) | متولی و منبع حقیقت (SSOT) | رفتار در خرابی، کرش و انزوا (Crash & Recovery Invariants) |
+| :--- | :--- | :--- | :--- | :--- |
+| **تعرفه و نرخ‌نامه‌ها**<br/>`rate_card_version`<br/>`tariff_version` | `ACTIVE`<br/>`DEPRECATED`<br/>`UNAVAILABLE` | `UNAVAILABLE -> ACTIVE -> DEPRECATED`<br/>(بارگذاری صرفاً در زمان بالا آمدن از فایل نسخه‌دار) | `quota-service`<br/>`rate-card-v1.json`<br/>`provider-tariff-v1.json` | **Fail-Fast & Fail-Closed:** غیاب فایل یا خطای Parse در startup منجر به خروج با کد ۱ می‌شود. در صورت نبود ردیف قیمت برای یک مدل، ارسال ابری ممنوع است (`ERR_PROVIDER_TARIFF_UNAVAILABLE`). |
+| **سقف بودجه پلتفرم**<br/>`budget_id`<br/>(از کانفیگ معتبر) | `INITIALIZED`<br/>`ACTIVE`<br/>`EXHAUSTED` | • `ACTIVE -> ACTIVE` (رزرو/تسویه)<br/>• `ACTIVE -> EXHAUSTED` (سقف پر شد)<br/>• `EXHAUSTED -> ACTIVE` (آزادسازی رزرو یا افزایش سقف) | `quota-service`<br/>PostgreSQL: `lemmo_quota.platform_budget_ledgers`<br/>(قفل ردیفی اتمیک) | **پایداری قطعی (Persistence):** ری‌استارت کانتینر مقادیر `committed` و `reserved` را صفر نمی‌کند. شناسه و سقف مستقیماً از فایل کانفیگ نسخه‌دار خوانده شده و با متد `Validate()` تایید می‌شوند. |
+| **رزرو دوگانه کردیت/دلار**<br/>`reservation_id`<br/>(کلید: `reserve:{ws}:{key}`) | `PENDING`<br/>`SETTLED`<br/>`VOIDED`<br/>`PENDING_UNKNOWN` | • `NULL -> PENDING` (رزرو اتمیک هم‌زمان دلار + کردیت)<br/>• `PENDING -> SETTLED` (تسویه قطعی با `settle:{job_id}`)<br/>• `PENDING -> VOIDED` (لغو یا شکست قطعی قبل از ابر)<br/>• `PENDING -> PENDING_UNKNOWN` (خطای ۵۰۴ یا قطع شبکه)<br/>• `PENDING_UNKNOWN -> SETTLED` (پاسخ دیرهنگام یا آشتی لاگ)<br/>• `PENDING_UNKNOWN -> VOIDED` (تایید قطعی عدم اجرا توسط ادمین) | `quota-service`<br/>TigerBeetle Transfer + PostgreSQL `lemmo_quota.credit_reservations` | **هماهنگی اتمیک و لغو جبرانی:** در صورت شکست رزرو کردیت، رزرو دلار بلافاصله رول‌بک می‌شود. در صورت Crash میان دو رزرو، جاب آشتی‌دهنده راه‌اندازی رکوردهای یتیم را خنثی می‌کند. **انقضای لجر در UNKNOWN هرگز مجوزی برای آزادسازی نیست.** |
+| **گزارش خام ورکر**<br/>`job_id`<br/>(کلید: `settle:{job_id}`) | `DISPATCHED`<br/>`COMPLETED`<br/>`FAILED`<br/>`UNKNOWN` | • `DISPATCHED -> COMPLETED` (خروجی آماده شد)<br/>• `DISPATCHED -> FAILED` (خطای قطعی ابر)<br/>• `DISPATCHED -> UNKNOWN` (تایم‌اوت ۵۰۴ یا قطعی ارتباط) | ورکر (`image-service`) صرفاً گزارش‌دهنده متریک خام به `quota-service` | **حذف محاسبه از ورکر:** ورکر هیچ ضریب یا هزینه‌ای محاسبه نمی‌کند. در صورت Fallback پیش از مجوز بودجه یا چند تلاش پولی، هر ارسال جدید ابری نیازمند رزرو بودجه مستقل در Quota است. |
+
+---
+
+### ۸. سناریوهای بحرانی آزمون‌های پذیرش (Comprehensive Edge-Case Test Scenarios):
+
+1. **پاسخ نامشخص Ledger (Ledger Timeout / Unknown Response):**  
+   هنگام اجرای `ReserveQuota` یا `SettleQuota`، ارتباط شبکه با موتور دفترکل (TigerBeetle) قطع شده یا دچار تایم‌اوت می‌شود. سیستم وضعیت را نهایی فرض نمی‌کند؛ درخواست با کد موقت معلق شده و مکانیزم Retry اتمیک با استعلام شناسه انتقال (`TransferLookup`) وضعیت واقعی را بازیابی می‌کند تا از کسر یا استرداد مضاعف ممانعت شود.
+2. **Crash میان دو رزرو (Crash Between the Two Reservations):**  
+   تزریق خطای کرش دقیقاً پس از ثبت موفق رزرو بودجه دلاری پلتفرم و پیش از اتمام تراکنش رزرو کردیت کاربر در TigerBeetle. سیستم در راه‌اندازی بعدی (Startup Reconciler)، رزرو دلاری فاقد رزرو کردیت معتبر را به عنوان رکورد یتیم شناسایی کرده و با تراکنش جبرانی (Compensating Void) آزاد می‌سازد.
+3. **پاسخ دیرهنگام ارائه‌دهنده (Late Provider Response):**  
+   ارائه‌دهنده ابری پس از تایم‌اوت ۵۰۴ و رفتن جاب به وضعیت `UNKNOWN`، ۱۰ دقیقه بعد وب‌هوک موفقیت را ارسال می‌کند. ورکر با ارسال کلید قطعی `settle:{job_id}` درخواست تسویه می‌دهد. سیستم وضعیت `PENDING_UNKNOWN` را به `SETTLED` تبدیل کرده، هزینه واقعی را بر اساس تعرفه محاسبه و ثبت نموده و از هرگونه تناقض حسابداری یا ثبت تکراری جلوگیری می‌کند.
+4. **Fallback پیش از مجوز بودجه (Fallback Before Budget Authorization):**  
+   ارائه‌دهنده اول با خطای ۵۰۳ مواجه شده و روتر قصد سوییچ به ارائه‌دهنده/مدل جایگزین با تعرفه متفاوت را دارد. ورکر یا روتر حق ارسال درخواست جدید به ابر را تا زمان اخذ مجوز و به‌روزرسانی رزرو بودجه در `quota-service` ندارد؛ چنانچه بودجه ۲ دلاری کافی نباشد، سوییچ متوقف و کل عملیات با خطای بودجه Fail-Closed می‌شود.
+5. **چند تلاش پولی برای یک Job (Multiple Paid Retries for Single Job):**  
+   در صورتی که جاب به دلیل شکست مرحله اول مجدداً تلاش پولی انجام دهد (ارسال مجدد به یک سرویس ابری دیگر)، هر تماس ابری نیازمند ثبت و رزرو بودجه مستقل در چارچوب سقف ۲ دلار پلتفرم است. مجموع تعهدات تمام تلاش‌های یک جاب نباید سقف پلتفرم را دور بزند.
+6. **انقضای Ledger هنگام وضعیت UNKNOWN (Ledger Expiry during UNKNOWN State):**  
+   مهلت زمانی پیش‌فرض رزرو در لجر (مثلاً ۳۰۰ ثانیه) به پایان می‌رسد در حالی که ارائه‌دهنده ابری هنوز در وضعیت نامشخص است. فرآیند دوره‌ای Reaper مکلف است رکوردهای با وضعیت `PENDING_UNKNOWN` را فیلتر کرده و تا زمان تعیین تکلیف قطعی، این سهمیه را به صورت خودکار آزاد (Void) نکند.
+7. **خواندن سقف بودجه و شناسه از پیکربندی معتبر (Validated Config Contract):**  
+   سقف بودجه پلتفرم و شناسه آن مستقیماً از بخش پیکربندی معتبر سرویس خوانده می‌شوند:
+   ```yaml
+   platform_budget:
+     budget_id: "platform_test_budget_v1"
+     limit_micros: 2000000 # $2.00
+     enabled: true
+   ```
+   متد `Validate()` سرویس در زمان بوت تضمین می‌کند که `budget_id` غیرخالی و `limit_micros > 0` باشند؛ در غیر این صورت سرویس Fail-Fast انجام می‌دهد.
+
+---
+
+## ۹. الحاقیهٔ اجرایی معماری چرخه مالی P04 (Executive Implementation Addendum — نسخه ۲ مصوب)
+
+### ۱. هماهنگی پایدار دو رزرو و شرط قطعی Dispatch
+- **شناسه ثابت عملیات:** `reservation_id` و `attempt_id` یک‌بار ساخته و در دیتابیس پایدار می‌شوند. برای هر عملیات مالی نوع‌دار (`reserve`, `void`, `post`, `reconcile`) یک `ledger_operation_id` یکتا پیش از تماس خارجی ذخیره می‌شود؛ استفاده از UUID تصادفی در retry اکیداً ممنوع است. نگاشت به شناسه عددی لجر با قید یکتایی و کنترل برخورد انجام می‌شود.
+- **مراحل پایدار هماهنگی (بدون ادعای تراکنش توزیع‌شده ۲PC میان PostgreSQL و Ledger):**
+  1. **گام ۱ (`PREPARING`):** در یک تراکنش PostgreSQL، کلید یکتای workspace/request، اثرانگشت payload، reservation، attempt اولیه، hold مقدارمحور کردیت با تخصیص دقیق FEFO در `wallet_buckets`، hold بودجه دلاری پلتفرم و رکورد عملیات Ledger ثبت می‌شوند. قفل کیف‌پول و بودجه با ترتیب ثابت گرفته می‌شود. در صورت ناکافی بودن مبلغ یا بودجه، کل تراکنش rollback می‌شود؛ هنوز dispatch مجاز نیست.
+  2. **گام ۲ (`LEDGER_RESERVE_PENDING`):** تماس شبکه با Ledger (TigerBeetle) خارج از تراکنش طولانی PostgreSQL و با شناسه ثابت از قبل ذخیره‌شده ارسال می‌شود. هر retry از همان شناسه، مبلغ و حساب‌ها استفاده می‌کند.
+  3. **گام ۳الف (`LEDGER_RESERVE_UNKNOWN`):** در صورت timeout یا مفقودی پاسخ، هیچ holdای آزاد نمی‌شود؛ reconciler با همان شناسه lookup انجام داده و در صورت نیاز همان عملیات را replay می‌کند. نیافتن رکورد در یک lookup به‌تنهایی اثبات شکست نیست.
+  4. **گام ۳ب (`AUTHORIZED`):** فقط پس از تأیید قطعی اثر Ledger با تطبیق شناسه عملیات، حساب‌ها و مبلغ، وضعیت `AUTHORIZED` در PostgreSQL ثبت و مجوز تلاش صادر می‌شود.
+  5. **گام ۳ج (`ABORTING → VOIDED`):** در شکست قطعی قبل از dispatch: اگر اثر Ledger موجود است، void با شناسه ثابت و تأیید نتیجه؛ در غیر این صورت بدون void، و سپس holdهای PostgreSQL دقیقاً یک‌بار آزاد می‌شوند.
+  6. **گام ۴ (`DISPATCH_CLAIMED`):** مجری یک‌بار مجوز را claim کرده و پیش از تماس ابری ثبت پایدار انجام می‌دهد. کرش پس از claim وضعیت را نامشخص می‌کند؛ بازگشت پیام صف مجوز تماس تازه نیست.
+- **شرط دقیق صدور مجوز Dispatch:** reservation مجاز و hold کردیتی مؤثر + hold بودجه همان attempt + تطبیق workspace/job/provider/model/parameters_hash و نسخه تعرفه + اعتبار زمانی مجوز + claim پایدار و یکتای اجرا. در غیاب هر شرط، هیچ فراخوانی پولی انجام نمی‌شود.
+
+### ۲. موجودیت attempt و استقلال هزینه Provider از کردیت Job
+- **جدول پایدار `provider_dispatch_attempts` در دیتابیس `lemmo_quota`:**  
+  فیلدها: `attempt_id`, `job_id`, `reservation_id`, `workspace_id`, `budget_id`, `attempt_number`, `provider_id`, `provider_instance_id`, `model_id`, `parameters_hash`, `tariff_version`, `rate_card_version`, `max_cost_micros`, `currency`, `provider_request_id`, `authorization_expires_at`, `execution_status`, `cost_status`.
+- **استقلال مالی تلاش از جاب:**
+  - وضعیت اجرای تلاش: `PREPARED → AUTHORIZED → DISPATCH_CLAIMED → ACCEPTED/UNKNOWN → SUCCEEDED/FAILED_CONFIRMED/NOT_EXECUTED_CONFIRMED`.
+  - حساب هزینه مستقل: `RESERVED → CALCULATED → VERIFIED` یا `RESERVED → VOIDED`.
+  - ثبت هزینه تلاش با کلید `attempt-cost:{attempt_id}` و رویداد تعدیل append-only انجام می‌شود (بدون overwrite خاموش رکورد قبلی).
+  - کردیت مشتری فقط یک‌بار در سطح Job با کلید قطعی `settle:{job_id}` و نسخه نرخ محصول تسویه می‌شود؛ چند تلاش ناموفق هرگز چند کسر از مشتری ایجاد نمی‌کند.
+  - شکست یک attempt به‌تنهایی مجوز release رزرو کردیت کل Job نیست؛ تصمیم نهایی جاب ملاک است.
+
+### ۳. انقضای واقعی Ledger هنگام UNKNOWN
+- **طرح اجرایی: hold مقدارمحور از لحظه PREPARING:** مقدار و سهم هر bucket از لحظه شروع رزرو مسدود می‌شود (نه قرنطینه در ثانیه‌های پایانی). همه مسیرهای برداشت و نمایش موجودی قابل خرج باید این hold را رعایت کنند.
+- **رفتار در انقضای Ledger:**
+  1. در وضعیت `UNKNOWN`، hold کردیتی و hold بودجه حفظ می‌شوند. پس از تأیید انقضای pending transfer در لجر، وضعیت `LEDGER_EXPIRED_HELD` ثبت می‌شود.
+  2. **پاسخ موفق دیرهنگام (Late Success):** زیر کنترل هم‌زمانی، با انتقال جدید دارای شناسه ثابت در TigerBeetle، مبلغ مجاز دوباره رزرو و سپس post می‌شود؛ pending منقضی‌شده دوباره post نمی‌شود.
+  3. **کمبود مانده یا اختلاف لجر:** در صورت عدم امکان رزرو مجدد، وضعیت `RECONCILIATION_REQUIRED` ثبت شده، هشدار صادر می‌شود و از ایجاد اعتبار مصنوعی یا مانده منفی ممانعت می‌گردد. هزینه واقعی Provider مستقل ثبت و مغایرت برای رسیدگی باقی می‌ماند.
+
+### ۴. متریک‌ها، نسخه تعرفه و واقعیت هزینه
+- **متریک‌های خام تصویر:** تعداد درخواست‌شده، تولیدشده، قابل صورتحساب و تحویل‌شده به‌صورت مجزا؛ ابعاد هر خروجی، steps و duration.
+- **متریک‌های خام Intent:** توکن‌های ورودی/خروجی، توکن‌های کش‌شده/عادی، توکن‌های استدلال و finish_reason.
+- **محاسبه و تأیید:** `calculated_cost_micros` برآورد مصرف طبق نسخه تعرفه رزرو است؛ `verified_cost_micros` هزینه دارای شاهد معتبر فاکتور ارائه‌دهنده است.
+- **قانون عدم قطع سقف (Overrun Reporting):** هزینه واقعی با `min(verified, reserved)` قطع نمی‌شود! اگر صورتحساب معتبر بیش از سقف رزرو بود، کل هزینه واقعی با تعدیل یکتا ثبت و overrun نمایان می‌شود؛ dispatch جدید در بودجه مربوط متوقف و تعرفه/مجوز بازبینی می‌گردد. مبلغ اضافه خودکار از مشتری کسر نمی‌شود.
+
+### ۵. طبقه‌بندی خطا بر اساس شواهد قطعیت
+| outcome | شاهد لازم | رفتار مالی و اجرایی |
+| :--- | :--- | :--- |
+| `NOT_EXECUTED_CONFIRMED` | اثبات عدم ارسال همین تلاش یا رد پیش از اجرا طبق قرارداد رسمی Provider | بودجه فقط در صورت اثبات عدم هزینه آزاد می‌شود؛ کلید تسویه کردیت Job فقط در پایان کل جاب تعیین تکلیف می‌شود. |
+| `EXECUTED_FAILED_CONFIRMED` | پذیرش و نتیجه شکست قطعی مرتبط با provider_request_id | هزینه Provider طبق usage/شاهد ثبت می‌شود؛ کردیت کاربر بر اساس سیاست شکست جاب استرداد می‌گردد. |
+| `EXECUTION_UNKNOWN` | احتمال ارسال/پذیرش و نبود نتیجه قطعی؛ timeout یا قطع پاسخ | حفظ کامل تعهدات و holdها؛ استعلام/وب‌هوک معتبر و reconciliation بدون retry/fallback کور. |
+| `SUCCEEDED_CONFIRMED` | نتیجه معتبر مرتبط با همان attempt | ثبت هزینه تلاش؛ ذخیره خروجی در Storage؛ تسویه مشتری طبق خروجی نهایی معتبر تحویل‌شده. |
+
+
+
+
+
