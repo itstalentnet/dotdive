@@ -101,18 +101,41 @@ MCP_TRANSPORT=http HTTP_HOST=127.0.0.1 HTTP_PORT=3900 \
 TOKENS_FILE=/secure/path/mcp-tokens.json node dist/index.js
 ```
 
-Token store JSON format (keep this file outside the repository):
+### Token & Client Store JSON Format
+
+Keep this file outside the repository (e.g. `/etc/dotdive/mcp-tokens.json`):
+
 ```json
 {
   "client-token-123": {
-    "clientName": "Customer A",
+    "clientName": "Customer A (Static Token)",
     "allowedProjects": ["lemmo"],
     "expiresAt": "2027-01-01T00:00:00.000Z"
+  },
+  "chatgpt-action-client": {
+    "clientName": "ChatGPT Custom GPT",
+    "clientSecret": "your-super-strong-client-secret",
+    "allowedProjects": ["lemmo"],
+    "redirectUris": ["https://chatgpt.com/aip/g-abc123/oauth/callback"]
   }
 }
 ```
 
-Client connects to `/mcp` with `Authorization: Bearer <token>`. Every token must have a non-empty `allowedProjects` list. `/healthz` and `/readyz` are intended for local/container health checks and must not be exposed publicly.
+### OAuth 2.0 for AI Models & Platforms
+
+For AI platforms (ChatGPT Custom GPTs, Claude Web, OpenAI Actions, Copilot Studio) requiring OAuth 2.0 authentication:
+
+- **Token Endpoint:** `POST https://<your-host>/oauth/token`
+  - Supports `grant_type=client_credentials` (machine-to-machine) and `grant_type=authorization_code`.
+  - Accepts credentials via `Authorization: Basic <base64>` header or form/json body (`client_id`, `client_secret`).
+  - Returns a standard signed Bearer JWT valid for 1 hour (`expires_in: 3600`).
+- **Authorization Endpoint:** `GET https://<your-host>/oauth/authorize`
+  - Validates `client_id`, `redirect_uri`, and issues authorization codes.
+- **Discovery Metadata:** `GET https://<your-host>/.well-known/oauth-authorization-server` and `/.well-known/openid-configuration`
+- **MCP Endpoint:** `POST https://<your-host>/mcp`
+  - Authenticate using `Authorization: Bearer <access_token>` (issued via OAuth 2.0) or a static token.
+  - Automatically restricts document visibility to the client's `allowedProjects`.
+  - Supports CORS for browser-based AI clients.
 
 Do not expose the plain HTTP listener directly to the Internet. Public access must terminate TLS at a reverse proxy and apply an additional proxy-level rate limit. The server itself applies a per-token request limit.
 

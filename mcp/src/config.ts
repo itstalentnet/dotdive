@@ -11,6 +11,8 @@ const configSchema = z.object({
   httpPort: z.coerce.number().int().min(1).max(65535).default(3900),
   httpRateLimit: z.coerce.number().int().min(1).default(120),
   tokensFile: z.string().default("/run/secrets/dotdive-mcp-tokens.json"),
+  oauthSecret: z.string().optional(),
+  publicUrl: z.string().optional(),
 });
 
 export type Config = z.infer<typeof configSchema>;
@@ -28,6 +30,8 @@ export function loadConfig(): Config {
     httpPort: process.env.HTTP_PORT,
     httpRateLimit: process.env.HTTP_RATE_LIMIT,
     tokensFile: process.env.TOKENS_FILE,
+    oauthSecret: process.env.MCP_OAUTH_SECRET || process.env.OAUTH_SECRET,
+    publicUrl: process.env.MCP_PUBLIC_URL || process.env.PUBLIC_URL,
   };
 
   const result = configSchema.safeParse(env);

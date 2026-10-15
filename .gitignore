@@ -32,3 +32,4 @@ mcp/.env
 # Lock files — keep only one
 web/package-lock.json
 mcp/package-lock.json
+mcp/deploy.sh
