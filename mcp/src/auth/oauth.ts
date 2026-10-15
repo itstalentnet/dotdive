@@ -125,6 +125,28 @@ export function consumeAuthorizationCode(
   return entry;
 }
 
+export function isRedirectUriAllowed(redirectUri: string, allowedList?: string[]): boolean {
+  if (!allowedList || allowedList.length === 0) return true;
+  if (allowedList.includes("*")) return true;
+
+  try {
+    const targetUrl = new URL(redirectUri);
+    for (const allowed of allowedList) {
+      if (allowed === "*") return true;
+      if (redirectUri.startsWith(allowed)) return true;
+      try {
+        const allowedUrl = new URL(allowed);
+        if (targetUrl.origin === allowedUrl.origin) return true;
+      } catch {
+        // Not a URL pattern, ignore
+      }
+    }
+  } catch {
+    return false;
+  }
+  return false;
+}
+
 export function issueAccessToken(
   client: { clientId: string; clientName: string; allowedProjects: string[] },
   secret: string,
@@ -232,19 +254,16 @@ export async function handleOAuthAuthorize(
     return;
   }
 
-  if (redirectUri && client.redirectUris && client.redirectUris.length > 0) {
-    const isAllowedRedirect = client.redirectUris.some((allowed) => redirectUri.startsWith(allowed));
-    if (!isAllowedRedirect) {
-      res.writeHead(400, {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      });
-      res.end(JSON.stringify({
-        error: "invalid_request",
-        error_description: "redirect_uri is not in the allowed redirect list for this client",
-      }));
-      return;
-    }
+  if (redirectUri && !isRedirectUriAllowed(redirectUri, client.redirectUris)) {
+    res.writeHead(400, {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    });
+    res.end(JSON.stringify({
+      error: "invalid_request",
+      error_description: `redirect_uri '${redirectUri}' is not in the allowed redirect list for this client`,
+    }));
+    return;
   }
 
   let scopedProjects = client.allowedProjects;
