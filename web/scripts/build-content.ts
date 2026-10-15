@@ -127,15 +127,19 @@ async function main() {
     };
 
     if (fs.existsSync(indexPath)) {
-      const { data, content: body } = matter(fs.readFileSync(indexPath, "utf8"));
-      const fm = FrontMatterSchema.safeParse(data);
-      if (fm.success) {
-        rootMeta = {
-          ...rootMeta,
-          title: fm.data.title ?? extractDocTitle(body, undefined, rootName),
-          description: fm.data.description,
-          icon: fm.data.icon,
-        };
+      try {
+        const { data, content: body } = matter(fs.readFileSync(indexPath, "utf8"));
+        const fm = FrontMatterSchema.safeParse(data);
+        if (fm.success) {
+          rootMeta = {
+            ...rootMeta,
+            title: fm.data.title ?? extractDocTitle(body, undefined, rootName),
+            description: fm.data.description,
+            icon: fm.data.icon,
+          };
+        }
+      } catch {
+        // Ignore YAMLException for root index files starting with markdown tables.
       }
     }
 
@@ -333,7 +337,17 @@ async function scanDirectoryHierarchical(
     const indexFilePath = path.join(dirPath, indexFileEntry.name);
     const indexFileRelPath = `${relDirPath}/${indexFileEntry.name}`;
     const rawContent = fs.readFileSync(indexFilePath, "utf8");
-    const { data, content: body } = matter(rawContent);
+    let data: Record<string, unknown> = {};
+    let body = rawContent;
+    try {
+      const parsed = matter(rawContent);
+      data = parsed.data as Record<string, unknown>;
+      body = parsed.content;
+    } catch {
+      // gray-matter throws YAMLException when a file starts with a markdown
+      // table row (| ...) without a --- frontmatter delimiter. Treat the
+      // whole file as body with no frontmatter.
+    }
     const fm = FrontMatterSchema.safeParse(data);
     const fmData: Partial<FrontMatter> = fm.success ? fm.data : {};
 
@@ -456,7 +470,16 @@ async function processFile(
   isRootIndex = false
 ): Promise<TreeNode | null> {
   const content = fs.readFileSync(mdPath, "utf8");
-  const { data, content: body } = matter(content);
+  let data: Record<string, unknown> = {};
+  let body = content;
+  try {
+    const parsed = matter(content);
+    data = parsed.data as Record<string, unknown>;
+    body = parsed.content;
+  } catch {
+    // gray-matter throws YAMLException when a file starts with a markdown
+    // table row (| ...) without a --- frontmatter delimiter.
+  }
 
   const fmResult = FrontMatterSchema.safeParse(data);
   const fm: Partial<FrontMatter> = fmResult.success ? fmResult.data : {};
