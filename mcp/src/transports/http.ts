@@ -18,14 +18,20 @@ export async function createHttpServer(config: Config = loadConfig()): Promise<R
     throw new Error("HTTP mode requires at least one scoped bearer token or OAuth client");
   }
 
+  const allProjects = Array.from(index.keys());
+
   for (const tokenData of authStore.tokens.values()) {
-    if (tokenData.allowedProjects.some((project) => !index.has(project))) {
+    if (tokenData.allowedProjects.includes("*")) {
+      tokenData.allowedProjects = allProjects;
+    } else if (tokenData.allowedProjects.some((project) => !index.has(project))) {
       throw new Error("token store contains a project scope that is not indexed");
     }
   }
 
   for (const client of authStore.clients.values()) {
-    if (client.allowedProjects.some((project) => !index.has(project))) {
+    if (client.allowedProjects.includes("*")) {
+      client.allowedProjects = allProjects;
+    } else if (client.allowedProjects.some((project) => !index.has(project))) {
       throw new Error("token store contains an OAuth client project scope that is not indexed");
     }
   }
@@ -127,7 +133,11 @@ export async function createHttpServer(config: Config = loadConfig()): Promise<R
     }
 
     const tokenData = await validateToken(match[1], config.tokensFile, effectiveOAuthSecret);
-    if (!tokenData || tokenData.allowedProjects.some((project) => !index.has(project))) {
+    let resolvedProjects = tokenData?.allowedProjects ?? [];
+    if (resolvedProjects.includes("*")) {
+      resolvedProjects = allProjects;
+    }
+    if (!tokenData || resolvedProjects.some((project) => !index.has(project))) {
       res.writeHead(401, {
         "Content-Type": "application/json",
         "WWW-Authenticate": "Bearer",
@@ -159,8 +169,8 @@ export async function createHttpServer(config: Config = loadConfig()): Promise<R
       version: "0.1.0",
     });
 
-    registerTools(sessionServer, { index, allowedProjects: tokenData.allowedProjects });
-    registerResources(sessionServer, { index, allowedProjects: tokenData.allowedProjects });
+    registerTools(sessionServer, { index, allowedProjects: resolvedProjects });
+    registerResources(sessionServer, { index, allowedProjects: resolvedProjects });
 
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,

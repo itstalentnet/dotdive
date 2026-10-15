@@ -15,6 +15,9 @@ services:
       - no-new-privileges:true
     ports:
       - "127.0.0.1:${MCP_HOST_PORT:-3900}:3900"
+    environment:
+      - MCP_PUBLIC_URL=${MCP_PUBLIC_URL:-https://mcp.dotdive.ir}
+      - MCP_OAUTH_SECRET=${MCP_OAUTH_SECRET:-}
     secrets:
       - source: dotdive_mcp_tokens
         target: dotdive-mcp-tokens.json
