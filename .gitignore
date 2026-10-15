@@ -2,6 +2,7 @@
 node_modules
 .pnpm-store
 mcp/node_modules
+mcp/tokens.json
 
 # Build outputs
 web/.next

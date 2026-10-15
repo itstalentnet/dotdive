@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll } from "vitest";
+import { fileURLToPath } from "node:url";
 import { buildIndex } from "../src/core/indexer.js";
 import { searchIndex } from "../src/core/search.js";
 
@@ -6,7 +7,7 @@ describe("indexer", () => {
   let index: Map<string, any>;
 
   beforeAll(async () => {
-    index = await buildIndex("../docs", []);
+    index = await buildIndex(fileURLToPath(new URL("../../docs", import.meta.url)), []);
   });
 
   it("should find lemmo project", () => {
@@ -27,6 +28,17 @@ describe("indexer", () => {
     expect(lemmo.files.some((f: any) => f.path === "index.md")).toBe(true);
   });
 
+  it("should preserve documents with table metadata instead of YAML frontmatter", () => {
+    const lemmo = index.get("lemmo");
+    const betaDoc = lemmo.files.find(
+      (file: any) => file.path === "03-backend/beta-invitation-and-gift-ownership.md"
+    );
+
+    expect(betaDoc).toBeDefined();
+    expect(betaDoc.title).toContain("Beta Invitation");
+    expect(betaDoc.content).toContain("| **Title (EN)** |");
+  });
+
   it("should extract title from frontmatter or H1", () => {
     const lemmo = index.get("lemmo");
     const indexFile = lemmo.files.find((f: any) => f.path === "index.md");
@@ -45,7 +57,7 @@ describe("search", () => {
   let index: Map<string, any>;
 
   beforeAll(async () => {
-    index = await buildIndex("../docs", []);
+    index = await buildIndex(fileURLToPath(new URL("../../docs", import.meta.url)), []);
   });
 
   it("should find results for common query", () => {

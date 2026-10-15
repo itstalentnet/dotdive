@@ -36,3 +36,5 @@ icon: "file-check"
 
 
 
+
+- **[ADR-022: قابلیت اطمینان، مشاهده‌پذیری و مرز تحویل MVP](./ADR-022-platform-reliability-and-observability.md)** — **Draft / Proposed**؛ telemetry مستقل، recovery در سرویس مالک، سلامت قابل اثبات و تحویل مرحله‌ای STB/REL.

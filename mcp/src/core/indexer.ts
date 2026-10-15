@@ -16,8 +16,12 @@ function extractHeadings(content: string): string[] {
 function extractTitle(content: string, filePath: string): string {
   const frontmatterMatch = content.match(/^---[\s\S]*?---/);
   if (frontmatterMatch) {
-    const { data } = matter(frontmatterMatch[0]);
-    if (data.title) return data.title;
+    try {
+      const { data } = matter(frontmatterMatch[0]);
+      if (typeof data.title === "string" && data.title) return data.title;
+    } catch {
+      // Some documentation uses a metadata table between --- separators.
+    }
   }
   const h1Match = content.match(/^#\s+(.+)$/m);
   if (h1Match) return h1Match[1].trim();
@@ -36,7 +40,12 @@ async function scanProject(projectDir: string, projectSlug: string): Promise<Pro
         await walk(fullPath, baseDir);
       } else if (entry.isFile() && entry.name.endsWith(".md")) {
         const content = await readFile(fullPath, "utf-8");
-        const { content: mdContent } = matter(content);
+        let mdContent = content;
+        try {
+          mdContent = matter(content).content;
+        } catch {
+          // Preserve Markdown documents whose leading metadata block is not YAML.
+        }
         const title = extractTitle(content, relPath);
         const headings = extractHeadings(mdContent);
         files.push({

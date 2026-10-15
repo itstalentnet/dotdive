@@ -1,11 +1,16 @@
 import { z } from "zod";
+import { fileURLToPath } from "node:url";
+
+const defaultDocsRoot = fileURLToPath(new URL("../../docs", import.meta.url));
 
 const configSchema = z.object({
   transport: z.enum(["stdio", "http"]).default("stdio"),
-  docsRoot: z.string().default("../docs"),
+  docsRoot: z.string().default(defaultDocsRoot),
   allowedProjects: z.string().optional().default(""),
-  httpPort: z.coerce.number().default(3900),
-  tokensFile: z.string().default("./tokens.json"),
+  httpHost: z.string().default("127.0.0.1"),
+  httpPort: z.coerce.number().int().min(1).max(65535).default(3900),
+  httpRateLimit: z.coerce.number().int().min(1).default(120),
+  tokensFile: z.string().default("/run/secrets/dotdive-mcp-tokens.json"),
 });
 
 export type Config = z.infer<typeof configSchema>;
@@ -19,7 +24,9 @@ export function loadConfig(): Config {
     transport: process.env.MCP_TRANSPORT,
     docsRoot: process.env.DOCS_ROOT,
     allowedProjects: process.env.ALLOWED_PROJECTS,
+    httpHost: process.env.HTTP_HOST,
     httpPort: process.env.HTTP_PORT,
+    httpRateLimit: process.env.HTTP_RATE_LIMIT,
     tokensFile: process.env.TOKENS_FILE,
   };
 

@@ -9,11 +9,22 @@ async function main(): Promise<void> {
     console.error("[dotdive-mcp] Starting in stdio mode...");
     await runStdio();
   } else {
-    console.error(`[dotdive-mcp] Starting HTTP server on port ${config.httpPort}...`);
-    const httpServer = await createHttpServer();
-    httpServer.listen(config.httpPort, () => {
-      console.error(`[dotdive-mcp] HTTP server listening on http://localhost:${config.httpPort}`);
+    console.error(`[dotdive-mcp] Starting HTTP server on ${config.httpHost}:${config.httpPort}...`);
+    const httpServer = await createHttpServer(config);
+    httpServer.listen(config.httpPort, config.httpHost, () => {
+      console.error(`[dotdive-mcp] HTTP server listening on ${config.httpHost}:${config.httpPort}`);
     });
+
+    const shutdown = () => {
+      httpServer.close((error) => {
+        if (error) {
+          console.error("[dotdive-mcp] HTTP shutdown failed:", error);
+          process.exitCode = 1;
+        }
+      });
+    };
+    process.once("SIGINT", shutdown);
+    process.once("SIGTERM", shutdown);
   }
 }
 

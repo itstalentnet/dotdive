@@ -6,7 +6,7 @@
 | **Category** | `devops` |
 | **Status** | `Active` |
 | **Owner** | DevOps / SRE Team |
-| **Last Updated** | 2026-09-26 |
+| **Last Updated** | 2026-10-15 |
 | **Summary (EN)** | Authoritative guide for Docker-centric hosting, deployment, multi-stage builds, Docker Compose orchestration, and CI/CD pipelines. |
 | **Summary (FA)** | راهنمای مرجع زیرساخت میزبانی و استقرار منحصراً مبتنی بر داکر، ارکستراسیون با Docker Compose، فایل‌های چندمرحله‌ای و خطوط CI/CD. |
 | **Tags** | `devops`, `cicd`, `docker`, `docker-compose`, `deployment`, `infrastructure` |
@@ -99,3 +99,13 @@
    - [گزارش رخداد INC-2026-10-12: توقف ایجنت در وضعیت Generating (DOC-OPS-INC-001)](./incidents/INC-2026-10-12-agent-perpetual-loading.md)
    - [گزارش رخداد INC-2026-10-13: اختلال ورود به استودیو بر اثر اتصال اولیهٔ ناموفق و جست‌وجوی نادرست کیف پول (DOC-OPS-INC-002)](./incidents/INC-2026-10-13-context-service-startup-failure.md)
 
+
+
+## ۷. قابلیت اطمینان و مشاهده‌پذیری پلتفرم
+
+[Platform Reliability & Observability — DOC-OPS-003](./platform-reliability-observability.md) موجودی مبتنی بر سورس و شکاف‌های trace، readiness، recovery، idempotency، outbox/inbox، DLQ، isolation، audit و DR را ثبت می‌کند. وجود ابزار یا متن سیاست به معنی پذیرش عملیاتی نیست: `db_backup.sh --verify` فقط فایل dump را بررسی می‌کند و شاهد restore واقعی یا دستیابی به RPO/RTO بالا محسوب نمی‌شود. اجرای حداقل مسیر MVP در STB-05..10 و تکمیل قابلیت‌های پیشرفته در بسته‌های REL رودمپ پیگیری می‌شود. جزئیات جدید این سند Draft هستند؛ استک مرکزی هنوز انتخاب یا نصب‌شده اعلام نمی‌شود.
+
+
+## ارزیابی ابزار مرحله یک
+
+[DOC-OPS-004](./phase-one-tooling-assessment.md) ابزار CLI موجود، trace.sh، deploy guard و CI را بررسی می‌کند. CLI برای scaffold قابل استفاده است ولی قالب جاری همه قراردادهای عملیاتی را تولید نمی‌کند. trace.sh موجود است اما موفقیت کاذب آن آفلاین بازتولید شده؛ پیش از اصلاح، گیت سلامت نیست. گزارش اصلی باگ در incidents و تبدیل به تسک در مرحله بعد انجام می‌شود.

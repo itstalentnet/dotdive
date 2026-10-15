@@ -85,20 +85,23 @@ Resources use the `dotdive://` URI scheme:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `MCP_TRANSPORT` | `stdio` | Transport mode: `stdio` (local) or `http` (remote) |
-| `DOCS_ROOT` | `../docs` | Path to docs folder relative to mcp/ |
+| `DOCS_ROOT` | package-relative docs path | Path to docs folder; the default is independent of the process working directory |
 | `ALLOWED_PROJECTS` | (empty) | Comma-separated list of allowed projects (local mode) |
+| `HTTP_HOST` | `127.0.0.1` | Bind address for direct HTTP runs; container deployment sets this to its private interface |
 | `HTTP_PORT` | `3900` | Port for HTTP transport |
-| `TOKENS_FILE` | `./tokens.json` | Token store for HTTP auth |
+| `HTTP_RATE_LIMIT` | `120` | Maximum authenticated HTTP requests per token per minute |
+| `TOKENS_FILE` | `/run/secrets/dotdive-mcp-tokens.json` | JSON token store for HTTP auth; required in HTTP mode |
 
 ## Remote Mode (HTTP)
 
-For customer-facing access:
+For local smoke testing only:
 
 ```bash
-MCP_TRANSPORT=http HTTP_PORT=3900 TOKENS_FILE=./tokens.json node dist/index.js
+MCP_TRANSPORT=http HTTP_HOST=127.0.0.1 HTTP_PORT=3900 \
+TOKENS_FILE=/secure/path/mcp-tokens.json node dist/index.js
 ```
 
-Tokens in `tokens.json`:
+Token store JSON format (keep this file outside the repository):
 ```json
 {
   "client-token-123": {
@@ -109,7 +112,44 @@ Tokens in `tokens.json`:
 }
 ```
 
-Client connects with `Authorization: Bearer client-token-123`.
+Client connects to `/mcp` with `Authorization: Bearer <token>`. Every token must have a non-empty `allowedProjects` list. `/healthz` and `/readyz` are intended for local/container health checks and must not be exposed publicly.
+
+Do not expose the plain HTTP listener directly to the Internet. Public access must terminate TLS at a reverse proxy and apply an additional proxy-level rate limit. The server itself applies a per-token request limit.
+
+### Docker Compose deployment
+
+Requirements: Docker Engine with the Compose plugin, an HTTPS reverse proxy, and a token file stored outside this repository.
+
+Create a private token file. Keep the generated token in a secret manager or deliver it to the client through a secure channel; do not commit it or put it in shell history:
+
+```bash
+sudo install -d -m 700 /etc/dotdive
+umask 077
+TOKEN="$(openssl rand -hex 32)"
+EXPIRES_AT="$(date -u -d '+90 days' '+%Y-%m-%dT%H:%M:%SZ')"
+printf '{"%s":{"clientName":"Client name","allowedProjects":["lemmo"],"expiresAt":"%s"}}\n' "$TOKEN" "$EXPIRES_AT" | sudo tee /etc/dotdive/mcp-tokens.json >/dev/null
+unset TOKEN
+unset EXPIRES_AT
+sudo chmod 600 /etc/dotdive/mcp-tokens.json
+sudo chown 1000:1000 /etc/dotdive/mcp-tokens.json
+```
+
+Build and start the service. The published port is bound to host loopback only:
+
+```bash
+MCP_TOKENS_FILE=/etc/dotdive/mcp-tokens.json \
+  docker compose -f mcp/compose.yaml up --build -d
+curl --fail http://127.0.0.1:3900/readyz
+```
+
+Configure the HTTPS reverse proxy to forward `https://<your-host>/mcp` to `http://127.0.0.1:3900/mcp`, preserving the `Authorization` header. Apply proxy-level connection/request limits and do not publish `/healthz` or `/readyz`. After documentation changes, rebuild and restart the image so its startup index contains the new content.
+
+Inspect runtime status and logs with:
+
+```bash
+MCP_TOKENS_FILE=/etc/dotdive/mcp-tokens.json docker compose -f mcp/compose.yaml ps
+MCP_TOKENS_FILE=/etc/dotdive/mcp-tokens.json docker compose -f mcp/compose.yaml logs --tail=100 dotdive-mcp
+```
 
 ## Development
 
@@ -145,7 +185,8 @@ mcp/
 │   └── auth/
 │       └── tokens.ts         # Token validation
 ├── tests/                    # Unit tests
-├── tokens.json               # Token store (remote mode)
+├── compose.yaml              # Loopback-only Docker deployment
+├── Dockerfile                # Multi-stage production image
 └── .env.example              # Config template
 ```
 
@@ -156,7 +197,7 @@ mcp/
 3. Builds in-memory `ProjectIndex` per project
 4. MCP Core exposes tools/resources over stdio or HTTP
 5. Local mode: zero auth, full access to all projects
-6. Remote mode: Bearer token → project scoping
+6. Remote mode: Bearer token → project scoping, with empty scopes rejected
 
 ## Architecture
 

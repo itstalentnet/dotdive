@@ -7,7 +7,7 @@ This document specifies an MCP (Model Context Protocol) server for dotdive that 
 Two deployment modes, one codebase:
 
 1. **Local mode (now):** runs on the developer's own machine via stdio transport, launched directly by a local MCP client (Claude Desktop, Claude Code, Cursor, etc.). No network exposure, no auth needed.
-2. **Remote mode (later):** the same server runs on a server and is reachable over Streamable HTTP, so external clients (a customer's AI tool) can connect with a single URL + access token, matching dotdive's product positioning ("one link, standardized project knowledge, no dependency on the dev team").
+2. **Remote mode:** the same server supports stateless Streamable HTTP with a scoped bearer token. Public deployment requires an HTTPS reverse proxy; the MCP process itself serves plain HTTP and must not be exposed directly to the Internet.
 Design goal: the transport is the only thing that changes between the two modes. All business logic (reading docs, indexing, search, listing projects) lives in a transport-agnostic core so the same server binary/package supports both without duplicating logic.
 ## 2. Architecture Overview
 ```text
@@ -37,19 +37,19 @@ MCP defines two transport kinds; both wrap the same MCP Core.
 | Transport | When used | Characteristics |
 | --- | --- | --- |
 | stdio | Local mode (now) | Server runs as a child process launched by the client (e.g. Claude Desktop config, Claude Code mcp config). Communicates over stdin/stdout. No network, no auth needed — trust boundary is "runs on your machine". |
-| Streamable HTTP | Remote mode (later) | Server runs standalone (e.g. node dist/index.js --http) and listens on a port. Client connects via URL. Supports multiple simultaneous clients. Requires auth (see §6). |
-Implementation approach: define one McpServer instance (using the official @modelcontextprotocol/sdk) that registers all tools/resources once. At startup, read a config flag (MCP_TRANSPORT=stdio|http) and attach the corresponding transport:
+| Streamable HTTP | Remote mode | Server runs standalone at `/mcp`. Each authenticated request uses stateless transport (`sessionIdGenerator: undefined`); tokens are scoped to a non-empty set of projects. Bind to loopback unless running inside a container behind a private reverse-proxy path. |
+The stdio transport uses one server connection for the client process. HTTP is stateless and creates a short-lived server/transport per request; the client performs initialize and subsequent calls without an MCP session ID:
 ```ts
 const server = createMcpServer(); // registers tools/resources from core/
 
 if (config.transport === "stdio") {
   await server.connect(new StdioServerTransport());
 } else {
-  const httpServer = createHttpTransport(server, { port: config.port, authMiddleware });
+  const httpServer = createStatelessHttpTransport({ port: config.port, authMiddleware });
   httpServer.listen(config.port);
 }
 ```
-This way, no tool/resource logic is ever duplicated between modes — only the outer connection code differs.
+Tool and resource logic remains shared across modes. The HTTP listener provides health endpoints and per-token request limiting; TLS and an additional connection/request limit belong at the reverse proxy.
 ## 4. Data Model & Indexing
 Source of truth: docs/<project>/**/*.md, same files the web/ frontend renders. No database — the index is derived, not authoritative.
 Index shape (in-memory, rebuilt on demand):
@@ -70,7 +70,7 @@ type DocFile = {
 Build strategy:
 
 - **Local dev mode:** watch `docs/` with a file watcher (e.g. chokidar); rebuild the affected project's index in-memory on change. No build step needed to test with an AI client.
-- **Production/remote mode:** generate the index once at deploy time (same script web/ may already use for static generation) and load it at server startup; optionally support a manual re-index trigger (webhook or CLI command) after a docs push, since content lives in GitHub.
+- **Production/remote mode:** docs are indexed at server startup. Updating documentation requires rebuilding/restarting the image; no live re-index endpoint is exposed.
 Search: start with a simple in-memory full-text match (filename + heading + body substring) across the indexed files; this is enough at current scale and avoids adding a search infra dependency. Revisit only if project count/doc volume grows significantly.
 ## 5. MCP Capabilities
 Tools (model-invoked functions):
@@ -148,14 +148,14 @@ Kept as its own package inside the monorepo (own package.json) so it can be run,
 | 1 — Core + stdio MVP | Indexer, list_projects/get_project_docs/read_doc tools, stdio transport | Connect from Claude Desktop/Code locally; can list lemmo/proje-02 and read a file |
 | 2 — Search | search_docs tool + in-memory search | Query returns relevant snippets across projects |
 | 3 — Resources | dotdive:// resource URIs alongside tools | A resource-browsing client (not just tool-calling) can navigate docs |
-| 4 — HTTP transport | Streamable HTTP transport, no auth yet (dev/staging only) | Same tools reachable over a local HTTP URL |
-| 5 — Auth & scoping | Token store, per-token project scope, deploy to a server | A test token restricted to one project only sees that project through a remote client |
-| 6 — Hardening | Rate limiting, logging, re-index trigger after docs push, MCP protocol version pin | Ready to hand a real customer a link |
-Phases 1–3 are enough for full local, single-developer use. Phases 4–6 are only needed when moving to remote/customer-facing access — nothing in Phases 1–3 needs to be rewritten to get there.
+| 4 — HTTP transport | Stateless Streamable HTTP at `/mcp`, health endpoints, short-lived per-request transport | SDK client initializes and makes repeated tool calls without a session ID |
+| 5 — Auth & scoping | Required bearer-token file, non-empty per-token project scope, fail-closed token reload, per-token request limit | Scoped client reads an allowed project and is denied an out-of-scope project |
+| 6 — Server packaging | Multi-stage Node 22 image, read-only Compose service, Docker secret, loopback-only published port | Container is healthy and an HTTPS reverse proxy can reach `/mcp` |
+Remote deployment still requires an operator-managed HTTPS reverse proxy, external secret storage/rotation, and an explicit logging/retention policy before broad customer rollout.
 ## 10. Non-Functional Requirements
 
 - **Performance:** index build should stay well under 1s for the current doc volume; re-index on file change (local dev) should not block in-flight tool calls.
-- **Security (remote mode only):** tokens transmitted over HTTPS only; never log token values; rate-limit per token to prevent scraping the whole docs set through repeated read_doc calls.
+- **Security (remote mode only):** tokens transmitted over HTTPS only; never log token values; apply per-token limits in the MCP service plus connection/request limits at the HTTPS reverse proxy.
 - **Logging:** structured logs per tool call (project, tool, caller in remote mode) to support later usage analytics per customer — useful for dotdive's business model (seeing which projects/customers actually use their MCP access).
 - **Protocol versioning:** pin the @modelcontextprotocol/sdk version and document the MCP protocol version supported, since the spec is still evolving; re-test both transports on any SDK upgrade.
 - **No lock-in to a specific AI client:** since MCP is an open protocol, the server must work with any compliant client (Claude, others), not just one — this is core to dotdive's "plug into your preferred AI model" pitch.
