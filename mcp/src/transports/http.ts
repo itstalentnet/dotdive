@@ -169,7 +169,12 @@ export async function createHttpServer(config: Config = loadConfig()): Promise<R
       version: "0.1.0",
     });
 
-    registerTools(sessionServer, { index, allowedProjects: resolvedProjects });
+    registerTools(sessionServer, {
+      index,
+      allowedProjects: resolvedProjects,
+      docsRoot: config.docsRoot,
+      canWrite: tokenData.canWrite ?? false,
+    });
     registerResources(sessionServer, { index, allowedProjects: resolvedProjects });
 
     const transport = new StreamableHTTPServerTransport({

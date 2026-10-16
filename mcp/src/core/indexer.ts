@@ -89,3 +89,13 @@ export async function buildIndex(docsRoot: string, allowedProjects: string[] = [
 
   return index;
 }
+
+export async function reindexProject(docsRoot: string, projectSlug: string, index: Map<string, ProjectIndex>): Promise<void> {
+  const projectDir = join(resolve(docsRoot), projectSlug);
+  try {
+    const projectIndex = await scanProject(projectDir, projectSlug);
+    index.set(projectSlug, projectIndex);
+  } catch {
+    index.delete(projectSlug);
+  }
+}

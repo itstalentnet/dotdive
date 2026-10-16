@@ -16,7 +16,7 @@ export async function createStdioServer(): Promise<McpServer> {
     version: "0.1.0",
   });
 
-  registerTools(server, { index, allowedProjects });
+  registerTools(server, { index, allowedProjects, docsRoot: config.docsRoot, canWrite: true });
   registerResources(server, { index, allowedProjects });
 
   return server;

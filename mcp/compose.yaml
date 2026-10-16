@@ -18,6 +18,8 @@ services:
     environment:
       - MCP_PUBLIC_URL=${MCP_PUBLIC_URL:-https://mcp.dotdive.ir}
       - MCP_OAUTH_SECRET=${MCP_OAUTH_SECRET:-}
+    volumes:
+      - ${MCP_DOCS_VOLUME:-../docs}:/app/docs
     secrets:
       - source: dotdive_mcp_tokens
         target: dotdive-mcp-tokens.json

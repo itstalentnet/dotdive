@@ -8,6 +8,7 @@ export type JwtPayload = {
   sub: string;
   clientName: string;
   allowedProjects: string[];
+  canWrite?: boolean;
   scope?: string;
   iat: number;
   exp: number;
@@ -148,7 +149,7 @@ export function isRedirectUriAllowed(redirectUri: string, allowedList?: string[]
 }
 
 export function issueAccessToken(
-  client: { clientId: string; clientName: string; allowedProjects: string[] },
+  client: { clientId: string; clientName: string; allowedProjects: string[]; canWrite?: boolean },
   secret: string,
   requestedScope?: string,
   expiresInSeconds = 3600
@@ -168,6 +169,7 @@ export function issueAccessToken(
       sub: client.clientId,
       clientName: client.clientName,
       allowedProjects: scopedProjects,
+      canWrite: client.canWrite ?? true,
       scope: scopedProjects.join(" "),
       exp: nowSeconds + expiresInSeconds,
     },
@@ -434,6 +436,7 @@ export async function handleOAuthToken(
         clientId: client.clientId,
         clientName: client.clientName,
         allowedProjects: codeEntry.allowedProjects,
+        canWrite: client.canWrite ?? true,
       },
       oauthSecret,
       codeEntry.scope

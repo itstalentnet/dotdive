@@ -6,6 +6,7 @@ export type TokenData = {
   clientName: string;
   allowedProjects: string[];
   expiresAt: string;
+  canWrite?: boolean;
 };
 
 export type OAuthClient = {
@@ -14,6 +15,7 @@ export type OAuthClient = {
   clientName: string;
   allowedProjects: string[];
   redirectUris?: string[];
+  canWrite?: boolean;
 };
 
 export type AuthStore = {
@@ -103,7 +105,12 @@ function parseTokenEntry(key: string, value: unknown, map: Map<string, TokenData
   ) {
     throw new Error(`token store entry '${key}' has invalid scope or metadata`);
   }
-  map.set(key, entry as TokenData);
+  map.set(key, {
+    clientName: entry.clientName,
+    allowedProjects: entry.allowedProjects,
+    expiresAt: entry.expiresAt,
+    canWrite: typeof entry.canWrite === "boolean" ? entry.canWrite : false,
+  });
 }
 
 function parseClientEntry(key: string, value: unknown, map: Map<string, OAuthClient>): void {
@@ -132,6 +139,7 @@ function parseClientEntry(key: string, value: unknown, map: Map<string, OAuthCli
     clientName: entry.clientName,
     allowedProjects: entry.allowedProjects,
     redirectUris: entry.redirectUris,
+    canWrite: typeof entry.canWrite === "boolean" ? entry.canWrite : true,
   });
 }
 
@@ -190,6 +198,7 @@ export async function validateToken(
         clientName: jwt.clientName,
         allowedProjects: jwt.allowedProjects,
         expiresAt: new Date(jwt.exp * 1000).toISOString(),
+        canWrite: jwt.canWrite ?? false,
       };
     }
   }
