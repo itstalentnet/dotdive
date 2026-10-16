@@ -297,13 +297,28 @@ export async function handleOAuthAuthorize(
     "Access-Control-Allow-Origin": "*",
   });
   res.end(`<!DOCTYPE html>
-<html>
-<head><title>Dotdive MCP Authorization</title></head>
-<body style="font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 20px;">
-  <h2>Authorization Granted</h2>
-  <p>Client: <strong>${escapeHtml(client.clientName)}</strong></p>
-  <p>Authorization Code:</p>
-  <pre style="background: #f4f4f4; padding: 12px; border-radius: 4px;">${code}</pre>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lemmo MCP — Authorization</title>
+  <link rel="icon" type="image/svg+xml" href="/logo.svg">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b0c0e; color: #f0f3f6; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
+    .card { background: #14171a; border: 1px solid #22272e; border-radius: 16px; max-width: 480px; width: 100%; padding: 32px; box-shadow: 0 16px 40px rgba(0,0,0,0.5); text-align: center; }
+    .logo { width: 56px; height: 56px; margin: 0 auto 16px; display: block; border-radius: 14px; }
+    h2 { font-size: 18px; margin-bottom: 8px; font-weight: 700; }
+    p { color: #8b949e; font-size: 14px; margin-bottom: 16px; }
+    .code-box { background: #0d0f12; border: 1px solid #22272e; border-radius: 8px; padding: 12px; font-family: monospace; color: #d1fe17; font-size: 14px; word-break: break-all; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img src="/logo.svg" alt="Lemmo" class="logo">
+    <h2>Authorization Granted</h2>
+    <p>Client: <strong style="color: #fff;">${escapeHtml(client.clientName)}</strong></p>
+    <div class="code-box">${code}</div>
+  </div>
 </body>
 </html>`);
 }
