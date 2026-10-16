@@ -104,9 +104,9 @@
 - [ADR-001 — Phase-3 code architecture (grouped)](01-architecture/decisions/ADR-001-phase3-code-architecture.md): ⚠️ **این تصمیم معماری منسوخ شده است (SUPERSEDED):**
 - [ADR-002 — Form & test stack](01-architecture/decisions/ADR-002-form-test-stack.md): Documentation file for ADR-002 — Form & test stack.
 - [ADR-003 — Single source of truth: audit & resolution](01-architecture/decisions/ADR-003-single-source-of-truth-audit.md): Documentation file for ADR-003 — Single source of truth: audit & resolution.
-- [Current MVP Execution Path & Golden Journey](09-governance/current-path.md): Authoritative two-page executive overview of the active MVP delivery path, golden user journey, priority sequence (D-15), parallel tracks, gate controls, and 4-tier capability statuses.
+- [Current MVP Execution Path & Golden Journey](09-governance/current-path.md): Authoritative executive overview of active MVP delivery path, golden user journey, priority sequence (D-15), 4-tier capability statuses, concise glossary, and comprehensive priority matrix across all open engineering items.
 - [Frontend Development Roadmap](08-roadmap/index.md): Documentation file for Frontend Development Roadmap.
-- [MVP Architecture & Governance Decision Register](09-governance/decision-register.md): Authoritative registry tracking all architectural decisions (D-01 to D-15) and pending action items (P-1 to P-6) for Lemmo MVP. Links directly to SSOT documents and ADRs.
+- [MVP Architecture & Governance Decision Register](09-governance/decision-register.md): Authoritative registry tracking all architectural decisions (D-01 to D-15), conflict resolutions (C-1 to C-5 approved by PM), and pending action items (P-1 to P-6) for Lemmo MVP. Links directly to SSOT documents and specifies publication targets.
 - [Phase 0 — Tooling & Governance](08-roadmap/01-phase-0-tooling-and-governance.md): **⛔ SUPERSEDED — historical phase deliverable.** Folder-structure and timeline claims inside may
 - [Phase 1 — Design System Documentation](08-roadmap/02-phase-1-design-system.md): **⛔ SUPERSEDED — historical phase deliverable.** Baseline values inside are old and do NOT match
 - [Phase 2 — Frontend Architecture](08-roadmap/03-phase-2-frontend-architecture.md): **⛔ SUPERSEDED — historical phase deliverable.** Architecture references inside use the old
