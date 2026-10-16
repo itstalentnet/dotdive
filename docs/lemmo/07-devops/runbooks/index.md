@@ -1,3 +1,11 @@
+---
+title: "ران‌بوک‌های عملیاتی"
+description: "نمایه مرکزی ران‌بوک‌های عملیاتی و راهنماهای تریاژ پلتفرم"
+order: 1
+icon: "book-open"
+slug: "lemmo-runbooks"
+---
+
 | فیلد / Field | مقدار / Value |
 | :--- | :--- |
 | **Title (EN)** | Platform Operational Runbooks & Triage Registry |

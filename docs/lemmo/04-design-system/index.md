@@ -3,6 +3,7 @@ title: "سیستم دیزاین لیمو"
 description: "راهنمای جامع هویت بصری، توکن‌های دیزاین، کامپوننت‌های پایه و الگوهای تعاملی"
 order: 4
 icon: "palette"
+slug: "lemmo-design-system"
 ---
 
 # سیستم دیزاین پروژه لیمو (Lemmo Design System)

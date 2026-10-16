@@ -3,6 +3,7 @@ title: "پروژه لیمو (Lemmo)"
 description: "استودیو خلاقیت هوش مصنوعی — مستندات مرجع، معماری و منبع یگانه حقیقت (SSOT)"
 order: 0
 icon: "sparkles"
+slug: "lemmo-root"
 ---
 
 | فیلد / Field | مقدار / Value |
@@ -13,7 +14,7 @@ icon: "sparkles"
 | **Category** | `architecture` |
 | **Status** | `Active` |
 | **Owner** | Core Engineering Team |
-| **Last Updated** | 2026-09-25 |
+| **Last Updated** | 2026-10-16 |
 | **Summary (EN)** | Central index, folder governance, authoring standards, and architectural blueprints for Lemmo. |
 | **Summary (FA)** | راهنمای مرکزی ساختار پوشه‌ها، قوانین مستندنویسی، جدول متادیتا و معماری پروژه لیمو. |
 | **Tags** | `docs`, `governance`, `ssot`, `standards`, `lemmo` |
@@ -21,6 +22,12 @@ icon: "sparkles"
 ---
 
 # مستندات مرجع پروژه Lemmo — منبع یگانه حقیقت (SSOT)
+
+> 🧭 **اسناد کلیدی و راهنمای عملیاتی مسیر جاری MVP (تصمیم D-10):**  
+> ۱. **[مسیر جاری اجرای MVP و زنجیره طلایی (DOC-GOV-003)](./09-governance/current-path.md)**: زنجیره طلایی کاربر، توالی اولویت‌های پنج‌گانه (D-15) و ماتریس وضعیت ۴ سطحی قابلیت‌ها.  
+> ۲. **[ماتریس رسمی تصمیم‌های معماری و حاکمیتی MVP (DOC-GOV-004)](./09-governance/decision-register.md)**: جدول وضعیت D-01 تا D-15 و پیگیری موارد باز P-1 تا P-6.  
+> ۳. **[استانداردهای مهندسی تسک و قواعد بازبینی مستقل (DOC-GOV-005)](./09-governance/task-template-and-review-rules.md)**: قالب مصوب تسک‌ها، معیارهای مانع لانچ، دفتر بدهی و پروتکل ناظر مستقل.  
+> 📌 جهت بررسی سوابق جلسه تصمیم‌گیری، به **[سند تصمیم‌ها و مرجع تسک‌ها](./09-governance/mvp-decision-register.md)** مراجعه فرمایید.
 
 > **اصل طلایی (The Golden Rule):**  
 > در کل اکوسیستم نرم‌افزاری Lemmo برای هر قانون معماری، مقدار دیزاین‌توکن و تصمیم فنی، **دقیقاً یک منبع موثق (Single Source of Truth)** وجود دارد. ثبت اطلاعات تکراری یا متناقض در چند سند ممنوع است. این بخش مرجع رسمی، الزام‌آور و معتبر برای تمامی اعضای تیم و ایجنت‌های هوش مصنوعی می‌باشد.

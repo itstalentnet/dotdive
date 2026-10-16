@@ -1,3 +1,7 @@
+---
+slug: "backend-style-guide"
+---
+
 | فیلد / Field | مقدار / Value |
 | :--- | :--- |
 | **Title (EN)** | Backend Style Guide & Engineering Standards |

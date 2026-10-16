@@ -1,3 +1,11 @@
+---
+title: "زیرساخت و دوآپس"
+description: "راهنمای زیرساخت، خطوط CI/CD و استقرار مبتنی بر Docker"
+order: 7
+icon: "terminal"
+slug: "lemmo-devops"
+---
+
 | فیلد / Field | مقدار / Value |
 | :--- | :--- |
 | **Title (EN)** | DevOps, CI/CD Pipelines & Docker Infrastructure Guide |
