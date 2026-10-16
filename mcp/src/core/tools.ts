@@ -36,6 +36,37 @@ function resolveDocPath(docsRoot: string, project: string, relPath: string): str
   return target;
 }
 
+function stripMetadataHeader(content: string): string {
+  // Strip markdown metadata tables: | فیلد / Field | مقدار / Value | ...
+  return content.replace(/^\|[^\n]+\|\n\|[\s:\-|]+\|\n(\|[\s\S]+?\|\n)+\n*/m, "").trim();
+}
+
+function extractSection(content: string, sectionQuery: string): string | null {
+  const lines = content.split("\n");
+  const headingRegex = /^(#{1,6})\s+(.+)$/;
+  let targetLevel = 0;
+  let startIndex = -1;
+  let endIndex = lines.length;
+  const q = sectionQuery.toLowerCase().trim();
+
+  for (let i = 0; i < lines.length; i++) {
+    const match = lines[i].match(headingRegex);
+    if (match) {
+      const headingText = match[2].toLowerCase();
+      if (startIndex === -1 && headingText.includes(q)) {
+        targetLevel = match[1].length;
+        startIndex = i;
+      } else if (startIndex !== -1 && match[1].length <= targetLevel) {
+        endIndex = i;
+        break;
+      }
+    }
+  }
+
+  if (startIndex === -1) return null;
+  return lines.slice(startIndex, endIndex).join("\n").trim();
+}
+
 export function registerTools(server: McpServer, context: ToolContext): void {
   const { index, allowedProjects, docsRoot, canWrite } = context;
 
@@ -57,9 +88,13 @@ export function registerTools(server: McpServer, context: ToolContext): void {
 
   server.tool(
     "get_project_docs",
-    "Get the file tree for a specific project",
-    { project: z.string().describe("Project slug (e.g., 'lemmo', 'nons')") },
-    async ({ project }) => {
+    "Get documents in a project, optionally filtered by folder/category to save tokens",
+    {
+      project: z.string().describe("Project slug (e.g., 'lemmo')"),
+      folder: z.string().optional().describe("Optional folder/category filter (e.g., '01-architecture', '02-frontend', '03-backend', '07-devops')"),
+      compact: z.boolean().optional().default(true).describe("Return compact text format to save tokens (default: true)"),
+    },
+    async ({ project, folder, compact }) => {
       const proj = getProject(index, project, allowedProjects);
       if (!proj) {
         return {
@@ -67,7 +102,22 @@ export function registerTools(server: McpServer, context: ToolContext): void {
           isError: true,
         };
       }
-      const tree = proj.files.map((f) => ({ path: f.path, title: f.title }));
+
+      let files = proj.files;
+      if (folder) {
+        const cleanFolder = folder.replace(/^[/\\]+/, "").replace(/[/\\]+$/, "");
+        files = files.filter((f) => f.path.startsWith(cleanFolder));
+      }
+
+      if (compact) {
+        const lines = files.map((f) => `- ${f.path}: ${f.title}`);
+        const header = `Project '${project}'${folder ? ` [folder: ${folder}]` : ""}: ${files.length} document(s)\n`;
+        return {
+          content: [{ type: "text", text: header + lines.join("\n") }],
+        };
+      }
+
+      const tree = files.map((f) => ({ path: f.path, title: f.title }));
       return {
         content: [{ type: "text", text: JSON.stringify(tree, null, 2) }],
       };
@@ -76,12 +126,16 @@ export function registerTools(server: McpServer, context: ToolContext): void {
 
   server.tool(
     "read_doc",
-    "Read the full content of a specific document",
+    "Read document content. Supports reading specific sections or line ranges to minimize token consumption.",
     {
-      project: z.string().describe("Project slug"),
+      project: z.string().describe("Project slug (e.g., 'lemmo')"),
       path: z.string().describe("Document path within the project (e.g., '01-architecture/index.md')"),
+      section: z.string().optional().describe("Optional heading/section to extract (e.g. 'Authentication', 'Architecture'). Saves tokens by returning only that section."),
+      strip_metadata: z.boolean().optional().default(true).describe("Strip repetitive metadata header table to save tokens (default: true)"),
+      start_line: z.number().optional().describe("Start line (1-indexed, optional)"),
+      max_lines: z.number().optional().describe("Maximum lines to return (optional)"),
     },
-    async ({ project, path }) => {
+    async ({ project, path, section, strip_metadata, start_line, max_lines }) => {
       const proj = getProject(index, project, allowedProjects);
       if (!proj) {
         return {
@@ -96,26 +150,61 @@ export function registerTools(server: McpServer, context: ToolContext): void {
           isError: true,
         };
       }
+
+      let textContent = file.content;
+      if (strip_metadata) {
+        textContent = stripMetadataHeader(textContent);
+      }
+
+      if (section && section.trim()) {
+        const extracted = extractSection(textContent, section);
+        if (extracted) {
+          return {
+            content: [{ type: "text", text: `# ${file.title} > Section: ${section}\n\n${extracted}` }],
+          };
+        }
+      }
+
+      if (typeof start_line === "number" || typeof max_lines === "number") {
+        const lines = textContent.split("\n");
+        const start = typeof start_line === "number" && start_line > 0 ? start_line - 1 : 0;
+        const count = typeof max_lines === "number" && max_lines > 0 ? max_lines : lines.length;
+        textContent = lines.slice(start, start + count).join("\n");
+      }
+
       return {
-        content: [{ type: "text", text: `# ${file.title}\n\n${file.content}` }],
+        content: [{ type: "text", text: `# ${file.title}\n\n${textContent}` }],
       };
     }
   );
 
   server.tool(
     "search_docs",
-    "Search across documentation projects",
+    "Search across documentation with relevance ranking, project/folder filtering, and result limits",
     {
-      query: z.string().describe("Search query"),
-      project: z.string().optional().describe("Optional project slug to limit search scope"),
+      query: z.string().describe("Search query keywords"),
+      project: z.string().optional().describe("Project slug (e.g., 'lemmo')"),
+      folder: z.string().optional().describe("Folder/category filter (e.g. '01-architecture', '02-frontend', '03-backend')"),
+      limit: z.number().optional().default(5).describe("Max results to return (default: 5, max: 20) to save tokens"),
     },
-    async ({ query, project }) => {
-      const results = searchIndex(index, query, project);
-      const filtered = allowedProjects.length === 0 || allowedProjects.includes("*")
-        ? results
-        : results.filter((r) => allowedProjects.includes(r.project));
+    async ({ query, project, folder, limit }) => {
+      const results = searchIndex(index, query, {
+        project,
+        folder,
+        limit,
+        allowedProjects,
+      });
+
+      if (results.length === 0) {
+        return {
+          content: [{ type: "text", text: `No documents found matching '${query}'` }],
+        };
+      }
+
+      // Compact representation to save tokens
+      const formatted = results.map((r, i) => `${i + 1}. [${r.project}] ${r.path} — ${r.title}\n   Snippet: ${r.snippet}`);
       return {
-        content: [{ type: "text", text: JSON.stringify(filtered, null, 2) }],
+        content: [{ type: "text", text: `Found ${results.length} relevant document(s):\n\n` + formatted.join("\n\n") }],
       };
     }
   );

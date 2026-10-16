@@ -194,11 +194,14 @@ export async function validateToken(
   if (oauthSecret) {
     const jwt = verifyJwt(token, oauthSecret);
     if (jwt) {
+      const client = await getOAuthClient(jwt.sub, tokensFile);
+      const canWrite = client ? (client.canWrite ?? true) : (jwt.canWrite ?? false);
+
       return {
         clientName: jwt.clientName,
         allowedProjects: jwt.allowedProjects,
         expiresAt: new Date(jwt.exp * 1000).toISOString(),
-        canWrite: jwt.canWrite ?? false,
+        canWrite,
       };
     }
   }

@@ -26,6 +26,42 @@ describe("tools", () => {
     // Write tools should NOT be registered if canWrite is not set
     expect("write_doc" in tools).toBe(false);
   });
+
+  it("supports get_project_docs with folder filter and compact format", async () => {
+    const tools = (server as any)._registeredTools;
+    const res = await tools["get_project_docs"].handler({
+      project: "lemmo",
+      folder: "01-architecture",
+      compact: true,
+    });
+    expect(res.isError).toBeFalsy();
+    expect(res.content[0].text).toContain("Project 'lemmo' [folder: 01-architecture]");
+    expect(res.content[0].text).toContain("01-architecture/");
+  });
+
+  it("supports read_doc with strip_metadata and section extraction", async () => {
+    const tools = (server as any)._registeredTools;
+    const res = await tools["read_doc"].handler({
+      project: "lemmo",
+      path: "01-architecture/index.md",
+      strip_metadata: true,
+    });
+    expect(res.isError).toBeFalsy();
+    // Metadata table header should be stripped
+    expect(res.content[0].text).not.toContain("| فیلد / Field |");
+  });
+
+  it("supports search_docs with limit and folder filter", async () => {
+    const tools = (server as any)._registeredTools;
+    const res = await tools["search_docs"].handler({
+      query: "architecture",
+      project: "lemmo",
+      folder: "01-architecture",
+      limit: 2,
+    });
+    expect(res.isError).toBeFalsy();
+    expect(res.content[0].text).toContain("Found");
+  });
 });
 
 describe("write tools", () => {
