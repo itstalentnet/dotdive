@@ -19,8 +19,8 @@ slug: "backend-style-guide"
 
 # Backend Style Guide (`api/`) — Engineering Standards
 
-> ⚠️ **وضعیت پیاده‌سازی در کد (`api/`):**  
-> وضعیت استانداردهای این سند `Approved` است؛ اما در حال حاضر در ریپازیتوری کدهای `api/` هیچ کد Go یا کاتالوگ خطایی نوشته نشده است (در حال حاضر ۰ سرویس فعال در مخزن وجود دارد). این سند به عنوان استایل‌گاید حاکمیتی قطعی، در زمان آغاز کدنویسی در گام ۰ نقشه راه اعمال خواهد شد. استانداردهای تکمیلی کاتالوگ خطاها و ابزار اسکافولد رسماً در [ADR-007](../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md) مصوب و قفل شده‌اند.
+> ℹ️ **یادداشت سابقه تاریخی و وضعیت استقرار (`api/`):**  
+> یادداشت اولیه این سند مربوط به زمان طراحی اولیه (۲۰۲۶-۱۰-۰۶) بود که اعلام می‌کرد کدهای Go وجود ندارد. با پیشرفت توسعه، مخزن `api/` اکنون شامل سرویس‌ها، قراردادهای proto و پکیج‌های core است. این سند استایل‌گاید مرجع و الزام‌آور کلیه سرویس‌ها و پکیج‌های بک‌اند محسوب می‌شود. استانداردهای تکمیلی کاتالوگ متمرکز خطا و ابزار اسکافولدینگ (`tools/errgen`) رسماً در [ADR-007](../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md) مصوب و قفل شده‌اند.
 
 This document defines the official Backend Style Guide for the Lemmo backend monorepo (`lemmo-api` / `api/`), built entirely from official and widely-adopted authoritative sources. Each section covers one core technology area: Go formatting & linting, project/package layout, the error envelope, Protobuf generation & management, and database migrations.
 
@@ -122,14 +122,14 @@ internal/
     handler.go      # gRPC / HTTP transport handlers
 ```
 
-> **Scaffolding Tooling (Ratified — [ADR-007](../../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md) & [ADR-008](../../01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md)):**  
+> **Scaffolding Tooling (Ratified — [ADR-007](../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md) & [ADR-008](../01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md)):**  
 > Automated generation of this directory layout, `service.md`, migration pairs, and Dockerfile is handled by the canonical Go CLI in `tools/lemmo-cli` (`go run ./tools/lemmo-cli service <name>`).
 
 ---
 
 ## 4. Error Envelope: `google.rpc.Status` (AIP-193) & RFC 7807
 
-> ✅ **تصمیم مصوب معماری: رجیستری متمرکز کدهای خطا ([ADR-007](../../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md)):**  
+> ✅ **تصمیم مصوب معماری: رجیستری متمرکز کدهای خطا ([ADR-007](../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md)):**  
 > ۱. یک رجیستری متمرکز در `contracts/platform/errors.proto` تعبیه شده و کلیه خطاهای مشترک در قالب `enum ErrorReason` تعریف می‌گردند.  
 > ۲. خطاهای اختصاصی دامنه‌ای در `contracts/<domain>/v1/errors.proto` تعریف و در بیلد نهایی تجمیع می‌شوند.  
 > ۳. تایپ‌های TypeScript مستقیماً در `@/sdk/errors.ts` با دستور `buf generate` تولید می‌شوند.  
@@ -175,6 +175,7 @@ For cross-service gRPC communication and external client error envelopes, Lemmo 
 }
 ```
 
+<a id="error-catalog-d-11"></a><a id="41-central-error-catalog-schema--unknown-error-invariants-decision-d-11"></a>
 ### 4.1. Central Error Catalog Schema & Unknown Error Invariants (Decision D-11)
 
 Per binding decision **[D-11 in MVP Decision Register](../09-governance/decision-register.md#d-11)** (2026-10-16):
@@ -195,6 +196,10 @@ Unhandled panics, infrastructure timeouts, or unmapped low-level database errors
 - `reason`: `"INTERNAL_UNEXPECTED_ERROR"`
 - `http_status`: `500`
 - `tracking_code`: Bound to the active `request_id` to allow support desk triage without exposing internal system topology.
+
+#### Physical Storage & Tooling Pipeline (ADR-007 & D-11):
+1. **Physical SSOT File:** The canonical centralized error catalog is physically authored and maintained in [`contracts/platform/errors.proto`](file:///home/behroz/Documents/Git/lemmo/api/contracts/platform/errors.proto) (with HTTP/OpenAPI mappings mirrored in `contracts/openapi/shared/errors.yaml`).
+2. **Code Generator (`tools/errgen`):** Per [ADR-007](../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md), the internal generator [`tools/errgen`](file:///home/behroz/Documents/Git/lemmo/api/tools/errgen/) parses `contracts/platform/errors.proto` to generate strongly-typed Go domain errors in `core/errors` and synchronized TypeScript definitions in `packages/ts-sdk` for frontend consumption. Neither frontend nor backend services may define ad-hoc error codes outside this pipeline.
 
 ---
 

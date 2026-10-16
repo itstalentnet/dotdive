@@ -55,8 +55,8 @@
 | :--- | :--- | :---: | :---: |
 | **`project-service`** | نگهداری و مدیریت JSON مرجع پروژه‌ها (نودها، پورت‌های پویا، متادیتا، لایه‌های وکتور Design Mode) | فاز ۱ | پیاده‌سازی لایه‌ای، مایگریشن و gRPC تکمیل شد (`Completed`) |
 | **`workspace-service`** | مدیریت فضاهای کاری چندمستأجری، سازمان‌ها، تیم‌ها، سطوح دسترسی، دعوت اعضا و ارتباط با کیف‌پول سازمانی (پورت `50060` gRPC / `8089` HTTP) | فاز ۱ | پیاده‌سازی کامل و بستن گیت ۵ (`Completed - Stage 9`) |
-| **`orchestrator-service`** | تفسیر گراف جریان کار (DAG Execution) و هدایت ترتیبی نودها (اینترفیس سهمیه `QuotaChecker` مصوب طبق [ADR-007](../../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md)) | فاز ۱ | پیاده‌سازی فعال هسته (`Core Stub Active`) |
-| **`node-registry-service`** | ثبت و اعتبارسنجی اسکیما و قرارداد نودها و پورت‌های پویا ([DOC-MOD-001](../06-modules/canvas-modes.md) و [ADR-007](../../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md)) | فاز ۱ | پیاده‌سازی لایه‌ای، مایگریشن و رجیستری داخلی تکمیل شد (`Completed - Stage 4`) |
+| **`orchestrator-service`** | تفسیر گراف جریان کار (DAG Execution) و هدایت ترتیبی نودها (اینترفیس سهمیه `QuotaChecker` مصوب طبق [ADR-007](../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md)) | فاز ۱ | پیاده‌سازی فعال هسته (`Core Stub Active`) |
+| **`node-registry-service`** | ثبت و اعتبارسنجی اسکیما و قرارداد نودها و پورت‌های پویا ([DOC-MOD-001](../06-modules/canvas-modes.md) و [ADR-007](../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md)) | فاز ۱ | پیاده‌سازی لایه‌ای، مایگریشن و رجیستری داخلی تکمیل شد (`Completed - Stage 4`) |
 | **`job-service`** | صف‌بندی کارهای ناهمگام ابری با RabbitMQ، اولویت‌بندی، تلاش مجدد (Retry)، استریم وضعیت با SSE | فاز ۱ | پیاده‌سازی لایه‌ای، صف RabbitMQ و ورکر تکمیل شد (`Completed - Stage 6`) |
 | **`storage-service`** | ذخیره‌سازی پایدار در MinIO S3، تولید دسته‌ای Presigned URLs و تمدید امضا در خطای ۴۰۳ | فاز ۱ | پیاده‌سازی لایه‌ای و درایور MinIO تکمیل شد (`Completed - Stage 6`) |
 | **`model-router-service`** | رجیستری ۴ لایه‌ای پراویدرها، آداپتورهای اعلانی REST، فالبک ۳ سطحی و ریت‌لیمیت توکن‌باکت در Redis | فاز ۱ | پیاده‌سازی لایه‌ای، کاتالوگ مدل‌ها و آداپتورها تکمیل شد (`Completed - Stage 7`) |
@@ -183,7 +183,7 @@ services/<service-name>/
 ```
 
 > **الزام فایل `service.md` و تولید خودکار با CLI:**  
-> پیش از نوشتن کدهای هر سرویس، فایل `service.md` باید در ریشه پوشه همان سرویس ایجاد شده و مسئولیت دقیق، رویدادهای تولیدی و جدول تعاملات آن مستند شود. تولید خودکار این ساختار لایه‌ای و فایل `service.md` توسط باینری رسمی اسکافولدر Go در `tools/lemmo-cli` (مصوب طبق [ADR-007](../../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md) و [ADR-008](../../01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md)) انجام می‌شود.
+> پیش از نوشتن کدهای هر سرویس، فایل `service.md` باید در ریشه پوشه همان سرویس ایجاد شده و مسئولیت دقیق، رویدادهای تولیدی و جدول تعاملات آن مستند شود. تولید خودکار این ساختار لایه‌ای و فایل `service.md` توسط باینری رسمی اسکافولدر Go در `tools/lemmo-cli` (مصوب طبق [ADR-007](../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md) و [ADR-008](../01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md)) انجام می‌شود.
 
 ---
 

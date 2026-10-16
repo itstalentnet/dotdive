@@ -97,7 +97,7 @@ message EventEnvelope {
 
 ## ۳. استانداردهای قرارداد نودها و اسکیماهای JSON
 
-### ۱. قراردادهای نودها و پورت‌ها (Protobuf — مصوب طبق [ADR-007](../../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md) و [DOC-MOD-001](../06-modules/canvas-modes.md))
+### ۱. قراردادهای نودها و پورت‌ها (Protobuf — مصوب طبق [ADR-007](../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md) و [DOC-MOD-001](../06-modules/canvas-modes.md))
 - کلیه تعاریف نودها، پورت‌های ورودی و خروجی و ارتباطات گراف در بک‌اند **انحصاداً بر پایه Protobuf** در فایل `contracts/lemmo/v1/node.proto` تعریف می‌شوند.
 - **معماری دوحالته بوم (`CanvasMode`):** تفکیک صریح حالت طراحی وکتور (`CANVAS_MODE_DESIGN` - رایگان) از حالت اجرای هوش مصنوعی (`CANVAS_MODE_WORKFLOW` - پردازشی) در سطح مدل قراردادها.
 - **اصل پورت‌های پویا و عدم هاردکد کردن (Dynamic & Extensible Ports):** هیچ پورتی در سیستم هاردکد نمی‌شود. نودهای پرامپت متغیرهای پویا (`var:xxx`) را به عنوان پورت ورودی باز می‌کنند، و نودهای تصویر پورت‌های چندگانه و افزایشی LoRA (`PORT_DATA_TYPE_LORA`)، تصاویر رفرنس و پرامپت منفی را به صورت داینامیک پشتیبانی می‌نمایند. نمونه‌های نود روی بوم فیلد `dynamic_ports` را برای ذخیره‌سازی این اتصالات نگه می‌دارند.
