@@ -3,7 +3,6 @@ title: "ماژول‌ها و ابزارها"
 description: "مشخصات عملکردی ماژول‌های مستقل (کانواس، چت، ابزارها، دارایی‌ها و پرداخت)"
 order: 6
 icon: "blocks"
-slug: "lemmo-modules"
 ---
 
 | فیلد / Field | مقدار / Value |

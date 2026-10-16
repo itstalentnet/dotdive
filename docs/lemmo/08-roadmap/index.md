@@ -3,7 +3,6 @@ title: "نقشه راه و فازها"
 description: "برنامه زمان‌بندی فازها، تاییدیه‌ها، چک‌لیست‌های QA و گزارش‌های تحویل مراحل پروژه"
 order: 8
 icon: "milestone"
-slug: "lemmo-roadmap"
 ---
 
 # Frontend Development Roadmap

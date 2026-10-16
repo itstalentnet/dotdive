@@ -1,7 +1,3 @@
----
-slug: "frontend-style-guide"
----
-
 | فیلد / Field | مقدار / Value |
 | :--- | :--- |
 | **Title (EN)** | Frontend Engineering Style Guide & Architecture Standards |

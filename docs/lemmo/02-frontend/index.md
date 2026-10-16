@@ -3,7 +3,6 @@ title: "معماری فرانت‌اند"
 description: "معماری Workspace در Next.js، سیستم پلاگین، SDK و مدیریت استیت"
 order: 2
 icon: "layout"
-slug: "lemmo-frontend"
 ---
 
 | فیلد / Field | مقدار / Value |

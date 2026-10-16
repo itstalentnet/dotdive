@@ -3,7 +3,6 @@ title: "هویت بصری و برندینگ"
 description: "اصول برند Lemmo، نشان ترایاد ۳ نقطه‌ای، استانداردهای اندازه و دارایی‌های وکتور"
 order: 5
 icon: "badge-check"
-slug: "lemmo-branding"
 ---
 
 | فیلد / Field | مقدار / Value |

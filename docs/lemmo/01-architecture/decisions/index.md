@@ -3,7 +3,6 @@ title: "تصمیمات معماری (ADR)"
 description: "سوابق رسمی تصمیم‌گیری‌های معماری مهندسی در پلتفرم لیمو"
 order: 1
 icon: "file-check"
-slug: "lemmo-adr"
 ---
 
 # تصمیمات رسمی معماری (ADR) — پروژه Lemmo

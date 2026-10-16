@@ -3,7 +3,6 @@ title: "معماری بک‌اند"
 description: "سرویس‌های بک‌اند، قراردادهای API، احراز هویت و پایپ‌لاین‌های پردازش"
 order: 3
 icon: "server"
-slug: "lemmo-backend"
 ---
 
 | فیلد / Field | مقدار / Value |
