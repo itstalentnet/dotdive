@@ -1,4 +1,3 @@
----
 | فیلد / Field | مقدار / Value |
 | :--- | :--- |
 | **Title (EN)** | Beta Invitation, Access Gate, and One-Time Gift Ownership |
@@ -11,7 +10,6 @@
 | **Summary (EN)** | Defines the seven-stage beta onboarding path (registration, beta access check, invite code page, activation, workspace/wallet plus one-time gift, studio) and fixes ownership: validation, beta capacity, single-use enforcement and gift issuance belong to the responsible backend service using the Quota Claim engine; the studio client only displays and calls the contract. Also records the current measured gaps. |
 | **Summary (FA)** | مسیر هفت‌مرحله‌ای آنبوردینگ بتا و مالکیت آن را تثبیت می‌کند: اعتبارسنجی، سقف ظرفیت، مصرف یک‌باره و اعطای هدیه متعلق به سرویس مسئول بک‌اند از مسیر موتور Claim در Quota است؛ کلاینت استودیو تنها نمایش می‌دهد و قرارداد را فراخوانی می‌کند. شکاف‌های اندازه‌گیری‌شده نیز ثبت شده است. |
 | **Tags** | `beta`, `invitation`, `onboarding`, `quota`, `claim`, `gateway`, `p06`, `p08` |
----
 
 # Beta Invitation, Access Gate, and One-Time Gift Ownership
 
@@ -97,8 +95,11 @@ The baseline lists the beta-access owner as an unresolved input (section 5 of
 `BASELINE_MVP_CONTENT_GENERATION.md`: "Beta access owner must be determined in
 B01; new service name is not predetermined"). Existing IAM surface must be
 reviewed before creating any new service. **This document does not choose the
-owner**; until it is decided, stages 2-5 cannot be implemented without an
-architectural decision, and the gap must not be closed by client-side behaviour.
+owner**; per decision **D-03** and action item **P-3**, the permanent ownership,
+data model, and service boundaries will be resolved in a dedicated upcoming ADR
+before any implementation in Stage 2 begins. Until that ADR is formally approved,
+stages 2-5 cannot be implemented without an architectural decision, and the gap
+must not be closed by client-side behaviour. Reference: [MVP Decision Register (DOC-GOV-004)](../09-governance/decision-register.md#d-03).
 
 ## دامنه جاری MVP — دستور مالک محصول 2026-10-15
 

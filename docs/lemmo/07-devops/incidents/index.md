@@ -1,3 +1,11 @@
+---
+title: "رخدادها و کالبدشکافی"
+description: "نمایه مرکزی گزارش‌های کالبدشکافی رخدادها و تحلیل ریشه‌ای پلتفرم"
+order: 2
+icon: "alert-triangle"
+slug: "lemmo-incidents"
+---
+
 | فیلد / Field | مقدار / Value |
 | :--- | :--- |
 | **Title (EN)** | System Incident Post-Mortems & Root Cause Analysis Registry |

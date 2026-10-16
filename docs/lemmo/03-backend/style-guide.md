@@ -1,3 +1,7 @@
+---
+slug: "backend-style-guide"
+---
+
 | فیلد / Field | مقدار / Value |
 | :--- | :--- |
 | **Title (EN)** | Backend Style Guide & Engineering Standards |
@@ -170,6 +174,27 @@ For cross-service gRPC communication and external client error envelopes, Lemmo 
   ]
 }
 ```
+
+### 4.1. Central Error Catalog Schema & Unknown Error Invariants (Decision D-11)
+
+Per binding decision **[D-11 in MVP Decision Register](../09-governance/decision-register.md#d-11)** (2026-10-16):
+Every business error reason registered across the backend services must adhere to the standardized catalog schema:
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `reason` | `string` | Canonical UPPER_SNAKE_CASE machine reason (e.g., `BETA_CAPACITY_EXHAUSTED`). |
+| `owner_service` | `string` | The authoritative domain service (e.g., `quota-service`, `agent-service`). |
+| `http_status` | `int` | RFC 7807 mapped HTTP status code (e.g., `400`, `403`, `404`, `409`, `429`). |
+| `grpc_code` | `string` | Google AIP-193 gRPC status (e.g., `INVALID_ARGUMENT`, `RESOURCE_EXHAUSTED`). |
+| `translation_key` | `string` | Frontend client i18n lookup key (e.g., `errors.beta.capacity_exhausted`). |
+| `retryable` | `bool` | Deterministic flag indicating if immediate or backoff retry is permitted. |
+| `help_key` | `string` | Optional documentation anchor for UI help links (e.g., `docs.errors.quota_refill`). |
+
+#### Unknown Error Handling Invariant:
+Unhandled panics, infrastructure timeouts, or unmapped low-level database errors must **never** leak raw driver traces, SQL snippets, or broker error bodies to the caller. The gateway/service wraps them in a sanitized fail-safe response:
+- `reason`: `"INTERNAL_UNEXPECTED_ERROR"`
+- `http_status`: `500`
+- `tracking_code`: Bound to the active `request_id` to allow support desk triage without exposing internal system topology.
 
 ---
 
