@@ -65,11 +65,21 @@ export async function createHttpServer(config: Config = loadConfig()): Promise<R
       return;
     }
 
-    // Favicon & Logo static assets (for ChatGPT / Claude / browsers)
+    // Favicon & Logo static assets (Dotdive brand assets)
+    if (requestUrl.pathname === "/favicon.ico" && (req.method === "GET" || req.method === "HEAD")) {
+      res.writeHead(200, {
+        "Content-Type": "image/x-icon",
+        "Cache-Control": "public, max-age=86400",
+        "Access-Control-Allow-Origin": "*",
+      });
+      if (req.method === "HEAD") { res.end(); return; }
+      res.end(DOTDIVE_FAVICON_ICO);
+      return;
+    }
+
     if (
-      (requestUrl.pathname === "/favicon.ico" ||
-        requestUrl.pathname === "/favicon.svg" ||
-        requestUrl.pathname === "/logo.svg" ||
+      (requestUrl.pathname === "/favicon.svg" ||
+        requestUrl.pathname === "/icon.svg" ||
         requestUrl.pathname === "/apple-touch-icon.png") &&
       (req.method === "GET" || req.method === "HEAD")
     ) {
@@ -79,7 +89,32 @@ export async function createHttpServer(config: Config = loadConfig()): Promise<R
         "Access-Control-Allow-Origin": "*",
       });
       if (req.method === "HEAD") { res.end(); return; }
-      res.end(BRAND_SVG_ICON);
+      res.end(DOTDIVE_FAVICON_SVG);
+      return;
+    }
+
+    if (
+      (requestUrl.pathname === "/logo.svg" || requestUrl.pathname === "/logo-dark.svg") &&
+      (req.method === "GET" || req.method === "HEAD")
+    ) {
+      res.writeHead(200, {
+        "Content-Type": "image/svg+xml",
+        "Cache-Control": "public, max-age=86400",
+        "Access-Control-Allow-Origin": "*",
+      });
+      if (req.method === "HEAD") { res.end(); return; }
+      res.end(DOTDIVE_LOGO_DARK);
+      return;
+    }
+
+    if (requestUrl.pathname === "/logo-light.svg" && (req.method === "GET" || req.method === "HEAD")) {
+      res.writeHead(200, {
+        "Content-Type": "image/svg+xml",
+        "Cache-Control": "public, max-age=86400",
+        "Access-Control-Allow-Origin": "*",
+      });
+      if (req.method === "HEAD") { res.end(); return; }
+      res.end(DOTDIVE_LOGO_LIGHT);
       return;
     }
 
@@ -111,7 +146,7 @@ export async function createHttpServer(config: Config = loadConfig()): Promise<R
       res.end(
         JSON.stringify({
           issuer,
-          client_name: "Lemmo Documentation Engine",
+          client_name: "Dotdive Documentation Hub",
           logo_uri: `${issuer}/logo.svg`,
           authorization_endpoint: `${issuer}/oauth/authorize`,
           token_endpoint: `${issuer}/oauth/token`,
@@ -199,7 +234,7 @@ export async function createHttpServer(config: Config = loadConfig()): Promise<R
     }
 
     const sessionServer = new McpServer({
-      name: "lemmo-documentation-engine",
+      name: "dotdive-mcp",
       version: "1.0.0",
     });
 
@@ -236,13 +271,35 @@ export async function createHttpServer(config: Config = loadConfig()): Promise<R
   return httpServer;
 }
 
-const BRAND_SVG_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <rect width="512" height="512" rx="128" fill="#0B0C0E"/>
-  <g>
-    <path d="M143.836 311.343C174.673 311.343 199.671 336.341 199.671 367.178C199.671 398.015 174.673 423.014 143.836 423.014C112.998 423.014 88 398.015 88 367.178C88 336.341 112.998 311.343 143.836 311.343Z" fill="#D1FE17"/>
-    <path d="M367.178 311.343C398.015 311.343 423.014 336.341 423.014 367.178C423.014 398.015 398.015 423.014 367.178 423.014C336.341 423.014 311.343 398.015 311.343 367.178C311.343 336.341 336.341 311.343 367.178 311.343Z" fill="#D1FE17"/>
-    <path d="M255.507 88C286.344 88 311.343 112.998 311.343 143.836C311.343 174.673 286.344 199.671 255.507 199.671C224.67 199.671 199.671 174.673 199.671 143.836C199.671 112.998 224.67 88 255.507 88Z" fill="#D1FE17"/>
-  </g>
+const DOTDIVE_FAVICON_ICO = Buffer.from(
+  "AAABAAEAEBAAAAAAIAAzAQAAFgAAAIlQTkcNChoKAAAADUlIRFIAAAAQAAAAEAgGAAAAH/P/YQAAAPpJREFUeJylkz1KxGAURe9NotgEB611Dy7ETYjY2wjiIqxtXYE7sBGEKVyHoFjrzCTHIu/BR2BkYi6EF5Kb93PeF2mmLElANeUb292sqmVBA62kR0mHksiuCjUR+4ivtm+BxvZGwDHwzXZ1wCau1FV0Ugs4At7DsB7FT+AEaIFF3D9HkgugygQf8bAfxa8YsZy/Bp7C0+5Cfw8wUAH7sYG3ZJIJmLAEBWgnYSQd/GFe2yZ8K2Ah6VzSjyQr2ruMmVcBcBvEU+AlvHeAh1UMcO4nrPEhuTSSeoZDcQ10ks6i3eQzPkhL2zeA/8FuUFR30ixf1Dtknf8zlfoFt3lVhfiLptgAAAAASUVORK5CYII=",
+  "base64"
+);
+
+const DOTDIVE_FAVICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <style>
+    path {
+      fill: #0b0c0e;
+    }
+    @media (prefers-color-scheme: dark) {
+      path {
+        fill: #ffffff;
+      }
+    }
+  </style>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M438.169 152.95L479 192.714V316.193L440.263 355.957L395.244 402H116.756L33 318.286V109H394.197L438.169 152.95ZM257.047 161.321V347.586H371.164L400.479 319.332L426.653 293.171V215.736L372.211 161.321H257.047Z"
+  />
+</svg>`;
+
+const DOTDIVE_LOGO_DARK = `<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M438.169 152.95L479 192.714V316.193L440.263 355.957L395.244 402H116.756L33 318.286V109H394.197L438.169 152.95ZM257.047 161.321V347.586H371.164L400.479 319.332L426.653 293.171V215.736L372.211 161.321H257.047Z" fill="white"/>
+</svg>`;
+
+const DOTDIVE_LOGO_LIGHT = `<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M438.169 152.95L479 192.714V316.193L440.263 355.957L395.244 402H116.756L33 318.286V109H394.197L438.169 152.95ZM257.047 161.321V347.586H371.164L400.479 319.332L426.653 293.171V215.736L372.211 161.321H257.047Z" fill="#1a1a2e"/>
 </svg>`;
 
 const LANDING_PAGE_HTML = `<!DOCTYPE html>
@@ -250,11 +307,11 @@ const LANDING_PAGE_HTML = `<!DOCTYPE html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lemmo Documentation Engine (MCP)</title>
-  <link rel="icon" type="image/svg+xml" href="/logo.svg">
-  <link rel="apple-touch-icon" href="/logo.svg">
-  <meta property="og:title" content="Lemmo Documentation Engine (MCP)">
-  <meta property="og:description" content="Official Model Context Protocol server for Lemmo architecture and documentation.">
+  <title>Dotdive MCP Server</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/favicon.svg">
+  <meta property="og:title" content="Dotdive MCP Server">
+  <meta property="og:description" content="Official Model Context Protocol server for Dotdive & Lemmo documentation.">
   <meta property="og:image" content="/logo.svg">
   <style>
     :root {
@@ -291,12 +348,15 @@ const LANDING_PAGE_HTML = `<!DOCTYPE html>
       gap: 16px;
       margin-bottom: 24px;
     }
-    .logo {
+    .logo-box {
       width: 56px;
       height: 56px;
       border-radius: 14px;
       background: #000;
       border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .title-group h1 {
       font-size: 20px;
@@ -357,13 +417,17 @@ const LANDING_PAGE_HTML = `<!DOCTYPE html>
 <body>
   <div class="card">
     <div class="header">
-      <img src="/logo.svg" alt="Lemmo Logo" class="logo">
+      <div class="logo-box">
+        <svg width="34" height="34" viewBox="0 0 512 512" fill="none">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M438.169 152.95L479 192.714V316.193L440.263 355.957L395.244 402H116.756L33 318.286V109H394.197L438.169 152.95ZM257.047 161.321V347.586H371.164L400.479 319.332L426.653 293.171V215.736L372.211 161.321H257.047Z" fill="white"/>
+        </svg>
+      </div>
       <div class="title-group">
-        <h1>Lemmo Documentation Engine</h1>
+        <h1>Dotdive MCP Server</h1>
         <div class="badge"><span class="badge-dot"></span> Active & Operational</div>
       </div>
     </div>
-    <p class="desc">Official Model Context Protocol (MCP) server providing live semantic search, document reading, and authorized authoring for Lemmo Architecture SSOT.</p>
+    <p class="desc">Official Model Context Protocol (MCP) server providing live search, document retrieval, and authorized authoring for Dotdive and Lemmo documentation.</p>
     <div class="endpoints">
       <div class="endpoint-row"><span class="path">/mcp</span><span class="method">POST (Streamable HTTP)</span></div>
       <div class="endpoint-row"><span class="path">/oauth/token</span><span class="method">POST (RFC 6749)</span></div>
