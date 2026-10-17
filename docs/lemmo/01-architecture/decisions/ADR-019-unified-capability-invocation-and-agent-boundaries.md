@@ -134,6 +134,6 @@ icon: "cpu"
 - شفافیت کامل مرزهای امنیتی ایجنت و جلوگیری از ایجاد یک God-Service متورم.
 
 ### اقدامات تکمیلی و هماهنگی:
-1. ثبت الحاقیه رسمی در مستندات **[ADR-018](./ADR-018-tools-platform-architecture-unified-execution-and-domain-decoupling.md)** و **[`DOC-BE-011`](../03-backend/tools-service-spec.md)**.
-2. به‌روزرسانی نقشه راه در **[`DOC-BE-005`](../03-backend/roadmap.md)** جهت ثبت اتصال بوم و نوع `workflow`.
+1. ثبت الحاقیه رسمی در مستندات **[ADR-018](./ADR-018-tools-platform-architecture-unified-execution-and-domain-decoupling.md)** و **[`DOC-BE-011`](../../03-backend/tools-service-spec.md)**.
+2. به‌روزرسانی نقشه راه در **[`DOC-BE-005`](../../03-backend/roadmap.md)** جهت ثبت اتصال بوم و نوع `workflow`.
 3. ثبت فهرست اقدامات قراردادها در تسک بدون اعمال تغییر در کدهای اجرایی فعلی.

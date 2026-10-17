@@ -302,7 +302,7 @@ flowchart TD
 
 #### مرحله ۱۲A: سیاست‌های قرارداد، تولید OpenAPI و سخت‌سازی گیت‌وی (`contracts/`, `tools/` & Gateway Ingress) ✅
 - **وضعیت:** تکمیل و اعتبارسنجی ۱۰۰٪ با موفقیت در تاریخ ۲۰۲۶-۱۰-۰۳.
-- **گزارش نهایی و مستندات اجرایی:** [`REPORT_BACKEND_STAGE12A.md`](../../../.task/stage12/REPORT_BACKEND_STAGE12A.md)
+- **گزارش نهایی و مستندات اجرایی:** [`REPORT_BACKEND_STAGE12A.md`](../../../../.task/archive/legacy-stages/stage12/REPORT_BACKEND_STAGE12A.md)
 1. **منبع حقیقت سیاست‌های ورک‌اسپیس (`x-lemmo-workspace-policy`):** برچسب‌گذاری صریح تمامی اندپوینت‌های سیستم با مقادیر `required`، `optional` و `none` در قراردادهای منبع.
 2. **متدولوژی قرارداد-محور (Contract-First OpenAPI 3.1):** نگارش مستقیم تعاریف OpenAPI YAML در `contracts/` به عنوان منبع حقیقت سرویس‌های REST، استفاده از ابزارهای بالغ نظیر `oapi-codegen` و تجمیع مونو-اسپک در `infra/gateway/docs/openapi.yaml`.
 3. **اصلاح و سخت‌سازی پلاگین `lemmo-access-enforcer` در گیت‌وی:**
@@ -323,7 +323,7 @@ flowchart TD
 
 #### مرحله ۱۲B: پیاده‌سازی آداپتور زنده، ترانسپورت و ایزولاسیون استودیو (`app/src/sdk/live/`) ✅
 - **وضعیت:** تکمیل و اعتبارسنجی ۱۰۰٪ با موفقیت در تاریخ ۲۰۲۶-۱۰-۰۳.
-- **گزارش نهایی و مستندات اجرایی:** [`REPORT_FRONTEND_STAGE12B.md`](../../../.task/stage12/REPORT_FRONTEND_STAGE12B.md)
+- **گزارش نهایی و مستندات اجرایی:** [`REPORT_FRONTEND_STAGE12B.md`](../../../../.task/archive/legacy-stages/stage12/REPORT_FRONTEND_STAGE12B.md)
 1. **تولید کلاینت Fetch با Orval در مرز محصور از نسخه پین‌شده (مصوب OQ-035):** تولید توابع کلاینت مستقل از هوک‌های React در پوشه ایزوله `app/src/sdk/live/generated/` با استفاده از ارجاع تغییرناپذیر به مونو-اسپک، با محافظت قواعد لینت از عدم دسترسی مستقیم از کدهای UI.
 2. **معماری شبکه Same-Origin با پروکسی معکوس Next.js (مصوب OQ-034):**
    - پیکربندی `rewrites` در `next.config.ts` برای هدایت مسیرهای `/api/v1/:path*` به درگاه Kong (`http://localhost:8000` در dev و آدرس کانتینر در prod).
@@ -355,7 +355,7 @@ flowchart TD
 
 #### مرحله ۱۲C: مهاجرت کامل ماژول‌های UI، کانتینر ماک Feed در Prism و اخراج استاتیک‌ها (مصوب ADR-016 بند ۲.۲۳) ✅
 - **وضعیت:** تکمیل قطعی، اصلاح نهایی و قبولی ۱۰۰٪ آزمون‌ها در تاریخ ۲۰۲۶-۱۰-۰۳ (کامیت `424ef7c`).
-- **گزارش نهایی و مستندات اجرایی:** [`REPORT_FRONTEND_STAGE12C_REMEDY.md`](../../../.task/stage12/REPORT_FRONTEND_STAGE12C_REMEDY.md)
+- **گزارش نهایی و مستندات اجرایی:** [`REPORT_FRONTEND_STAGE12C_REMEDY.md`](../../../../.task/archive/legacy-stages/stage12/REPORT_FRONTEND_STAGE12C_REMEDY.md)
 1. **اصلاح کسری‌های استیج ۱۲B:**
    - ایزولاسیون کامل تست `live_sse_proxy.test.ts` با راه‌اندازی سرور آزمایشی موقت در حافظه و پاس شدن کامل ۷ آزمون با Vitest.
    - رفع هشدار لینتر React 19 / Next 16 (`react-hooks/set-state-in-effect`) در `StudioContextProvider.tsx`.
@@ -377,9 +377,9 @@ flowchart TD
 ---
 
 ### مرحله ۱۲.۵: فاز جامع بازسازی و استحکام امنیتی پلتفرم (Platform Zero-Trust Hardening — مصوب بازآزمایی ۶ اکتبر) 🛡️📋
-> **هدف معماری و ضرورت مهندسی:** اجرای الزامی جهت رفع قطعی ۲۵ یافته امنیتی کاتالوگ [DOC-ARCH-010](../01-architecture/security-audit-and-remediation.md)؛ بر اساس گزارش بازآزمایی رسمی ۶ اکتبر ۲۰۲۶ ([SECURITY_RETEST_REPORT](../../../.task/others/SECURITY_RETEST_REPORT_2026_10_06.md))، دو مانع P0 (جعل هویت و IDOR) و چندین نقص در مرزهای اعتماد P1 همچنان فعال هستند. خروج از این مرحله شرط بدون‌اغماض ورود به مرحله ۱۳ و دستیابی به Gate 6 است.  
-> **سند تسک اجرایی تیم‌های توسعه:** [`TASK_STAGE12_5_SECURITY_HARDENING.md`](../../../.task/stage12_5/TASK_STAGE12_5_SECURITY_HARDENING.md)  
-> **گزارش نهایی و راستی‌آزمایی معماری:** [`REPORT_STAGE12_5_SECURITY_HARDENING.md`](../../../.task/stage12_5/REPORT_STAGE12_5_SECURITY_HARDENING.md)  
+> **هدف معماری و ضرورت مهندسی:** اجرای الزامی جهت رفع قطعی ۲۵ یافته امنیتی کاتالوگ [DOC-ARCH-010](../01-architecture/security-audit-and-remediation.md)؛ بر اساس گزارش بازآزمایی رسمی ۶ اکتبر ۲۰۲۶ ([SECURITY_RETEST_REPORT](../../../../.task/audits/SECURITY_RETEST_REPORT_2026_10_06.md))، دو مانع P0 (جعل هویت و IDOR) و چندین نقص در مرزهای اعتماد P1 همچنان فعال هستند. خروج از این مرحله شرط بدون‌اغماض ورود به مرحله ۱۳ و دستیابی به Gate 6 است.  
+> **سند تسک اجرایی تیم‌های توسعه:** [`TASK_STAGE12_5_SECURITY_HARDENING.md`](../../../../.task/archive/legacy-stages/stage12_5/TASK_STAGE12_5_SECURITY_HARDENING.md)  
+> **گزارش نهایی و راستی‌آزمایی معماری:** [`REPORT_STAGE12_5_SECURITY_HARDENING.md`](../../../../.task/archive/legacy-stages/stage12_5/REPORT_STAGE12_5_SECURITY_HARDENING.md)  
 > **وضعیت:** **تکمیل قطعی، راستی‌آزمایی ۱۰۰٪ و قبولی تمامی سناریوهای نفوذ در تاریخ ۲۰۲۶-۱۰-۰۷** (کامیت‌های `61131b3` در `api/`، `fc1dcfb` در `app/` و `43daa0f` در `auth/`). Gate 6 با موفقیت تایید شد و ورود به مرحله ۱۳ مجاز است.
 
 ```mermaid
@@ -415,8 +415,8 @@ flowchart TD
 ### مرحله ۱۳: میکروسرویس مدیریت دسترسی‌ها و مجوزهای دانه‌ریز (`iam-service` — مصوب ADR-014) 📋
 - **وضعیت:** **تکمیل قطعی، راستی‌آزمایی ۱۰۰٪ و قبولی تمامی آزمون‌های امنیتی در تاریخ ۲۰۲۶-۱۰-۰۷** (کامیت `cc339b9` در `api/`).
 - **سند معماری و مشخصات فنی مرجع:** [DOC-BE-009: معماری میکروسرویس IAM و مشخصات قراردادها](./iam-service-spec.md)
-- **سند تسک اجرایی تیم‌های توسعه:** [`TASK_BACKEND_STAGE13.md`](../../../.task/stage13/TASK_BACKEND_STAGE13.md)
-- **گزارش نهایی و راستی‌آزمایی معماری:** [`REPORT_BACKEND_STAGE13.md`](../../../.task/stage13/REPORT_BACKEND_STAGE13.md)
+- **سند تسک اجرایی تیم‌های توسعه:** [`TASK_BACKEND_STAGE13.md`](../../../../.task/archive/legacy-stages/stage13/TASK_BACKEND_STAGE13.md)
+- **گزارش نهایی و راستی‌آزمایی معماری:** [`REPORT_BACKEND_STAGE13.md`](../../../../.task/archive/legacy-stages/stage13/REPORT_BACKEND_STAGE13.md)
 - **دامنه:**
   - استقرار سرویس اختصاصی `services/iam-service/` با معماری Clean Architecture در Go.
   - مدل اعطای امتیازات و سهمیه‌های بوم (Entitlement Grants per DOC-BE-008).
@@ -433,7 +433,7 @@ flowchart TD
 
 #### مرحله 14A: پیش‌اقدام زیرساختی، ارتقای هسته به سرور دوگانه، تفکیک قرارداد محتوا و ماک Prism ✅
 - **وضعیت:** **تکمیل و اعتبارسنجی ۱۰۰٪ با موفقیت در تاریخ ۲۰۲۶-۱۰-۰۷** (کامیت‌های `4e51221` در `api/` و `5994da7` در `app/`).
-- **گزارش نهایی و مستندات اجرایی:** [`REPORT_BACKEND_STAGE14A.md`](../../../.task/stage14/REPORT_BACKEND_STAGE14A.md)
+- **گزارش نهایی و مستندات اجرایی:** [`REPORT_BACKEND_STAGE14A.md`](../../../../.task/archive/legacy-stages/stage14/REPORT_BACKEND_STAGE14A.md)
 - **دامنه دستاوردها:**
   1. **ارتقای هسته مشترک (`core/bootstrap`):** پیاده‌سازی سرور دوگانه (`DualServer`) برای مدیریت یکپارچه و هماهنگ چرخه حیات، لیسنرها و Graceful Shutdown همزمان هر دو ورودی gRPC و HTTP/REST با رفتار قطعی Fail-Fast (منع حالت نیمه‌فعال). قبولی ۱۰۰٪ تست‌های واحد ۴‌گانه در `server_test.go`.
   2. **تدوین قرارداد مستقل محتوا (`contracts/openapi/content/v1/openapi.yaml`):** تفکیک بنرها، اسلایدها و ابزارهای برجسته لندینگ استودیو به دامنه محتوا و استقرار کانتینر سبک `lemmo-mock-content` با `stoplight/prism:5` در داکر کامپوز و گیت‌وی Kong (`/api/v1/content`).
@@ -442,7 +442,7 @@ flowchart TD
 
 #### مرحله 14B: پیاده‌سازی و استقرار میکروسرویس زنده فید (`feed-service` — پایان اتکا به Prism Mock) ✅
 - **وضعیت:** **تکمیل و اعتبارسنجی ۱۰۰٪ با موفقیت در تاریخ ۲۰۲۶-۱۰-۰۷** (کامیت `0bdb5e6` در `api/`).
-- **گزارش نهایی و مستندات اجرایی:** [`REPORT_BACKEND_STAGE14B.md`](../../../.task/stage14/REPORT_BACKEND_STAGE14B.md)
+- **گزارش نهایی و مستندات اجرایی:** [`REPORT_BACKEND_STAGE14B.md`](../../../../.task/archive/legacy-stages/stage14/REPORT_BACKEND_STAGE14B.md)
 - **دامنه دستاوردها:**
   1. استقرار سرویس اختصاصی `services/feed-service/` با معماری Clean Architecture در Go.
   2. پایگاه داده اختصاصی `lemmo_feed` در PostgreSQL، جدول `feed_items` و مایگریشن با ایندکس‌های کامپوزیت Keyset و بذر اولیه ۲۰ اثر منتخب.
@@ -469,7 +469,7 @@ flowchart TD
 
 #### مرحله 16A: ارتقای قراردادهای اجرای قابلیت، قیمت‌گذاری تک‌نقطه‌ای و همگام‌سازی متادیتای ایجنت ✅
 - **وضعیت:** **تکمیل و اعتبارسنجی ۱۰۰٪ با موفقیت در تاریخ ۲۰۲۶-۱۰-۰۹** (کامیت‌های `07aa5a7` در `api/` و `1c893bb` در `app/`).
-- **گزارش نهایی و مستندات اجرایی:** [`REPORT_BACKEND_STAGE16A.md`](../../../.task/stage16/REPORT_BACKEND_STAGE16A.md)
+- **گزارش نهایی و مستندات اجرایی:** [`REPORT_BACKEND_STAGE16A.md`](../../../../.task/archive/legacy-stages/stage16/REPORT_BACKEND_STAGE16A.md)
 - **دستاوردها:**
   1. **اجباری‌سازی `input_kind` (CAP-CHK-1):** افزودن فیلد صریح `input_kind` با مقادیر `structured`, `command`, `natural_language` در قراردادهای OpenAPI، Proto و هندلرهای `tools-service`، با رد قاطع هرگونه استنباط حدسی در گیت‌وی.
   2. **کنترل سقف قیمت و حفاظت مالی (CAP-CHK-2):** پیاده‌سازی سقف محافظتی `expected_cost`؛ در صورت تجاوز هزینه واقعی، سرویس بدون کسر اعتبار با خطای استاندارد `409 PRICE_CHANGED` پاسخ می‌دهد.
@@ -480,7 +480,7 @@ flowchart TD
 
 #### مرحله 16B: پیاده‌سازی و استقرار سرویس زنده چت ایجنت (`agent-service` — Agent Chat Pipeline) ✅
 - **وضعیت:** **تکمیل و اعتبارسنجی ۱۰۰٪ با موفقیت در تاریخ ۲۰۲۶-۱۰-۰۹** (کامیت‌های `b9bb702` در `api/` و `0ca0839` در `app/`).
-- **گزارش نهایی و مستندات اجرایی:** [`REPORT_BACKEND_STAGE16B.md`](../../../.task/stage16/REPORT_BACKEND_STAGE16B.md)
+- **گزارش نهایی و مستندات اجرایی:** [`REPORT_BACKEND_STAGE16B.md`](../../../../.task/archive/legacy-stages/stage16/REPORT_BACKEND_STAGE16B.md)
 - **دستاوردها:**
   1. **استقرار سرویس زنده `agent-service`:** راه‌اندازی بر بستر DualServer (پورت HTTP `8096` و gRPC `50066`) با دیتابیس اختصاصی `lemmo_agent`، جدول‌های `chat_threads`، `chat_messages`، و `message_jobs`.
   2. **حریم خصوصی مطلق پرامپت‌ها (AGENT-CHK-1):** دسترسی به Thread یا پیام سایر کاربران با خطای ۴۰۴ پاسخ داده شده و هیچ داده‌ای نشت نمی‌کند.
@@ -502,9 +502,9 @@ flowchart TD
     - اتصال فید عمومی و شوکیس محتوا با صفحه‌بندی Keyset به `feed-service` و تدوین گزارش رسمی ممیزی تطبیق سرتاسری فرانت و بک‌اند (`REPORT_STAGE17_FULLSTACK_PARITY_AND_GAP_AUDIT.md`).
 <a id="step-17b"></a><a id="مرحله-17b"></a>
   - **مرحله 17B — تکمیل حلقه سرتاسری تولید محتوا، انضباط مالی و فراخوانی ابزارها (`End-to-End MVP Content Generation Loop, Financial Hardening & Capability Invocation` — تسک فعال جاری 🎯):**
-    - **مرجع دامنه و پیگیری:** [مرجع یکپارچه و ردیاب تحویل MVP](../../../.task/active/BASELINE_MVP_CONTENT_GENERATION.md) دو گزارش ممیزی، تصمیم‌های محصول، شکاف‌ها و چک‌لیست پذیرش را تجمیع می‌کند؛ وجود پیاده‌سازی با پذیرش نسخه مستقر یکسان نیست.
+    - **مرجع دامنه و پیگیری:** [مرجع یکپارچه و ردیاب تحویل MVP](../../../../.task/active/BASELINE_MVP_CONTENT_GENERATION.md) دو گزارش ممیزی، تصمیم‌های محصول، شکاف‌ها و چک‌لیست پذیرش را تجمیع می‌کند؛ وجود پیاده‌سازی با پذیرش نسخه مستقر یکسان نیست.
     - **اصل استفاده از مالک اصلی:** ۱۱ سرویس مسیر تولید در ممیزی موجود گزارش شده‌اند؛ سرویس مالی موازی ایجاد نمی‌شود. مالک دعوت و استحقاق بتا در بسته B01 با بررسی IAM و دامنه‌های موجود تعیین می‌شود؛ فقط در صورت خلأ واقعی مسئولیت، سرویس کوچک با مسئولیت دائمی و تصویب معماری تعریف شود. ممنوعیت ADR-019 درباره Intent/Capability به ممنوعیت مطلق تمام سرویس‌های جدید تعمیم داده نمی‌شود.
-    - **بسته اولویت بحرانی P0 (مقاوم‌سازی خط تولید و انضباط مالی — مطابق [`TASK_MVP_CONTENT_GEN_P0_HARDENING.md`](../../../.task/active/TASK_MVP_CONTENT_GEN_P0_HARDENING.md)):**
+    - **بسته اولویت بحرانی P0 (مقاوم‌سازی خط تولید و انضباط مالی — مطابق [`TASK_MVP_CONTENT_GEN_P0_HARDENING.md`](../../../../.task/archive/TASK_MVP_CONTENT_GEN_P0_HARDENING.md)):**
       1. *اتصال مجدد مصرف‌کننده صف (`image-service`):* پیاده‌سازی حلقه Reconnect با بازگشت نمایی در `startRabbitConsumer` جهت حذف توقف مصرف صف در راه‌اندازی با تاخیر بروکر.
       2. *انضباط تسویه مالی با تک‌نقطه نرخ‌گذاری:* حذف مقدار هاردکد ۸ و `uuid.NewString()` تصادفی در ورکر؛ ورکر صرفاً `reservation_id` و `delivered_count` را ارسال می‌کند تا `quota-service` بر مبنای نرخ‌نامه رسمی تسویه کند؛ کلید ایدمپوتنس قطعی: `settle:{job_id}`.
       3. *آزادسازی سهمیه در شکست پراویدر ابری:* فراخوانی متد `ReleaseQuota` با کلید قطعی `release:{job_id}` در شکست/لغو قطعی مطابق سیاست مالی؛ Timeout و نتیجه نامشخص Provider ابتدا تعیین تکلیف شوند تا Retry باعث تولید پولی مضاعف نشود.
@@ -549,7 +549,7 @@ flowchart TD
 | `DEBT-CANVAS-01` | شبیه‌سازی ماک اجرای نودهای بوم در فرانت و ارکستریتور | `app/src/modules/canvas/components/CanvasWorkspaceEditor.tsx`<br>`api/services/orchestrator-service/internal/app/service.go` | در فرانت‌اند با `setTimeout(..., 1800)` تصاویر تصادفی تولید می‌شود و در `orchestrator-service` متد `executeStage` جاب واقعی ایجاد نمی‌کند. | مهاجرت کامل به مسیر اجرای مشترک `tools-service` با رزرو در سطح ران (`run_id` و `parent_reservation_id`) در مرحله 17B. |
 | `DEBT-CTX-01` | خرابی پایدار context-service پس از شکست اتصال اولیه و نگاشت کاذب ۴۰۴ به جای ۵۰۳ | `api/services/context-service/internal/adapters/clients/*_client.go`<br>`api/services/context-service/cmd/server/main.go`<br>`api/services/context-service/internal/adapters/grpc/handler.go` | کلاینت در صورت تاخیر وابستگی `nil` مانده و خطای کاذب ۴۰۴ صادر می‌کند؛ با ری‌استارت دستی کانتینر موقتاً برطرف شد (INC-2026-10-13-CONTEXT-01). | استقرار اتصال غیرمسدودکننده با تلاش مجدد خودکار، بازگرداندن ۵۰۳ در زمان اختلال، بازیابی خودکار پس از وصل سرویس بدون ری‌استارت، و تست‌های رگرسیون CI (طبق DOC-OPS-INC-002). |
 | `DEBT-IMG-01` | آسیب‌پذیری مصرف صف و انضباط مالی در ورکر تصویر | `api/services/image-service/cmd/main.go`<br>`api/services/image-service/internal/app/service.go`<br>`api/services/image-service/migrations/` | مصرف‌کننده رابیت در صورت تاخیر بروکر متوقف می‌ماند، تسویه روی عدد ۸ هاردکد است، در خطای پراویدر سهمیه آزاد نمی‌شود و جدول فاقد قید یکتایی `job_id` است. | پیاده‌سازی کامل بسته P0 شامل Reconnect صف، تسویه داینامیک، کلید قطعی `settle`/`release`، و قید یکتایی (طبق `TASK_MVP_CONTENT_GEN_P0_HARDENING.md`). |
-| `DEBT-ONBOARD-01` | وابستگی کیف‌پول و هدیه کاربر تازه به داده‌های Seed و غیاب چرخه اهدای زنده | `api/services/workspace-service/internal/app/workspace_service.go`<br>`api/services/quota-service/internal/app/service.go`<br>`api/scripts/dev_seed.go` | کاربر تازه در ثبت‌نام واقعی کیف‌پول با مانده صفر دریافت می‌کند و هیچ هدیه‌ای اعطا نمی‌شود؛ ۱۰۰۰ کردیت صرفاً در اسکریپت `dev_seed.go` هاردکد است. | پیاده‌سازی چرخه اعطای هدیه کانفیگ‌شده در بتای محدود به هویت واجد شرایط، بدون وابستگی به Seed (بسته B06 در [`.task/active/BASELINE_MVP_CONTENT_GENERATION.md`](../../../.task/active/BASELINE_MVP_CONTENT_GENERATION.md)). |
+| `DEBT-ONBOARD-01` | وابستگی کیف‌پول و هدیه کاربر تازه به داده‌های Seed و غیاب چرخه اهدای زنده | `api/services/workspace-service/internal/app/workspace_service.go`<br>`api/services/quota-service/internal/app/service.go`<br>`api/scripts/dev_seed.go` | کاربر تازه در ثبت‌نام واقعی کیف‌پول با مانده صفر دریافت می‌کند و هیچ هدیه‌ای اعطا نمی‌شود؛ ۱۰۰۰ کردیت صرفاً در اسکریپت `dev_seed.go` هاردکد است. | پیاده‌سازی چرخه اعطای هدیه کانفیگ‌شده در بتای محدود به هویت واجد شرایط، بدون وابستگی به Seed (بسته B06 در [`.task/active/BASELINE_MVP_CONTENT_GENERATION.md`](../../../../.task/active/BASELINE_MVP_CONTENT_GENERATION.md)). |
 
 
 <a id="step-18"></a><a id="سرفصل-مرحله-۱۸"></a>
@@ -667,7 +667,7 @@ flowchart TD
 | شناسه | موضوع بدهی فنی | استراتژی موقت فعلی | معیار و زمان استخراج قطعی | سند مرجع |
 | :--- | :--- | :--- | :--- | :--- |
 | **TD-001** | استخراج ابزارهای مشترک میان‌پروژه‌ای و قراردادها | مصرف مستقیم مونو-اسپک OpenAPI و بایندینگ‌های تایپ‌اسکریپت Proto از مخزن `api/` با نسخه و Commit SHA پین‌شده در Orval. | ظهور سومین ریپوی مصرف‌کننده در اکوسیستم لیمو، یا افزایش نامتعارف هزینه هماهنگی دستی تغییرات؛ استخراج به یک پکیج مستقل و نسخه‌دار در رجیستری خصوصی npm. | OQ-035 / ADR-016 |
-| **DEBT-CTX-01** | خرابی پایدار context-service پس از شکست اتصال اولیه و نگاشت کاذب ۴۰۴ به جای ۵۰۳ | ری‌استارت دستی کانتینر context-service پس از آماده‌شدن user-service. | اتصال غیرمسدودکننده با Backoff Reconnect در پس‌زمینه، بازگرداندن خطای صریح ۵۰۳ به جای ۴۰۴، و تست رگرسیون تاخیر بالا آمدن وابستگی‌ها. | DOC-OPS-INC-002 / pending-01.md |
+| **DEBT-CTX-01** | خرابی پایدار context-service پس از شکست اتصال اولیه و نگاشت کاذب ۴۰۴ به جای ۵۰۳ | ری‌استارت دستی کانتینر context-service پس از آماده‌شدن user-service. | اتصال غیرمسدودکننده با Backoff Reconnect در پس‌زمینه، بازگرداندن خطای صریح ۵۰۳ به جای ۴۰۴، و تست رگرسیون تاخیر بالا آمدن وابستگی‌ها. | [DOC-OPS-INC-002](../07-devops/incidents/INC-2026-10-13-context-service-startup-failure.md) |
 
 
 

@@ -31,7 +31,6 @@ slug: "lemmo-roadmap"
 
 ## اسناد و بازنگری‌های تکمیلی نقشه راه
 
-- [تکمیل حلقه تولید محتوای MVP در فاز دو و بازنگری نقشه راه مهندسی پلتفرم (DOC-ROAD-007)](./phase-2-mvp-content-generation-revision.md)
 - [نقشه راه جامع پیاده‌سازی گام‌به‌گام بک‌اند و گیت‌های کنترل کیفیت (DOC-BE-005)](../03-backend/roadmap.md)
-- [گزارش ممیزی تفصیلی شکاف‌های حلقه تولید محتوا (REPORT-MVP-GEN-001)](../../../.task/audits/REPORT_CONTENT_GENERATION_MVP_GAP_AUDIT.md)
+- [گزارش ممیزی تفصیلی شکاف‌های حلقه تولید محتوا (REPORT-MVP-GEN-001)](../../../../.task/audits/REPORT_CONTENT_GENERATION_MVP_GAP_AUDIT.md)
 

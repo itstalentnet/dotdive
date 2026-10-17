@@ -14,7 +14,7 @@ slug: "lemmo-incidents"
 | **Category** | `devops` |
 | **Status** | `Active` |
 | **Owner** | SRE / Core Engineering Team |
-| **Last Updated** | 2026-10-15 |
+| **Last Updated** | 2026-10-16 |
 | **Summary (EN)** | Authoritative registry of system incidents, post-mortems, root cause analyses, and permanent remediation playbooks for Lemmo platform. |
 | **Summary (FA)** | نمایه رسمی گزارش‌های کالبدشکافی رخدادها، تحلیل علل ریشه‌ای (RCA)، شواهد و راهکارهای پیشگیرانه ثبت‌شده در پلتفرم لِمو. |
 | **Tags** | `devops`, `incidents`, `post-mortem`, `sre`, `rca`, `reliability` |
@@ -61,3 +61,4 @@ slug: "lemmo-incidents"
 | شناسه | نوع | وضعیت | مرجع |
 | --- | --- | --- | --- |
 | INC-2026-10-15-DIAG-01 | موفقیت کاذب ابزار تشخیص؛ اثر محصول اثبات نشده | Open؛ ادغام در بریف مرحله یک در گام بعد | [شواهد و RCA](./INC-2026-10-15-diagnostic-tool-false-success.md) |
+| INC-2026-10-16-STB03-VERIFY-01 | موانع راستی‌آزمایی STB-03 و یافته‌های نامطمئن؛ خرابی سرویس اثبات نشده | Open؛ بررسی موردی پس از در دسترس‌شدن Docker | [یافته‌ها و اقدامات پیگیری](./INC-2026-10-16-stb03-verification-blockers.md) |

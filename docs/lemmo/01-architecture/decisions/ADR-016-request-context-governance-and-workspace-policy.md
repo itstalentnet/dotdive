@@ -225,8 +225,8 @@
 ## ۳. پیوندها و اسناد مرتبط (Traceability)
 
 - **سند مبنای گیت‌وی (اصلاح بند ۲.۳):** [`dotdive/docs/lemmo/01-architecture/decisions/ADR-013-three-tier-edge-gateway-and-bff-architecture.md`](./ADR-013-three-tier-edge-gateway-and-bff-architecture.md)
-- **سند معماری کلاینت فرانت‌اند:** [`dotdive/docs/lemmo/02-frontend/workspace-decisions.md`](../02-frontend/workspace-decisions.md)
-- **نقشه راه مرجع و جامع بک‌اند و پلتفرم:** [`dotdive/docs/lemmo/03-backend/roadmap.md`](../03-backend/roadmap.md) (DOC-BE-005)
-- **قواعد حاکمیت کدهای محرمانه و Fail-Fast:** [`dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md`](./configuration-and-secrets.md) (DOC-ARCH-009)
+- **سند معماری کلاینت فرانت‌اند:** [`dotdive/docs/lemmo/02-frontend/workspace-decisions.md`](../../02-frontend/workspace-decisions.md)
+- **نقشه راه مرجع و جامع بک‌اند و پلتفرم:** [`dotdive/docs/lemmo/03-backend/roadmap.md`](../../03-backend/roadmap.md) (DOC-BE-005)
+- **قواعد حاکمیت کدهای محرمانه و Fail-Fast:** [`dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md`](../configuration-and-secrets.md) (DOC-ARCH-009)
 
 

@@ -19,7 +19,7 @@
 > **شدت رخداد:** `SEV-1` (مسدودسازی کامل ورود به محیط استودیو برای تمامی کاربران پلتفرم)  
 > **تاریخ وقوع و مهار:** ۲۰۲۶-۱۰-۱۳  
 > **وضعیت نهایی:** برطرف‌شده، مستقر در کانتینرها و تاییدشده برای ۱۲ حساب کاربری (`Resolved, Deployed & Verified`)  
-> **ران‌بوک و راهنمای عملیاتی مرتبط:** [راهنمای عیب‌یابی و حل مشکلات پلتفرم (DOC-OPS-002)](../troubleshooting.md)
+> **ران‌بوک و راهنمای عملیاتی مرتبط:** [راهنمای عیب‌یابی و حل مشکلات پلتفرم (DOC-OPS-002)](../runbooks/RB-STUDIO-002-context-and-wallet-resolution.md)
 
 ---
 
@@ -113,7 +113,7 @@ flowchart TD
 ---
 
 ## ۷. اسناد مرتبط
-- [راهنمای جامع عیب‌یابی و مشکلات و راه‌حل‌ها (DOC-OPS-002)](../troubleshooting.md)
+- [راهنمای جامع عیب‌یابی و مشکلات و راه‌حل‌ها (DOC-OPS-002)](../runbooks/RB-STUDIO-002-context-and-wallet-resolution.md)
 - [نمایه مرکزی کالبدشکافی رخدادها (DOC-OPS-INC-000)](./index.md)
 - [نقشه راه جامع بک‌اند پلتفرم (DOC-BE-005)](../../03-backend/roadmap.md)
-- [گزارش اجرای تسک تاب‌آوری کانتکست (REPORT_CTX_001)](../../../../.task/review/REPORT_CTX_001_DOWNSTREAM_RESILIENCE_AND_RECONNECT.md)
+- [گزارش اجرای تسک تاب‌آوری کانتکست (REPORT_CTX_001)](../../../../../.task/review/REPORT_CTX_001_DOWNSTREAM_RESILIENCE_AND_RECONNECT.md)
