@@ -1,498 +1,611 @@
-# ==============================================================================
-# Lemmo Microservice Blueprint & Conformance Rules Catalog (SSOT)
-# Reference: ADR-024 (Service Blueprint & Conformance)
-# Authority: dotdive/docs/lemmo/ (SSOT)
-# Note: Tools (lemmo-cli) MUST consume this file as the authoritative catalog.
-# ==============================================================================
-version: "2.0.0"
-adr: "ADR-024"
-last_updated: "2026-10-18"
+version: 3.0.0
+adr: ADR-024
+last_updated: '2026-10-18'
 total_rules: 50
-categories:
-  static_core: 18
-  contracts_and_openapi: 8
-  events_and_messaging: 4
-  security_resilience_observability: 8
-  conditional: 5
-  live_runtime: 7
-
 rules:
-  # ============================================================================
-  # 1. Directory Structure & Packaging (Static)
-  # ============================================================================
-  - id: "SB-DIR-01"
-    name: "Clean Architecture Layer Structure"
-    domain: "directory"
-    authority: "static"
-    evaluation_mechanism: "filesystem"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md §3, dotdive/docs/lemmo/03-backend/style-guide.md §3"
-    phase: "Phase 1"
-    description: "Enforces presence of internal/domain, internal/app, internal/ports, and internal/adapters."
-
-  - id: "SB-DIR-02"
-    name: "Thin Entrypoint Main"
-    domain: "directory"
-    authority: "static"
-    evaluation_mechanism: "ast"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md §2.1, dotdive/docs/lemmo/03-backend/style-guide.md §3"
-    phase: "Phase 1"
-    description: "Requires thin cmd/main.go dedicated strictly to dependency wiring and core bootstrap invocation."
-
-  - id: "SB-DIR-03"
-    name: "Independent Go Module Definition"
-    domain: "directory"
-    authority: "static"
-    evaluation_mechanism: "filesystem"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md §2.2, dotdive/docs/lemmo/03-backend/architecture.md §2"
-    phase: "Phase 1"
-    description: "Requires go.mod in service root with module path github.com/lemmo-lab/api/services/<name>."
-
-  - id: "SB-DIR-04"
-    name: "Database Migration Structure"
-    domain: "directory"
-    authority: "static"
-    evaluation_mechanism: "filesystem"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md §3, dotdive/docs/lemmo/03-backend/style-guide.md §6"
-    phase: "Phase 1"
-    description: "Requires 6-digit golang-migrate SQL pairs in migrations/ or explicit migrations/.no_migration marker."
-
-  # ============================================================================
-  # 2. Documentation & Manifest (Static)
-  # ============================================================================
-  - id: "SB-DOC-01"
-    name: "Service Catalog Specification"
-    domain: "documentation"
-    authority: "static"
-    evaluation_mechanism: "frontmatter_parse"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md §3, dotdive/docs/lemmo/03-backend/services.md"
-    phase: "Phase 1"
-    description: "Requires service.md with complete metadata header (Title, ID, Status, Owner, Tags, Exposed Ports, Storage, Dependencies)."
-
-  - id: "SB-MAN-01"
-    name: "Machine-Readable Service Manifest"
-    domain: "manifest"
-    authority: "static"
-    evaluation_mechanism: "json_schema_validation"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-024-service-blueprint-and-conformance.md §2.4, contracts/schemas/service-manifest.json"
-    phase: "Phase 1"
-    description: "Requires valid service manifest (service.manifest.yaml or frontmatter) validated against schema; enforces 4-way parity (manifest, code, live, docs)."
-
-  # ============================================================================
-  # 3. Configuration & Secrets (Static)
-  # ============================================================================
-  - id: "SB-CFG-01"
-    name: "Versioned Configuration Default File"
-    domain: "configuration"
-    authority: "static"
-    evaluation_mechanism: "filesystem"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md §2, dotdive/docs/lemmo/09-governance/rules.md §۲.۵"
-    phase: "Phase 1"
-    description: "Requires config/default.yaml for non-sensitive defaults, loaded exclusively through api/core/config."
-
-  - id: "SB-CFG-02"
-    name: "Startup Fail-Fast Validation"
-    domain: "configuration"
-    authority: "static"
-    evaluation_mechanism: "ast"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md §3"
-    phase: "Phase 1"
-    description: "Requires implementation of config.Validator (Validate() error) on service config struct to abort on invalid state."
-
-  - id: "SB-CFG-03"
-    name: "Secret Hardcoding Fallback Ban"
-    domain: "security"
-    authority: "static"
-    evaluation_mechanism: "ast"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md §1, dotdive/docs/lemmo/09-governance/rules.md §۲.۲"
-    phase: "Phase 1"
-    description: "Prohibits fallback default values for sensitive secrets in source code; missing secrets must fail-fast with exit code 1."
-
-  - id: "SB-CFG-04"
-    name: "Operational Literal Constants Ban"
-    domain: "configuration"
-    authority: "static"
-    evaluation_mechanism: "ast"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md §2.4, dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md §1"
-    phase: "Phase 1"
-    description: "Automated AST gate prohibits literal port numbers and addresses in listen/dial calls; remaining variable constants subject to manual review."
-
-  # ============================================================================
-  # 4. Deployment & Docker Hygiene (Static)
-  # ============================================================================
-  - id: "SB-DEP-01"
-    name: "Service-Owned Deployment Composition"
-    domain: "deployment"
-    authority: "static"
-    evaluation_mechanism: "filesystem"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md §2.1, dotdive/docs/lemmo/07-devops/docker-spec.md §3.3"
-    phase: "Phase 1"
-    description: "Requires deploy/compose.yaml and deploy/config/ for modular inclusion into root dev compose via native include:."
-
-  - id: "SB-DEP-02"
-    name: "Single Multi-Stage Dockerfile"
-    domain: "deployment"
-    authority: "static"
-    evaluation_mechanism: "filesystem"
-    doc_ref: "dotdive/docs/lemmo/07-devops/docker-spec.md §4.3"
-    phase: "Phase 1"
-    description: "Requires exactly one multi-stage Dockerfile in service root; bans rogue Dockerfile.dev variants."
-
-  - id: "SB-DEP-03"
-    name: "Container Role-Based Naming"
-    domain: "deployment"
-    authority: "static"
-    evaluation_mechanism: "yaml_lint"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md §2.3, dotdive/docs/lemmo/07-devops/docker-spec.md §3.1-§3.2"
-    phase: "Phase 1"
-    description: "Requires container_name: lemmo-svc-<name> in deploy/compose.yaml; bans third-party tool names."
-
-  - id: "SB-DEP-04"
-    name: "Build Provenance Logging in Startup"
-    domain: "deployment"
-    authority: "static"
-    evaluation_mechanism: "content_match"
-    doc_ref: "dotdive/docs/lemmo/07-devops/docker-spec.md §4.5"
-    phase: "Phase 1"
-    description: "Requires injection of ARG GIT_COMMIT and ARG BUILD_TIME in Dockerfile and mandatory logging in startup line."
-
-  # ============================================================================
-  # 5. Versioning, Changelog & Generated Files (Static)
-  # ============================================================================
-  - id: "SB-VER-01"
-    name: "Human-Curated Changelog"
-    domain: "versioning"
-    authority: "static"
-    evaluation_mechanism: "filesystem"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md §2.6, dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md §2.1"
-    phase: "Phase 1"
-    description: "Requires CHANGELOG.md in service root conforming to Keep a Changelog standard."
-
-  - id: "SB-VER-02"
-    name: "Semantic Versioning and Module Git Tags"
-    domain: "versioning"
-    authority: "static"
-    evaluation_mechanism: "git_tags"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md §2.3-§2.4, dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md §2.1"
-    phase: "Phase 1"
-    description: "Requires SemVer compliance and prefixed git tags matching services/<name>/vX.Y.Z."
-
-  - id: "SB-IMG-01"
-    name: "Source-Derived Image Tagging & Retention Policy"
-    domain: "deployment"
-    authority: "static"
-    evaluation_mechanism: "compose_lint"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md §2.5, dotdive/docs/lemmo/07-devops/docker-spec.md §4.6"
-    phase: "Phase 1"
-    description: "Enforces image tag derivation from official service SemVer (lemmo/svc-<name>:vX.Y.Z) and 3-version retention."
-
-  - id: "SB-HDR-01"
-    name: "Generated File Provenance Header & Zero-Diff"
-    domain: "governance"
-    authority: "static"
-    evaluation_mechanism: "content_match"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md §2.3-§2.4"
-    phase: "Phase 1"
-    description: "Requires immutable 4-field header in all generated files (tool name, tool version, source contract SHA, edit warning) and Zero-Diff in CI."
-
-  # ============================================================================
-  # 6. Contracts, OpenAPI & Client SDK (Static — REV-2 A1..A8)
-  # ============================================================================
-  - id: "SB-CTR-01"
-    name: "Protobuf Contracts Centralization & Buf Lint"
-    domain: "contracts"
-    authority: "static"
-    evaluation_mechanism: "filesystem_and_buf"
-    doc_ref: "dotdive/docs/lemmo/03-backend/contracts.md §1, §4, dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md §2"
-    phase: "Phase 1"
-    description: "Requires service proto contracts in api/contracts/lemmo/v1/, referenced from service.md; bans local proto files in service; enforces buf lint & buf breaking."
-
-  - id: "SB-CTR-02"
-    name: "Domain OpenAPI Specification & Single Ownership"
-    domain: "contracts"
-    authority: "static"
-    evaluation_mechanism: "filesystem"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md §2.14, dotdive/docs/lemmo/01-architecture/decisions/ADR-018-image-generation-ownership-boundary-and-state-machine.md §2.6"
-    phase: "Phase 1"
-    description: "Requires public HTTP services to have exactly one contracts/openapi/<domain>/v1/openapi.yaml owned by the service; 'one path, one contract, one owner'."
-
-  - id: "SB-CTR-03"
-    name: "OpenAPI Operation Compliance"
-    domain: "contracts"
-    authority: "static"
-    evaluation_mechanism: "openapi_lint"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md §2.2, dotdive/docs/lemmo/.task/templates/COMPLIANCE_CHECKLIST_TEMPLATE_V1.md §K-02"
-    phase: "Phase 1"
-    description: "Every operation in OpenAPI must declare a unique operationId and explicit x-lemmo-workspace-policy metadata."
-
-  - id: "SB-CTR-04"
-    name: "OpenAPI Breaking Changes Gate"
-    domain: "contracts"
-    authority: "static"
-    evaluation_mechanism: "oasdiff"
-    doc_ref: "dotdive/docs/lemmo/.task/templates/COMPLIANCE_CHECKLIST_TEMPLATE_V1.md §K-03"
-    phase: "Phase 1"
-    description: "Breaking changes on existing endpoints are prohibited without API version increment; enforced via oasdiff in CI."
-
-  - id: "SB-CTR-05"
-    name: "HTTP Error Envelope Conformance"
-    domain: "contracts"
-    authority: "static"
-    evaluation_mechanism: "openapi_lint"
-    doc_ref: "dotdive/docs/lemmo/03-backend/contracts.md §5.3, dotdive/docs/lemmo/03-backend/style-guide.md §4"
-    phase: "Phase 1"
-    description: "All HTTP error responses must reference contracts/openapi/shared/errors.yaml (RFC 7807 ProblemDetails with reason and help_key)."
-
-  - id: "SB-CTR-06"
-    name: "Mutating Operation Idempotency Key"
-    domain: "contracts"
-    authority: "static"
-    evaluation_mechanism: "openapi_and_ast"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md §2.10, dotdive/docs/lemmo/.task/templates/COMPLIANCE_CHECKLIST_TEMPLATE_V1.md §S-04"
-    phase: "Phase 1"
-    description: "Mutating operations (POST/PUT/PATCH) must declare Idempotency-Key header in OpenAPI and wire core/idempotency middleware."
-
-  - id: "SB-CTR-07"
-    name: "Gateway Route ↔ OpenAPI Contract Bidirectional Parity"
-    domain: "contracts"
-    authority: "static"
-    evaluation_mechanism: "contract_lint"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-013-edge-gateway-and-transport-layer.md §2.1, dotdive/docs/lemmo/.task/templates/COMPLIANCE_CHECKLIST_TEMPLATE_V1.md §K-04"
-    phase: "Phase 1"
-    description: "Bidirectional parity between Kong routes in infra/gateway and OpenAPI specs: no route without contract, no public contract without route."
-
-  - id: "SB-CTR-08"
-    name: "Frontend SDK Freshness Zero-Diff"
-    domain: "contracts"
-    authority: "static"
-    evaluation_mechanism: "zero_diff"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md §2.4, dotdive/docs/lemmo/.task/templates/COMPLIANCE_CHECKLIST_TEMPLATE_V1.md §K-05"
-    phase: "Phase 1"
-    description: "Enforces zero uncommitted diff in app/ generated client SDK code upon re-running Orval against OpenAPI contracts in CI."
-
-  # ============================================================================
-  # 7. Events, Outbox & Messaging (Static — R9, A9)
-  # ============================================================================
-  - id: "SB-EVT-01"
-    name: "Transactional Outbox Publishing"
-    domain: "messaging"
-    authority: "static"
-    evaluation_mechanism: "ast"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md §2, §5, dotdive/docs/lemmo/03-backend/style-guide.md §7"
-    phase: "Phase 1"
-    description: "Commercial domain events must be published transactionally via api/core/outbox; direct non-transactional broker publishing is banned."
-
-  - id: "SB-EVT-02"
-    name: "Standard Event Envelope Conformance"
-    domain: "messaging"
-    authority: "static"
-    evaluation_mechanism: "ast"
-    doc_ref: "dotdive/docs/lemmo/03-backend/contracts.md §2, dotdive/docs/lemmo/03-backend/style-guide.md §7"
-    phase: "Phase 1"
-    description: "Enforces event envelope schema compliance (event_id, event_type, occurred_at, payload) matching platform contract definitions."
-
-  - id: "SB-EVT-03"
-    name: "Traceparent Propagation in Async Events"
-    domain: "messaging"
-    authority: "static"
-    evaluation_mechanism: "ast"
-    doc_ref: "dotdive/docs/lemmo/09-governance/current-path.md §F-7, dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md M0-02"
-    phase: "Phase 1"
-    description: "Mandatory injection of W3C traceparent into Outbox message headers upon publication and context reconstruction in consumers."
-
-  - id: "SB-EVT-04"
-    name: "Central Event Catalog Registration"
-    domain: "messaging"
-    authority: "static"
-    evaluation_mechanism: "contract_lint"
-    doc_ref: "dotdive/docs/lemmo/03-backend/contracts.md §2.1-§2.2"
-    phase: "Phase 1"
-    description: "Every published event name must be formally registered in contracts/lemmo/v1/events.proto / platform event registry."
-
-  # ============================================================================
-  # 8. Security, Resilience & Observability (Static — A10..A12, C6)
-  # ============================================================================
-  - id: "SB-SEC-01"
-    name: "Service Identity & Auth Interceptor"
-    domain: "security"
-    authority: "static"
-    evaluation_mechanism: "ast"
-    doc_ref: "dotdive/docs/lemmo/03-backend/iam-service-spec.md §1.3, §6"
-    phase: "Phase 1"
-    description: "Service must wire core auth interceptor in bootstrap and propagate identity context metadata in internal RPC calls."
-
-  - id: "SB-RES-01"
-    name: "Call Resilience & Non-blocking Dials"
-    domain: "resilience"
-    authority: "static"
-    evaluation_mechanism: "ast"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md §5"
-    phase: "Phase 1"
-    description: "External and RPC dials must specify deadline/timeout and retry policy via versioned config; blocking dials without context/timeout are strictly forbidden."
-
-  - id: "SB-RES-02"
-    name: "Graceful Shutdown Lifecycle"
-    domain: "resilience"
-    authority: "static"
-    evaluation_mechanism: "ast"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md §9"
-    phase: "Phase 1"
-    description: "Service must handle SIGTERM/SIGINT, stop accepting new requests, drain in-flight connections within Grace Period, and close DB/queue cleanly."
-
-  - id: "SB-LOG-01"
-    name: "Standard Structured JSON Logging"
-    domain: "observability"
-    authority: "static"
-    evaluation_mechanism: "ast"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md M0-03, dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §11.1"
-    phase: "Phase 1"
-    description: "Logs must be structured JSON emitted to stdout using core/bootstrap / slog; fmt.Print is banned in service code."
-
-  - id: "SB-LOG-02"
-    name: "Contextual Request & Hop Logging"
-    domain: "observability"
-    authority: "static"
-    evaluation_mechanism: "ast"
-    doc_ref: "dotdive/docs/lemmo/.task/templates/COMPLIANCE_CHECKLIST_TEMPLATE_V1.md §S-05"
-    phase: "Phase 1"
-    description: "Logs must carry request_id, hop count, and user/workspace IDs where applicable, with strict exclusion of PII and credentials."
-
-  - id: "SB-TRC-01"
-    name: "W3C Distributed Tracing"
-    domain: "observability"
-    authority: "static"
-    evaluation_mechanism: "ast"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md M0-02, dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §11.2"
-    phase: "Phase 1"
-    description: "Requires core/middleware.TraceInterceptor() wired in all gRPC and HTTP handlers to extract and echo W3C traceparent."
-
-  - id: "SB-ERR-01"
-    name: "Central Error Catalog AIP-193 Conformance"
-    domain: "observability"
-    authority: "static"
-    evaluation_mechanism: "ast"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md §1, dotdive/docs/lemmo/03-backend/style-guide.md §4"
-    phase: "Phase 1"
-    description: "Business errors must be returned as google.rpc.Status containing ErrorInfo with reason referencing contracts/platform/errors.proto."
-
-  - id: "SB-TST-01"
-    name: "Live Test Directory & Makefile Targets"
-    domain: "testing"
-    authority: "static"
-    evaluation_mechanism: "filesystem_and_makefile"
-    doc_ref: "AGENTS.md §4, dotdive/docs/lemmo/03-backend/style-guide.md §3"
-    phase: "Phase 1"
-    description: "Live tests must reside in tests/live/ with standard test and verify-live Makefile targets; test binaries in cmd/ are banned."
-
-  # ============================================================================
-  # 9. Conditional Rules Based on Service Capabilities (Static/Conditional — B3)
-  # ============================================================================
-  - id: "SB-CND-JSON"
-    name: "JSON Schema Validation for Dynamic Payloads"
-    domain: "contracts"
-    authority: "conditional"
-    evaluation_mechanism: "ast"
-    doc_ref: "dotdive/docs/lemmo/03-backend/contracts.md §schemas"
-    phase: "Phase 1"
-    description: "Services accepting dynamic JSON payloads (e.g. project-graph, plugins) must validate payloads against schemas in contracts/schemas/."
-
-  - id: "SB-CND-SSRF"
-    name: "SSRF-Safe Outbound Client"
-    domain: "security"
-    authority: "conditional"
-    evaluation_mechanism: "ast"
-    doc_ref: "dotdive/docs/lemmo/09-governance/rules.md §۲"
-    phase: "Phase 1"
-    description: "Services performing outbound external HTTP calls must use an SSRF-safe HTTP client with private IP blacklisting and DNS pinning."
-
-  - id: "SB-CND-TENANT"
-    name: "Storage Tenant Prefix Isolation"
-    domain: "storage"
-    authority: "conditional"
-    evaluation_mechanism: "ast"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md §2.8"
-    phase: "Phase 1"
-    description: "Services writing objects to storage-service / MinIO must enforce tenant path prefix (<workspace_id>/...) on all keys."
-
-  - id: "SB-CND-RATE"
-    name: "Billable Usage Reporting"
-    domain: "billing"
-    authority: "conditional"
-    evaluation_mechanism: "ast"
-    doc_ref: "dotdive/docs/lemmo/.task/templates/COMPLIANCE_CHECKLIST_TEMPLATE_V1.md §M-01"
-    phase: "Phase 1"
-    description: "Billable services invoking AI models/providers must report usage metrics to quota-service / financial ledger per official rate card."
-
-  - id: "SB-CND-REF"
-    name: "Reference Data Architectural Pattern"
-    domain: "architecture"
-    authority: "conditional"
-    evaluation_mechanism: "ast"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-012-reference-data-architecture-and-model-pricing.md"
-    phase: "Phase 1"
-    description: "Services utilizing static lookup data or provider catalog must query reference-data-service instead of maintaining local duplicates."
-
-  # ============================================================================
-  # 10. Live Runtime Probes (make verify-live / make doctor — D3b, B1, B2)
-  # ============================================================================
-  - id: "SB-RT-01"
-    name: "Honest Dependency Readiness Probe"
-    domain: "runtime"
-    authority: "live"
-    evaluation_mechanism: "network_probe"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md §3, dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §11.4"
-    phase: "Phase 1"
-    description: "Queries /readyz endpoint; service must ping all critical dependencies (PostgreSQL, Redis, RabbitMQ, downstreams); fake UP banned."
-
-  - id: "SB-RT-02"
-    name: "Runtime Version, Commit & Container Digest Parity"
-    domain: "runtime"
-    authority: "live"
-    evaluation_mechanism: "network_probe"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md §2.1-§2.5, dotdive/docs/lemmo/07-devops/docker-spec.md §4.5"
-    phase: "Phase 1"
-    description: "Compares running version, git commit, and container image digest reported in health metadata against repository tags and docker inspect."
-
-  - id: "SB-RT-03"
-    name: "Live W3C Traceparent Echo Probe"
-    domain: "runtime"
-    authority: "live"
-    evaluation_mechanism: "network_probe"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md M0-02, dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §11.2"
-    phase: "Phase 1"
-    description: "Sends probe request with traceparent header; validates returned TraceID matches probe and corresponding JSON log emitted to stdout."
-
-  - id: "SB-RT-04"
-    name: "Live Outbox Health & Broker Connectivity Probe"
-    domain: "runtime"
-    authority: "live"
-    evaluation_mechanism: "network_probe"
-    doc_ref: "dotdive/docs/lemmo/09-governance/current-path.md §F-7, dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md §2"
-    phase: "Phase 1 (F-7)"
-    description: "Queries service health metadata for Outbox pending/failed counts, oldest pending message age, and live RabbitMQ broker channel status (no direct DB queries)."
-
-  - id: "SB-RT-05"
-    name: "Controlled Read-Only AIP-193 Error Probe"
-    domain: "runtime"
-    authority: "live"
-    evaluation_mechanism: "network_probe"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md §1, dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md M0-04"
-    phase: "Phase 1"
-    description: "Calls read-only endpoint with intentional zero UUID; validates AIP-193 status error envelope with reason, owner_service, and request_id."
-
-  - id: "SB-RT-06"
-    name: "Live Security & IDOR Tenant Isolation Probe"
-    domain: "runtime"
-    authority: "live"
-    evaluation_mechanism: "network_probe"
-    doc_ref: "dotdive/docs/lemmo/.task/templates/COMPLIANCE_CHECKLIST_TEMPLATE_V1.md §S-03, dotdive/docs/lemmo/01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md"
-    phase: "Phase 2"
-    description: "Probes endpoint without auth token (expects 401) and with valid token accessing resource of another workspace (expects 404/403 IDOR rejection)."
-
-  - id: "SB-RT-07"
-    name: "Edge Gateway Route Accessibility Probe"
-    domain: "runtime"
-    authority: "live"
-    evaluation_mechanism: "network_probe"
-    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-013-edge-gateway-and-transport-layer.md §2.1"
-    phase: "Phase 5"
-    description: "End-to-end journey probe verifying route reachability and CORS/header propagation from external Kong edge gateway."
+- id: SB-DIR-01
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md
+    §3, dotdive/docs/lemmo/03-backend/style-guide.md §3
+  enforced_by: lemmo-cli check
+- id: SB-DIR-02
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md
+    §2.1, dotdive/docs/lemmo/03-backend/style-guide.md §3
+  enforced_by: lemmo-cli check
+- id: SB-DIR-03
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md
+    §2.2, dotdive/docs/lemmo/03-backend/architecture.md §2
+  enforced_by: lemmo-cli check
+- id: SB-DIR-04
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: manifest.storage.postgres == true
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md
+    §3, dotdive/docs/lemmo/03-backend/style-guide.md §6
+  enforced_by: lemmo-cli check
+- id: SB-DOC-01
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  - packaged-engine
+  - planned-stub
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md
+    §3, dotdive/docs/lemmo/03-backend/services.md
+  enforced_by: lemmo-cli check
+- id: SB-MAN-01
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  - packaged-engine
+  - planned-stub
+  applies_when: always
+  automation: not_implemented
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-024-service-blueprint-and-conformance.md
+    §3
+  enforced_by: lemmo-cli check
+- id: SB-CFG-01
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md §2, dotdive/docs/lemmo/09-governance/rules.md
+    §۲.۵
+  enforced_by: lemmo-cli check
+- id: SB-CFG-02
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md §3
+  enforced_by: lemmo-cli check
+- id: SB-CFG-03
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md §1, dotdive/docs/lemmo/09-governance/rules.md
+    §۲.۲
+  enforced_by: lemmo-cli check
+- id: SB-CFG-04
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: partial
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md
+    §2.4, dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md §1
+  enforced_by: lemmo-cli check
+- id: SB-DEP-01
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  - packaged-engine
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md
+    §2.1, dotdive/docs/lemmo/07-devops/docker-spec.md §3.3
+  enforced_by: lemmo-cli check
+- id: SB-DEP-02
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/07-devops/docker-spec.md §4.3
+  enforced_by: lemmo-cli check
+- id: SB-DEP-03
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  - packaged-engine
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md
+    §2.3, dotdive/docs/lemmo/07-devops/docker-spec.md §3.1
+  enforced_by: lemmo-cli check
+- id: SB-DEP-04
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/07-devops/docker-spec.md §4.5
+  enforced_by: lemmo-cli check
+- id: SB-VER-01
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md
+    §2.6, dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md
+    §2.1
+  enforced_by: lemmo-cli check
+- id: SB-VER-02
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md
+    §2.3, dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md
+    §2.1
+  enforced_by: lemmo-cli check
+- id: SB-IMG-01
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md
+    §2.5, dotdive/docs/lemmo/07-devops/docker-spec.md §4.6
+  enforced_by: lemmo-cli check
+- id: SB-HDR-01
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md
+    §2.3-§2.4
+  enforced_by: lemmo-cli check
+- id: SB-CTR-01
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: manifest.contracts.proto.size() > 0
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/03-backend/contracts.md §1, dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md
+    §2
+  enforced_by: lemmo-cli check
+- id: SB-CTR-02
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: manifest.contracts.openapi_domain != null
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md
+    §2.14, dotdive/docs/lemmo/01-architecture/decisions/ADR-018-tools-platform-architecture-unified-execution-and-domain-decoupling.md
+    §2.6
+  enforced_by: lemmo-cli check
+- id: SB-CTR-03
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: manifest.contracts.openapi_domain != null
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md
+    §2.2
+  enforced_by: lemmo-cli check
+- id: SB-CTR-04
+  check: static
+  scope: platform
+  applies_to:
+  - go-service
+  - packaged-engine
+  applies_when: manifest.contracts.openapi_domain != null
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/03-backend/contracts.md §3.2, dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md
+    §2.3
+  enforced_by: ci:oasdiff
+- id: SB-CTR-05
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: manifest.networking.inbound_http_port != null
+  automation: partial
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/03-backend/style-guide.md §4.3, dotdive/docs/lemmo/03-backend/contracts.md
+    §5.3
+  enforced_by: lemmo-cli check
+- id: SB-CTR-06
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: manifest.capabilities.idempotency == true
+  automation: partial
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md
+    §2.10
+  enforced_by: lemmo-cli check
+- id: SB-CTR-07
+  check: static
+  scope: platform
+  applies_to:
+  - go-service
+  - packaged-engine
+  applies_when: manifest.contracts.openapi_domain != null
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-013-three-tier-edge-gateway-and-bff-architecture.md
+    §2.1
+  enforced_by: ci:gateway-route-conformance
+- id: SB-CTR-08
+  check: static
+  scope: platform
+  applies_to:
+  - go-service
+  applies_when: manifest.contracts.openapi_domain != null
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md
+    §2.4, dotdive/docs/lemmo/01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md
+    §2.14
+  enforced_by: ci:frontend-sdk-zero-diff
+- id: SB-EVT-01
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: manifest.events.published.size() > 0
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/03-backend/architecture.md §2, dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md
+    §2
+  enforced_by: lemmo-cli check
+- id: SB-EVT-02
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: manifest.events.published.size() > 0
+  automation: partial
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/03-backend/contracts.md §2
+  enforced_by: lemmo-cli check
+- id: SB-EVT-03
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: manifest.events.published.size() > 0 || manifest.events.consumed.size()
+    > 0
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/09-governance/current-path.md#f-7, dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md
+    §M0-02
+  enforced_by: lemmo-cli check
+- id: SB-EVT-04
+  check: static
+  scope: platform
+  applies_to:
+  - go-service
+  applies_when: manifest.events.published.size() > 0
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/03-backend/contracts.md §2.1-§2.2
+  enforced_by: ci:event-registry-lint
+- id: SB-SEC-01
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: manifest.capabilities.auth_interceptor == true
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/03-backend/iam-service-spec.md §1.3, dotdive/docs/lemmo/01-architecture/secure-system-design.md
+    §الگوی ۱
+  enforced_by: lemmo-cli check
+- id: SB-RES-01
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md
+    §5
+  enforced_by: lemmo-cli check
+- id: SB-RES-02
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: manifest.capabilities.graceful_shutdown == true
+  automation: partial
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md
+    §متن تصمیم پیشنهادی، بند ۹
+  enforced_by: lemmo-cli check
+- id: SB-LOG-01
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md
+    §M0-03, dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §11.1
+  enforced_by: lemmo-cli check
+- id: SB-LOG-02
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: partial
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §11.2, dotdive/docs/lemmo/01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md
+    §2.2, dotdive/docs/lemmo/01-architecture/secure-system-design.md §الگوی ۱
+  enforced_by: lemmo-cli check
+- id: SB-TRC-01
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md
+    §M0-02
+  enforced_by: lemmo-cli check
+- id: SB-ERR-01
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md
+    §1, dotdive/docs/lemmo/03-backend/style-guide.md §4.1
+  enforced_by: lemmo-cli check
+- id: SB-TST-01
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: AGENTS.md §4, dotdive/docs/lemmo/03-backend/style-guide.md §3
+  enforced_by: lemmo-cli check
+- id: SB-CND-JSON
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: manifest.capabilities.dynamic_payload == true
+  automation: full
+  roadmap_stage: 2
+  gate: new_service
+  doc_ref: dotdive/docs/lemmo/03-backend/contracts.md §3.2
+  enforced_by: lemmo-cli check
+- id: SB-CND-SSRF
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: manifest.networking.external_outbound == true
+  automation: partial
+  roadmap_stage: 2
+  gate: new_service
+  doc_ref: dotdive/docs/lemmo/01-architecture/secure-system-design.md §الگوی ۴, dotdive/docs/lemmo/03-backend/style-guide.md
+    §8.4
+  enforced_by: lemmo-cli check
+- id: SB-CND-TENANT
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: manifest.storage.object_storage == true
+  automation: full
+  roadmap_stage: 2
+  gate: new_service
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md
+    §2.8
+  enforced_by: lemmo-cli check
+- id: SB-CND-RATE
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: manifest.billable == true
+  automation: partial
+  roadmap_stage: 2
+  gate: new_service
+  doc_ref: dotdive/docs/lemmo/03-backend/credit-and-ledger.md §1, dotdive/docs/lemmo/01-architecture/decisions/ADR-018-tools-platform-architecture-unified-execution-and-domain-decoupling.md
+    §2.6
+  enforced_by: lemmo-cli check
+- id: SB-CND-REF
+  check: static
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: manifest.capabilities.reference_data == true
+  automation: partial
+  roadmap_stage: 2
+  gate: new_service
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-012-reference-data-registry-and-client-cache.md
+    §2
+  enforced_by: lemmo-cli check
+- id: SB-RT-01
+  check: live
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md
+    §3
+  enforced_by: make verify-live
+- id: SB-RT-02
+  check: live
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md
+    §2.1-§2.5
+  enforced_by: make verify-live
+- id: SB-RT-03
+  check: live
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md
+    §M0-02
+  enforced_by: make verify-live
+- id: SB-RT-04
+  check: live
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: manifest.events.published.size() > 0
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/09-governance/current-path.md#f-7
+  enforced_by: make verify-live
+- id: SB-RT-05
+  check: live
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: always
+  automation: full
+  roadmap_stage: 1
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md
+    §1
+  enforced_by: make verify-live
+- id: SB-RT-06
+  check: live
+  scope: service
+  applies_to:
+  - go-service
+  applies_when: manifest.capabilities.auth_interceptor == true
+  automation: full
+  roadmap_stage: 2
+  gate: new_service
+  doc_ref: dotdive/docs/lemmo/01-architecture/secure-system-design.md §الگوی ۲, dotdive/docs/lemmo/01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md
+    §2.2-§2.4
+  enforced_by: make verify-live
+- id: SB-RT-07
+  check: live
+  scope: platform
+  applies_to:
+  - go-service
+  - packaged-engine
+  applies_when: manifest.contracts.openapi_domain != null
+  automation: full
+  roadmap_stage: 5
+  gate: new_service
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-013-three-tier-edge-gateway-and-bff-architecture.md
+    §2.1
+  enforced_by: ci:edge-gateway-probe

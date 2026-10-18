@@ -7,8 +7,8 @@
 | **Status** | `Draft` |
 | **Owner** | Platform Architecture & Tech Lead |
 | **Last Updated** | 2026-10-18 |
-| **Summary (EN)** | Authoritative specification for Lemmo microservice blueprint, 50 canonical conformance rules (SSOT rules.yaml), machine-readable service manifest, contracts and OpenAPI governance, static AST verification via lemmo-cli, and live runtime probes aggregated into make doctor. |
-| **Summary (FA)** | سند رسمی الگوی استاندارد میکروسرویس‌های لیمو، کاتالوگ ۵۰ گانه قواعد انطباق (SSOT)، مانیفست ماشین‌خوان سرویس، حاکمیت قراردادها و OpenAPI، اعتبارسنجی ایستا با lemmo-cli و آزمون‌های زنده متصل به make doctor. |
+| **Summary (EN)** | Authoritative specification for Lemmo microservice blueprint, 50 canonical conformance rules codified in machine-readable ADR-024.rules.yaml, service manifest schema, contracts and OpenAPI governance, static AST verification via lemmo-cli, and live runtime probes aggregated into make doctor. |
+| **Summary (FA)** | سند رسمی الگوی استاندارد میکروسرویس‌های لیمو، کاتالوگ ۵۰ گانه قواعد انطباق ماشین‌خوان در ADR-024.rules.yaml، مانیفست سرویس، حاکمیت قراردادها و OpenAPI، اعتبارسنجی ایستا با lemmo-cli و آزمون‌های زنده متصل به make doctor. |
 | **Tags** | `adr`, `blueprint`, `conformance`, `lemmo-cli`, `manifest`, `contracts`, `openapi`, `make-doctor`, `zero-diff` |
 
 ---
@@ -16,7 +16,7 @@
 # ADR-024: الگوی استاندارد میکروسرویس، اسکلت مرجع، مانیفست سرویس و اعتبارسنج انطباق
 
 > 📖 **منبع یگانه حقیقت قواعد (SSOT):**  
-> کاتالوگ جامع و رسمی کلیه قواعد این تصمیم در فایل داده‌ای ماشین‌خوان [`ADR-024.rules.yaml`](./ADR-024.rules.yaml) تعریف شده است. ابزار `lemmo-cli` مستقیماً این فایل را مصرف کرده و به عنوان مجری استانداردهای مستند عمل می‌نماید (تولید سند از کد ملغی است).
+> کاتالوگ جامع و رسمی کلیه قواعد این تصمیم در فایل داده‌ای ماشین‌خوان [`ADR-024.rules.yaml`](./ADR-024.rules.yaml) (منطبق بر اسکیمای [`rules-catalog.schema.json`](./rules-catalog.schema.json)) تعریف شده است. ابزار `lemmo-cli` مستقیماً این فایل را مصرف کرده و به عنوان مجری استانداردهای مستند عمل می‌نماید (تولید سند از کد ملغی است).
 
 ---
 
@@ -25,7 +25,7 @@
 در پی بازبینی‌های فنی و دستور مالک محصول مورخ ۲۰۲۶-۱۰-۱۸، مقرر گردید پیش از آغاز توسعه سرویس‌های جدید فاز ۲ (نظیر Access/Promo تحت ADR-025)، تمامی سرویس‌های پلتفرم از یک معماری استاندارد، زیرساخت یکپارچه، قراردادهای معتبر (Proto / OpenAPI)، مانیفست هویتی ماشین‌خوان و سازوکار ارزیابی ماشینی پیروی کنند.
 
 ### اصل حاکم بر حقیقت (Authoritative Baseline Invariant):
-> **هیچ سرویس پیاده‌سازی‌شده‌ای مرجع حقیقت نیست.** استانداردهای الگو و آزمون‌های انطباق منحصراً از اسناد معماری، تصمیمات مصوب بالادستی ([ADR-007](./ADR-007-backend-contracts-and-tooling-standards.md)، [ADR-008](./ADR-008-internal-tooling-and-versioning-governance.md)، [ADR-009](./ADR-009-service-owned-deployment-and-financial-ledger.md)، [ADR-013](./ADR-013-three-tier-edge-gateway-and-bff-architecture.md)، [ADR-016](./ADR-016-request-context-governance-and-workspace-policy.md)، [ADR-022](./ADR-022-platform-reliability-and-observability.md)، [ADR-023](./ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md)) و راهنماهای مرجع استخراج می‌گردند.
+> **هیچ سرویس پیاده‌سازی‌شده‌ای مرجع حقیقت نیست.** استانداردهای الگو و آزمون‌های انطباق منحصراً از اسناد معماری، تصمیمات مصوب بالادستی ([ADR-007](./ADR-007-backend-contracts-and-tooling-standards.md)، [ADR-008](./ADR-008-internal-tooling-and-versioning-governance.md)، [ADR-009](./ADR-009-service-owned-deployment-and-financial-ledger.md)، [ADR-012](./ADR-012-reference-data-registry-and-client-cache.md)، [ADR-013](./ADR-013-three-tier-edge-gateway-and-bff-architecture.md)، [ADR-016](./ADR-016-request-context-governance-and-workspace-policy.md)، [ADR-018](./ADR-018-tools-platform-architecture-unified-execution-and-domain-decoupling.md)، [ADR-022](./ADR-022-platform-reliability-and-observability.md)، [ADR-023](./ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md)) و راهنماهای مرجع استخراج می‌گردند.
 
 ---
 
@@ -41,8 +41,8 @@
 | **`SB-DIR-02`** | **نقطه ورود باریک (Thin Entrypoint):** وجود فایل تک‌منظوره `cmd/main.go` صرفاً جهت سیم‌کشی و فراخوانی لایف‌سایکل بوت‌استرپ مشترک؛ منع پیاده‌سازی لاجیک بیزینسی در این فایل. | `ast` | [ADR-008 §2.1](./ADR-008-internal-tooling-and-versioning-governance.md)، [DOC-BE-004 §3](../../03-backend/style-guide.md) |
 | **`SB-DIR-03`** | **ماژول مستقل Go:** وجود فایل معتبر `go.mod` در ریشه سرویس با پیشوند رسمی `github.com/lemmo-lab/api/services/<name>`. | `filesystem` | [ADR-008 §2.2](./ADR-008-internal-tooling-and-versioning-governance.md)، [DOC-BE-001 §2](../../03-backend/architecture.md) |
 | **`SB-DIR-04`** | **مایگریشن‌های دیتابیس:** وجود پوشه `migrations/` حاوی زوج‌فایل‌های SQL ۶رقمی یا نشانگر صریح `migrations/.no_migration`. | `filesystem` | [ADR-007 §3](./ADR-007-backend-contracts-and-tooling-standards.md)، [DOC-BE-004 §6](../../03-backend/style-guide.md) |
-| **`SB-DOC-01`** | **شناسنامه سرویس (`service.md`):** وجود فایل شناسنامه در ریشه سرویس با جدول متادیتای کامل مطابق DOC-BE-002. | `frontmatter_parse` | [ADR-007 §3](./ADR-007-backend-contracts-and-tooling-standards.md)، [DOC-BE-002](../../03-backend/services.md) |
-| **`SB-MAN-01`** | **مانیفست ماشین‌خوان سرویس (A15):** وجود فایل مانیفست معتبر منطبق بر اسکیمای `contracts/schemas/service-manifest.json` و برقراری انطباق چهارجانبه (مانیفست، کد، لایو، مستندات). | `json_schema` | [ADR-024 §۲.۵](./ADR-024-service-blueprint-and-conformance.md) |
+| **`SB-DOC-01`** | **شناسنامه انسانی سرویس (`service.md`):** وجود فایل مستندات در ریشه سرویس جهت شرح معماری، اهداف و مرزهای سرویس؛ متادیتای فنی به مانیفست سرویس (SSOT) ارجاع می‌دهد (تک‌منبعی متادیتا). | `frontmatter_parse` | [ADR-007 §3](./ADR-007-backend-contracts-and-tooling-standards.md)، [DOC-BE-002](../../03-backend/services.md) |
+| **`SB-MAN-01`** | **مانیفست ماشین‌خوان سرویس (A15):** وجود فایل مانیفست معتبر منطبق بر اسکیمای `contracts/schemas/service-manifest.json` (طراحی در §۳) به عنوان مرجع حقیقت (SSOT) متادیتای ماشینی سرویس و برقراری انطباق چهارجانبه. | `json_schema` | [ADR-024 §۳](./ADR-024-service-blueprint-and-conformance.md) |
 
 ### ۲.۲. قواعد پیکربندی، سکرت‌ها و انضباط کد (Configuration & Secrets)
 
@@ -66,18 +66,18 @@
 | **`SB-IMG-01`** | **تگ ایمیج مبتنی بر نسخه سورس:** استخراج تگ ایمیج داکر از نسخه سرویس (`lemmo/svc-<name>:vX.Y.Z`) و سیاست نگه‌داری ۳ نسخه آخر. | `compose_lint` | [ADR-023 §2.5](./ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md) (D-17)، [DOC-OPS-001 §4.6](../../07-devops/docker-spec.md) |
 | **`SB-HDR-01`** | **هدر شناسنامه فایل خودتولید:** درج هدر ۴گانه غیرقابل‌ویرایش در فایل‌های تولیدی توسط ژنراتورها و برقراری گیت Zero-Diff در CI. | `content_match` | [ADR-023 §2.3-§2.4](./ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md) (D-18) |
 
-### ۲.۴. قراردادها، OpenAPI و کلاینت SDK (Contracts & OpenAPI — REV-2 A1..A8)
+### ۲.۴. قراردادها، OpenAPI و کلاینت SDK (Contracts & OpenAPI)
 
 | شناسه | شرح الزام فنی | نوع ارزیابی | مرجع سندی مصوب |
 | :---: | :--- | :---: | :--- |
-| **`SB-CTR-01`** | **تراکم قراردادهای Protobuf و لینت با Buf:** قراردادهای proto در `contracts/lemmo/v1/` مستقر و از مانیفست سرویس ارجاع شوند؛ بدون proto محلی در سرویس؛ گیت `buf lint` و `buf breaking`. | `filesystem_and_buf` | [DOC-BE-003 §1, §4](../../03-backend/contracts.md)، [ADR-007 §2](./ADR-007-backend-contracts-and-tooling-standards.md) |
+| **`SB-CTR-01`** | **تراکم قراردادهای Protobuf و لینت با Buf:** قراردادهای proto در `contracts/lemmo/v1/` مستقر و از مانیفست سرویس (`contracts.proto`) ارجاع شوند؛ بدون proto محلی در سرویس؛ گیت `buf lint` و `buf breaking`. | `filesystem_and_buf` | [DOC-BE-003 §1, §4](../../03-backend/contracts.md)، [ADR-007 §2](./ADR-007-backend-contracts-and-tooling-standards.md) |
 | **`SB-CTR-02`** | **قرارداد OpenAPI دامنه‌ای با مالکیت یگانه:** هر سرویس دارای HTTP عمومی دارای دقیقاً یک فایل `contracts/openapi/<domain>/v1/openapi.yaml` با مالک اعلام‌شده است («یک مسیر، یک قرارداد، یک مالک»). | `filesystem` | [ADR-016 §2.14](./ADR-016-request-context-governance-and-workspace-policy.md)، [ADR-018 §2.6](./ADR-018-tools-platform-architecture-unified-execution-and-domain-decoupling.md) |
-| **`SB-CTR-03`** | **قواعد Operation در OpenAPI:** هر operation در OpenAPI باید دارای `operationId` یکتا و متادیتای `x-lemmo-workspace-policy` معتبر باشد. | `openapi_lint` | [ADR-016 §2.2](./ADR-016-request-context-governance-and-workspace-policy.md)، [K-02](../../../../../.task/templates/COMPLIANCE_CHECKLIST_TEMPLATE_V1.md) |
-| **`SB-CTR-04`** | **گیت تغییرات ناسازگار OpenAPI:** هرگونه شکستن سازگاری در اندپوینت‌های موجود بدون معرفی نسخه جدید API ممنوع است؛ ارزیابی با `oasdiff` در CI. | `oasdiff` | [K-03](../../../../../.task/templates/COMPLIANCE_CHECKLIST_TEMPLATE_V1.md) |
-| **`SB-CTR-05`** | **انطباق انولوپ خطای HTTP:** پاسخ‌های خطای HTTP باید به `contracts/openapi/shared/errors.yaml` (RFC 7807 + `reason` + `help_key`) ارجاع دهند. | `openapi_lint` | [DOC-BE-003 §5.3](../../03-backend/contracts.md)، [DOC-BE-004 §4](../../03-backend/style-guide.md) |
-| **`SB-CTR-06`** | **الزام کلید هرزپذیری (Idempotency):** کلیه عملیات تغییردهنده (POST/PUT/PATCH) هدر `Idempotency-Key` را در OpenAPI اعلام کرده و میدل‌ور `core/idempotency` را سیم‌کشی نمایند. | `openapi_and_ast` | [ADR-016 §2.10](./ADR-016-request-context-governance-and-workspace-policy.md)، [S-04](../../../../../.task/templates/COMPLIANCE_CHECKLIST_TEMPLATE_V1.md) |
-| **`SB-CTR-07`** | **انطباق دوطرفه روت‌های Kong با قرارداد:** هیچ روت گیت‌وی بدون قرارداد OpenAPI و هیچ قرارداد عمومی بدون روت در Kong وجود ندارد. | `contract_lint` | [ADR-013 §2.1](./ADR-013-three-tier-edge-gateway-and-bff-architecture.md)، [K-04](../../../../../.task/templates/COMPLIANCE_CHECKLIST_TEMPLATE_V1.md) |
-| **`SB-CTR-08`** | **تازگی کلاینت فرانت‌اند و گیت Zero-Diff:** کدهای تولیدی کلاینت استودیو با Orval (`app/src/sdk/generated`) نسبت به قراردادهای OpenAPI بدون diff هستند. | `zero_diff` | [ADR-023 §2.4](./ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md)، [K-05](../../../../../.task/templates/COMPLIANCE_CHECKLIST_TEMPLATE_V1.md) |
+| **`SB-CTR-03`** | **قواعد Operation در OpenAPI:** هر operation در OpenAPI باید دارای `operationId` یکتا و متادیتای `x-lemmo-workspace-policy` معتبر باشد. | `openapi_lint` | [ADR-016 §2.2](./ADR-016-request-context-governance-and-workspace-policy.md) |
+| **`SB-CTR-04`** | **گیت تغییرات ناسازگار OpenAPI:** هرگونه شکستن سازگاری در اندپوینت‌های موجود بدون معرفی نسخه جدید API ممنوع است؛ ارزیابی با `oasdiff` در CI. | `oasdiff` | [DOC-BE-003 §3.2](../../03-backend/contracts.md)، [ADR-008 §2.3](./ADR-008-internal-tooling-and-versioning-governance.md) |
+| **`SB-CTR-05`** | **انطباق انولوپ خطای HTTP و مالکیت نگاشت:** پاسخ‌های خطای HTTP باید به `contracts/openapi/shared/errors.yaml` (RFC 7807 + `reason` + `help_key`) ارجاع دهند؛ مالکیت نگاشت AIP-193 به RFC 7807 منحصراً در اختیار `api/core/transport/http` و درگاه لبه Kong است. | `openapi_lint` | [DOC-BE-004 §4.3](../../03-backend/style-guide.md)، [DOC-BE-003 §5.3](../../03-backend/contracts.md) |
+| **`SB-CTR-06`** | **الزام کلید هرزپذیری (Idempotency):** کلیه عملیات تغییردهنده (POST/PUT/PATCH) هدر `Idempotency-Key` را در OpenAPI اعلام کرده و میدل‌ور `core/idempotency` را سیم‌کشی نمایند. | `openapi_and_ast` | [ADR-016 §2.10](./ADR-016-request-context-governance-and-workspace-policy.md) |
+| **`SB-CTR-07`** | **انطباق دوطرفه روت‌های Kong با قرارداد:** هیچ روت گیت‌وی بدون قرارداد OpenAPI و هیچ قرارداد عمومی بدون روت در Kong وجود ندارد. | `contract_lint` | [ADR-013 §2.1](./ADR-013-three-tier-edge-gateway-and-bff-architecture.md) |
+| **`SB-CTR-08`** | **تازگی کلاینت فرانت‌اند و گیت Zero-Diff:** کدهای تولیدی کلاینت استودیو با Orval (`app/src/sdk/generated`) نسبت به قراردادهای OpenAPI بدون diff هستند. | `zero_diff` | [ADR-023 §2.4](./ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md)، [ADR-016 §2.14](./ADR-016-request-context-governance-and-workspace-policy.md) |
 
 ### ۲.۵. رویدادها، امنیت، تاب‌آوری و مشاهده‌پذیری (Events, Security & Observability)
 
@@ -85,25 +85,25 @@
 | :---: | :--- | :---: | :--- |
 | **`SB-EVT-01`** | **الگوی Transactional Outbox:** انتشار رویدادهای دامنه منحصراً از طریق `core/outbox` و ثبت اتمیک در دیتابیس محلی؛ منع ارسال مستقیم به صف در وب. | `ast` | [DOC-BE-001 §2](../../03-backend/architecture.md)، [ADR-022 §2](./ADR-022-platform-reliability-and-observability.md) |
 | **`SB-EVT-02`** | **پاکت استاندارد EventEnvelope:** قراردادن پیام‌های رویداد درون `platform.v1.EventEnvelope` همراه با نام‌گذاری سه‌بخشی نسخه‌دار. | `ast` | [DOC-BE-003 §2](../../03-backend/contracts.md) |
-| **`SB-EVT-03`** | **انتقال Traceparent در رویدادها (F-7):** الزام تزریق W3C `traceparent` در هدر پیام‌های Outbox و استخراج مجدد در کانسومرها (مرحله ۱). | `ast` | [DOC-GOV-002 §F-7](../../09-governance/current-path.md#f-7)، [ADR-022 M0-02](./ADR-022-platform-reliability-and-observability.md) |
+| **`SB-EVT-03`** | **انتقال Traceparent در رویدادها (F-7):** الزام تزریق W3C `traceparent` در هدر پیام‌های Outbox و استخراج مجدد در کانسومرها (مرحله ۱). | `ast` | [DOC-GOV-002 §F-7](../../09-governance/current-path.md#f-7)، [ADR-022 §M0-02](./ADR-022-platform-reliability-and-observability.md) |
 | **`SB-EVT-04`** | **ثبت رویداد در رجیستری متمرکز:** هر نام رویداد منتشرشده در `contracts/lemmo/v1/events.proto` / رجیستری رویدادها ثبت شده باشد. | `contract_lint` | [DOC-BE-003 §2.1-§2.2](../../03-backend/contracts.md) |
-| **`SB-SEC-01`** | **احراز هویت سرویس و متادیتای کانتکست:** ثبت اینترسپتور auth در بوت‌استرپ و انتشار متادیتای هویت در RPCهای داخلی. | `ast` | [iam-service-spec §1.3, §6](../../03-backend/iam-service-spec.md) |
+| **`SB-SEC-01`** | **احراز هویت سرویس و متادیتای کانتکست:** ثبت اینترسپتور auth در بوت‌استرپ و انتشار متادیتای هویت در RPCهای داخلی. | `ast` | [DOC-BE-007 §1.3, §6](../../03-backend/iam-service-spec.md)، [DOC-ARCH-007 §الگوی ۱](../secure-system-design.md) |
 | **`SB-RES-01`** | **تاب‌آوری و منع Dialهای مسدودکننده:** تنظیم مهلت و سیاست تلاش مجدد در کانفیگ نسخه‌دار؛ ممنوعیت دیال بدون timeout/context. | `ast` | [ADR-022 §5](./ADR-022-platform-reliability-and-observability.md) |
-| **`SB-RES-02`** | **توقف تمیز (Graceful Shutdown):** هندلینگ سیگنال‌های SIGTERM/SIGINT، تخلیه درخواست‌های فعال با مهلت کانفیگ و بستن امن اتصالات. | `ast` | [ADR-022 §9](./ADR-022-platform-reliability-and-observability.md) |
-| **`SB-LOG-01`** | **لاگ استاندارد ساخت‌یافته JSON:** صدور لاگ‌ها روی stdout در فرمت JSON از طریق `core/bootstrap` / `slog`؛ منع `fmt.Print`. | `ast` | [ADR-022 M0-03](./ADR-022-platform-reliability-and-observability.md)، [DOC-BE-005 §11.1](../../03-backend/mvp-operational-readiness.md) |
-| **`SB-LOG-02`** | **لاگ با زمینه و رهگیری درخواست:** درج `request_id`، تعداد گام‌ها (`hop`) و شناسه کاربر/ورک‌اسپیس با حذف اکید PII. | `ast` | [S-05](../../../../../.task/templates/COMPLIANCE_CHECKLIST_TEMPLATE_V1.md) |
-| **`SB-TRC-01`** | **انتشار W3C traceparent:** سیم‌کشی `core/middleware.TraceInterceptor()` جهت استخراج و بازتاب هدر استاندارد `traceparent`. | `ast` | [ADR-022 M0-02](./ADR-022-platform-reliability-and-observability.md) |
-| **`SB-ERR-01`** | **انطباق کاتالوگ خطا با AIP-193:** بازگرداندن خطاها در قالب `google.rpc.Status` متصل به `contracts/platform/errors.proto`. | `ast` | [ADR-007 §1](./ADR-007-backend-contracts-and-tooling-standards.md)، [DOC-BE-004 §4](../../03-backend/style-guide.md) |
-| **`SB-TST-01`** | **بهداشت تست‌ها و Makefile:** قرارگیری تست‌های زنده در `tests/live/` و وجود تارگت‌های `test` و `verify-live` در Makefile. | `filesystem` | [AGENTS.md §4](../../../../../AGENTS.md)، [DOC-BE-004 §3](../../03-backend/style-guide.md) |
+| **`SB-RES-02`** | **توقف تمیز (Graceful Shutdown):** هندلینگ سیگنال‌های SIGTERM/SIGINT، تخلیه درخواست‌های فعال با مهلت کانفیگ و بستن امن اتصالات. | `ast` | [ADR-022 §متن تصمیم پیشنهادی، بند ۹](./ADR-022-platform-reliability-and-observability.md) |
+| **`SB-LOG-01`** | **لاگ استاندارد ساخت‌یافته JSON:** صدور لاگ‌ها روی stdout در فرمت JSON از طریق `core/bootstrap` / `slog`؛ منع `fmt.Print`. | `ast` | [ADR-022 §M0-03](./ADR-022-platform-reliability-and-observability.md)، [DOC-BE-005 §11.1](../../03-backend/mvp-operational-readiness.md) |
+| **`SB-LOG-02`** | **لاگ با زمینه و رهگیری درخواست:** درج `request_id`، تعداد گام‌ها (`hop`) و شناسه کاربر/ورک‌اسپیس با حذف اکید PII. | `ast` | [DOC-BE-005 §11.2](../../03-backend/mvp-operational-readiness.md)، [ADR-016 §2.2](./ADR-016-request-context-governance-and-workspace-policy.md)، [DOC-ARCH-007 §الگوی ۱](../secure-system-design.md) |
+| **`SB-TRC-01`** | **انتشار W3C traceparent:** سیم‌کشی `core/middleware.TraceInterceptor()` جهت استخراج و بازتاب هدر استاندارد `traceparent`. | `ast` | [ADR-022 §M0-02](./ADR-022-platform-reliability-and-observability.md) |
+| **`SB-ERR-01`** | **انطباق کاتالوگ خطا با AIP-193:** بازگرداندن خطاها در قالب `google.rpc.Status` متصل به `contracts/platform/errors.proto`. | `ast` | [ADR-007 §1](./ADR-007-backend-contracts-and-tooling-standards.md)، [DOC-BE-004 §4.1](../../03-backend/style-guide.md) |
+| **`SB-TST-01`** | **بهداشت تست‌ها و Makefile:** قرارگیری تست‌های زنده در `tests/live/` و وجود تارگت‌های `test` و `verify-live` در Makefile. | `filesystem` | [DOC-BE-004 §3](../../03-backend/style-guide.md) |
 
 ### ۲.۶. قواعد شرطی بر مبنای نوع و قابلیت‌های سرویس (Conditional Rules — B3)
 
 این قواعد بر اساس فیلدهای اعلام‌شده در مانیفست سرویس (`service.manifest.yaml`) فعال می‌گردند:
-1. **`SB-CND-JSON`:** اعتبارسنجی اسکیمای JSON برای سرویس‌های با پی‌لود پویا (پروژه‌ها و افزونه‌ها) با مراجع `contracts/schemas/`.
-2. **`SB-CND-SSRF`:** استفاده اجباری از کلاینت HTTP امن با بلک‌لیست IPهای داخلی و DNS Pinning برای سرویس‌های دارای فراخوانی بیرونی.
-3. **`SB-CND-TENANT`:** الزام درج پیشوند ورک‌اسپیس (`workspace_id/`) در کلیه مسیرهای ذخیره‌سازی شیء در MinIO/S3.
-4. **`SB-CND-RATE`:** گزارش‌گیری مصرف و اتصال به Rate-Card رسمی برای سرویس‌های مشمول کسر سهمیه (Billable Services).
-5. **`SB-CND-REF`:** تبعیت از الگوی داده مرجع ([ADR-012](./ADR-012-reference-data-registry-and-client-cache.md)) برای داده‌های کاتالوگ استاتیک.
+1. **`SB-CND-JSON`:** اعتبارسنجی اسکیمای JSON برای سرویس‌های با پی‌لود پویا (پروژه‌ها و افزونه‌ها) در [DOC-BE-003 §3.2](../../03-backend/contracts.md).
+2. **`SB-CND-SSRF`:** استفاده اجباری از کلاینت HTTP امن با بلک‌لیست IPهای داخلی و DNS Pinning برای سرویس‌های دارای فراخوانی بیرونی در [DOC-ARCH-007 §الگوی ۴](../secure-system-design.md) و [DOC-BE-004 §8.4](../../03-backend/style-guide.md).
+3. **`SB-CND-TENANT`:** الزام درج پیشوند ورک‌اسپیس (`workspace_id/`) در کلیه مسیرهای ذخیره‌سازی شیء در MinIO/S3 در [ADR-016 §2.8](./ADR-016-request-context-governance-and-workspace-policy.md).
+4. **`SB-CND-RATE`:** گزارش‌گیری مصرف و اتصال به Rate-Card رسمی برای سرویس‌های مشمول کسر سهمیه (Billable Services) در [DOC-BE-006 §1](../../03-backend/credit-and-ledger.md) و [ADR-018 §2.6](./ADR-018-tools-platform-architecture-unified-execution-and-domain-decoupling.md).
+5. **`SB-CND-REF`:** تبعیت از الگوی داده مرجع ([ADR-012 §2](./ADR-012-reference-data-registry-and-client-cache.md)) برای داده‌های کاتالوگ استاتیک.
 
 ### ۲.۷. مشخصات آزمون زنده ران‌تایم (`make verify-live` / `make doctor` — D3b, B1, B2)
 
@@ -111,10 +111,10 @@
 | :---: | :--- | :---: | :--- | :--- | :---: |
 | **`SB-RT-01`** | سلامت وابستگی‌ها (Honest Readiness) | `network_probe` | پینگ لایو وابستگی‌های حیاتی در `/readyz`؛ منع Fake UP در غیاب اتصال. | [ADR-022 §3](./ADR-022-platform-reliability-and-observability.md) | **مرحله ۱** |
 | **`SB-RT-02`** | تطبیق نسخه، کامیت و Digest | `network_probe` | مقایسه نسخه، کامیت و داکر ایمیج دایجست در حال اجرا با مخزن و داکر اینسپکت. | [ADR-023 §2.1-§2.5](./ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md) | **مرحله ۱** |
-| **`SB-RT-03`** | بازتاب و همگامی Traceparent | `network_probe` | ارسال درخواست با `traceparent`؛ تایید بازگشت همان TraceID در پاسخ و لاگ stdout. | [ADR-022 M0-02](./ADR-022-platform-reliability-and-observability.md) | **مرحله ۱** |
+| **`SB-RT-03`** | بازتاب و همگامی Traceparent | `network_probe` | ارسال درخواست با `traceparent`؛ تایید بازگشت همان TraceID در پاسخ و لاگ stdout. | [ADR-022 §M0-02](./ADR-022-platform-reliability-and-observability.md) | **مرحله ۱** |
 | **`SB-RT-04`** | سلامت Outbox و اتصال بروکر | `network_probe` | استعلام وضعیت پیام‌های pending/failed و کانال بروکر از طریق پاسخ متادیتای اندپوینت آمادگی خودِ سرویس بدون اتصال مستقیم SQL به دیتابیس (F-7). | [DOC-GOV-002 §F-7](../../09-governance/current-path.md#f-7) | **مرحله ۱ (F-7)** |
 | **`SB-RT-05`** | انطباق خطای کنترل‌شده AIP-193 | `network_probe` | ارسال درخواست خواندنی با شناسه نامعتبر؛ اعتبارسنجی پاسخ بر مبنای انولوپ استاندارد خطا بدون عارضه مالی یا داده‌ای. | [ADR-007 §1](./ADR-007-backend-contracts-and-tooling-standards.md) | **مرحله ۱** |
-| **`SB-RT-06`** | امنیت و ایزولاسیون ورک‌اسپیس (IDOR) | `network_probe` | ارسال درخواست بدون توکن (انتظار ۴۰۱) و با توکن به منبع ورک‌اسپیس دیگر (انتظار ۴۰۴/۴۰۳ Fail-Closed). | [S-03](../../../../../.task/templates/COMPLIANCE_CHECKLIST_TEMPLATE_V1.md) | **مرحله ۲** |
+| **`SB-RT-06`** | امنیت و ایزولاسیون ورک‌اسپیس (IDOR) | `network_probe` | ارسال درخواست بدون توکن (انتظار ۴۰۱) و با توکن به منبع ورک‌اسپیس دیگر (انتظار ۴۰۴/۴۰۳ Fail-Closed). | [DOC-ARCH-007 §الگوی ۲](../secure-system-design.md)، [ADR-016 §2.2-§2.4](./ADR-016-request-context-governance-and-workspace-policy.md) | **مرحله ۲** |
 | **`SB-RT-07`** | مسیریابی لبه از گیت‌وی Kong | `network_probe` | آزمون سرتاسری دسترسی به روت‌های سرویس از طریق درگاه خارجی Kong Edge Gateway. | [ADR-013 §2.1](./ADR-013-three-tier-edge-gateway-and-bff-architecture.md) | **مرحله ۵** |
 
 ---

@@ -1,0 +1,109 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LemmoRulesCatalogSchema",
+  "description": "Authoritative schema for Lemmo microservice blueprint and conformance rules catalog (ADR-024).",
+  "type": "object",
+  "required": [
+    "version",
+    "adr",
+    "last_updated",
+    "total_rules",
+    "rules"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "adr": {
+      "type": "string"
+    },
+    "last_updated": {
+      "type": "string"
+    },
+    "total_rules": {
+      "type": "integer"
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "check",
+          "scope",
+          "applies_to",
+          "applies_when",
+          "automation",
+          "roadmap_stage",
+          "gate",
+          "doc_ref",
+          "enforced_by"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^SB-[A-Z0-9-]+$"
+          },
+          "check": {
+            "type": "string",
+            "enum": [
+              "static",
+              "live"
+            ]
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "service",
+              "platform"
+            ]
+          },
+          "applies_to": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "go-service",
+                "packaged-engine",
+                "planned-stub"
+              ]
+            },
+            "minItems": 1
+          },
+          "applies_when": {
+            "type": "string"
+          },
+          "automation": {
+            "type": "string",
+            "enum": [
+              "full",
+              "partial",
+              "manual",
+              "not_implemented"
+            ]
+          },
+          "roadmap_stage": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 6
+          },
+          "gate": {
+            "type": "string",
+            "enum": [
+              "new_service",
+              "ratchet"
+            ]
+          },
+          "doc_ref": {
+            "type": "string"
+          },
+          "enforced_by": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
