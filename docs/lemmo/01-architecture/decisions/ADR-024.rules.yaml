@@ -1,0 +1,299 @@
+# ==============================================================================
+# Lemmo Microservice Blueprint & Conformance Rules Catalog (SSOT)
+# Reference: ADR-024 (Service Blueprint & Conformance)
+# Authority: dotdive/docs/lemmo/ (SSOT)
+# Note: Tools (lemmo-cli) MUST consume this file as the authoritative catalog.
+# ==============================================================================
+version: "1.0.0"
+adr: "ADR-024"
+last_updated: "2026-10-18"
+total_rules: 27
+categories:
+  static: 22
+  live: 5
+
+rules:
+  # ----------------------------------------------------------------------------
+  # 1. Directory Structure & Clean Architecture (Static)
+  # ----------------------------------------------------------------------------
+  - id: "SB-DIR-01"
+    name: "Clean Architecture Layer Structure"
+    domain: "directory"
+    authority: "static"
+    evaluation_mechanism: "filesystem"
+    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md §3, dotdive/docs/lemmo/03-backend/style-guide.md §3"
+    phase: "Phase 1"
+    description: "Enforces presence of internal/domain, internal/app, internal/ports, and internal/adapters."
+
+  - id: "SB-DIR-02"
+    name: "Thin Entrypoint Main"
+    domain: "directory"
+    authority: "static"
+    evaluation_mechanism: "ast"
+    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md §2.1, dotdive/docs/lemmo/03-backend/style-guide.md §3"
+    phase: "Phase 1"
+    description: "Requires thin cmd/main.go dedicated strictly to dependency wiring and core bootstrap invocation."
+
+  - id: "SB-DIR-03"
+    name: "Independent Go Module Definition"
+    domain: "directory"
+    authority: "static"
+    evaluation_mechanism: "filesystem"
+    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md §2.2, dotdive/docs/lemmo/03-backend/architecture.md §2"
+    phase: "Phase 1"
+    description: "Requires go.mod in service root with module path github.com/lemmo-lab/api/services/<name>."
+
+  - id: "SB-DIR-04"
+    name: "Database Migration Structure"
+    domain: "directory"
+    authority: "static"
+    evaluation_mechanism: "filesystem"
+    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md §3, dotdive/docs/lemmo/03-backend/style-guide.md §6"
+    phase: "Phase 1"
+    description: "Requires 6-digit golang-migrate SQL pairs in migrations/ or explicit migrations/.no_migration marker."
+
+  # ----------------------------------------------------------------------------
+  # 2. Service Catalog Documentation (Static)
+  # ----------------------------------------------------------------------------
+  - id: "SB-DOC-01"
+    name: "Service Catalog Specification"
+    domain: "documentation"
+    authority: "static"
+    evaluation_mechanism: "filesystem"
+    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md §3, dotdive/docs/lemmo/03-backend/services.md §1"
+    phase: "Phase 1"
+    description: "Requires service.md in service root with complete metadata header and operational parameters."
+
+  # ----------------------------------------------------------------------------
+  # 3. Configuration & Secrets Management (Static)
+  # ----------------------------------------------------------------------------
+  - id: "SB-CFG-01"
+    name: "Versioned Configuration Defaults"
+    domain: "configuration"
+    authority: "static"
+    evaluation_mechanism: "filesystem"
+    doc_ref: "dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md §2, dotdive/docs/lemmo/09-governance/rules.md §2.5"
+    phase: "Phase 1"
+    description: "Requires config/default.yaml in repository and loading exclusively via api/core/config."
+
+  - id: "SB-CFG-02"
+    name: "Fail-Fast Configuration Validation"
+    domain: "configuration"
+    authority: "static"
+    evaluation_mechanism: "ast"
+    doc_ref: "dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md §3"
+    phase: "Phase 1"
+    description: "Requires service config struct to implement Validate() error matching config.Validator interface."
+
+  - id: "SB-CFG-03"
+    name: "Prohibition of Fallback Secrets"
+    domain: "configuration"
+    authority: "static"
+    evaluation_mechanism: "ast"
+    doc_ref: "dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md §1, dotdive/docs/lemmo/09-governance/rules.md §2.2"
+    phase: "Phase 1"
+    description: "Bans hardcoded fallback default values for sensitive secrets (DB password, JWT secret, API keys)."
+
+  - id: "SB-CFG-04"
+    name: "Prohibition of Literal Network Constants"
+    domain: "configuration"
+    authority: "static"
+    evaluation_mechanism: "ast"
+    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md §2.4, dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md §1"
+    phase: "Phase 1"
+    description: "Bans string/int literal addresses or ports in net.Listen, http.ListenAndServe, and grpc.Dial; requires dynamic config."
+
+  # ----------------------------------------------------------------------------
+  # 4. Service-Owned Deployment & Docker Hygiene (Static)
+  # ----------------------------------------------------------------------------
+  - id: "SB-DEP-01"
+    name: "Service-Owned Compose Manifest"
+    domain: "deployment"
+    authority: "static"
+    evaluation_mechanism: "filesystem"
+    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md §2.1, dotdive/docs/lemmo/07-devops/docker-spec.md §3.3"
+    phase: "Phase 1"
+    description: "Requires deploy/compose.yaml and deploy/config/ in service directory for native compose include."
+
+  - id: "SB-DEP-02"
+    name: "Single Multi-Stage Dockerfile"
+    domain: "deployment"
+    authority: "static"
+    evaluation_mechanism: "filesystem"
+    doc_ref: "dotdive/docs/lemmo/07-devops/docker-spec.md §4.3"
+    phase: "Phase 1"
+    description: "Requires exactly one multi-stage Dockerfile in service root; bans parallel .dev or .local dockerfiles."
+
+  - id: "SB-DEP-03"
+    name: "Role-Based Container Naming"
+    domain: "deployment"
+    authority: "static"
+    evaluation_mechanism: "yaml_schema"
+    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md §2.3, dotdive/docs/lemmo/07-devops/docker-spec.md §3.1"
+    phase: "Phase 1"
+    description: "Enforces container_name: lemmo-svc-<name> and role-based resource naming without third-party product names."
+
+  - id: "SB-DEP-04"
+    name: "Build Provenance Ingestion"
+    domain: "deployment"
+    authority: "static"
+    evaluation_mechanism: "dockerfile"
+    doc_ref: "dotdive/docs/lemmo/07-devops/docker-spec.md §4.5"
+    phase: "Phase 1"
+    description: "Requires ARG GIT_COMMIT and ARG BUILD_TIME in Dockerfile and logging both in first startup log."
+
+  # ----------------------------------------------------------------------------
+  # 5. Versioning, Changelog & Generated Files (Static)
+  # ----------------------------------------------------------------------------
+  - id: "SB-VER-01"
+    name: "Keep a Changelog Compliance"
+    domain: "versioning"
+    authority: "static"
+    evaluation_mechanism: "filesystem"
+    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md §2.6, dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md §2.1"
+    phase: "Phase 1"
+    description: "Requires CHANGELOG.md in service root matching Keep a Changelog with official categories."
+
+  - id: "SB-VER-02"
+    name: "SemVer & Multi-Module Git Tagging"
+    domain: "versioning"
+    authority: "static"
+    evaluation_mechanism: "filesystem"
+    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md §2.3-§2.4, dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md §2.1"
+    phase: "Phase 1"
+    description: "Requires SemVer 2.0.0 compliance and multi-module git tag format services/<name>/vX.Y.Z."
+
+  - id: "SB-IMG-01"
+    name: "Source-Derived Docker Image Tagging"
+    domain: "versioning"
+    authority: "static"
+    evaluation_mechanism: "yaml_schema"
+    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md §2.5, dotdive/docs/lemmo/07-devops/docker-spec.md §4.6"
+    phase: "Phase 1"
+    description: "Derives image tags from service SemVer (lemmo/svc-<name>:vX.Y.Z) and enforces 3-version retention (gated on QF-BUILD-REGISTRY-01)."
+
+  - id: "SB-HDR-01"
+    name: "Generated File Provenance Header"
+    domain: "codegen"
+    authority: "static"
+    evaluation_mechanism: "ast"
+    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md §2.3-§2.4"
+    phase: "Phase 1"
+    description: "Enforces 4-part immutable header on all generated code and mandates CI zero-diff freshness gate."
+
+  # ----------------------------------------------------------------------------
+  # 6. Event Publishing & Messaging Contracts (Static)
+  # ----------------------------------------------------------------------------
+  - id: "SB-EVT-01"
+    name: "Transactional Outbox Pattern"
+    domain: "events"
+    authority: "static"
+    evaluation_mechanism: "ast"
+    doc_ref: "dotdive/docs/lemmo/03-backend/architecture.md §2, dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md §2"
+    phase: "Phase 1"
+    description: "Mandates event publishing strictly through api/core/outbox and outbox_messages table within the local DB transaction."
+
+  - id: "SB-EVT-02"
+    name: "Canonical Event Envelope"
+    domain: "events"
+    authority: "static"
+    evaluation_mechanism: "ast"
+    doc_ref: "dotdive/docs/lemmo/03-backend/contracts.md §2"
+    phase: "Phase 1"
+    description: "Requires events to wrap payloads inside platform.v1.EventEnvelope with 3-part versioned name <domain>.<entity>.<action>.v<ver>."
+
+  - id: "SB-EVT-03"
+    name: "Async Traceparent Propagation"
+    domain: "events"
+    authority: "static"
+    evaluation_mechanism: "ast"
+    doc_ref: "dotdive/docs/lemmo/09-governance/current-path.md §F-7, dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md M0-02"
+    phase: "Phase 1"
+    description: "Enforces propagation of W3C traceparent into event message headers and envelope trace_id field (F-7)."
+
+  # ----------------------------------------------------------------------------
+  # 7. Core Libraries & Observability (Static)
+  # ----------------------------------------------------------------------------
+  - id: "SB-LOG-01"
+    name: "Standard Structured JSON Logs"
+    domain: "observability"
+    authority: "static"
+    evaluation_mechanism: "ast"
+    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md M0-03, dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §11.1"
+    phase: "Phase 1"
+    description: "Enforces structured JSON logging to stdout via api/core/bootstrap / log/slog; bans raw fmt.Print."
+
+  - id: "SB-TRC-01"
+    name: "W3C Traceparent gRPC/HTTP Middleware"
+    domain: "observability"
+    authority: "static"
+    evaluation_mechanism: "ast"
+    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md M0-02, dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §11.2"
+    phase: "Phase 1"
+    description: "Requires wiring api/core/middleware.TraceInterceptor() on all gRPC and HTTP listener endpoints."
+
+  - id: "SB-ERR-01"
+    name: "AIP-193 Error Envelope & Catalog"
+    domain: "errors"
+    authority: "static"
+    evaluation_mechanism: "ast"
+    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md §1, dotdive/docs/lemmo/03-backend/style-guide.md §4, dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §11.3"
+    phase: "Phase 1"
+    description: "Enforces google.rpc.Status with ErrorInfo.reason mapped to contracts/platform/errors.proto."
+
+  - id: "SB-TST-01"
+    name: "Integration Test Layout & Makefile"
+    domain: "testing"
+    authority: "static"
+    evaluation_mechanism: "filesystem"
+    doc_ref: "AGENTS.md §4, dotdive/docs/lemmo/03-backend/style-guide.md §3"
+    phase: "Phase 1"
+    description: "Requires tests/live/ directory, bans step-named test binaries in cmd/, and requires test and verify-live Makefile targets."
+
+  # ----------------------------------------------------------------------------
+  # 8. Non-Destructive Live Probes (Live / Runtime - make verify-live)
+  # ----------------------------------------------------------------------------
+  - id: "SB-RT-01"
+    name: "Honest Readiness Dependency Probe"
+    domain: "runtime"
+    authority: "live"
+    evaluation_mechanism: "network_probe"
+    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md §3, dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §11.4"
+    phase: "Phase 1"
+    description: "Probes /readyz endpoint; asserts honest failure (non-200) when database, redis, or critical downstream are disconnected."
+
+  - id: "SB-RT-02"
+    name: "Live Image, Commit & Digest Parity"
+    domain: "runtime"
+    authority: "live"
+    evaluation_mechanism: "network_probe"
+    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md §2.1-§2.5, dotdive/docs/lemmo/07-devops/docker-spec.md §4.5"
+    phase: "Phase 1"
+    description: "Compares running version/commit from startup log or health endpoint against git HEAD and deployed image digest."
+
+  - id: "SB-RT-03"
+    name: "Traceparent Round-Trip Probe"
+    domain: "runtime"
+    authority: "live"
+    evaluation_mechanism: "network_probe"
+    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md M0-02 & M0-03, dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §11.2"
+    phase: "Phase 1"
+    description: "Sends probe request with explicit traceparent; verifies exact trace ID is returned in response header and logged to stdout."
+
+  - id: "SB-RT-04"
+    name: "Service-Reported Outbox Health Probe"
+    domain: "runtime"
+    authority: "live"
+    evaluation_mechanism: "network_probe"
+    doc_ref: "dotdive/docs/lemmo/09-governance/current-path.md §F-7, dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md §2"
+    phase: "Phase 1"
+    description: "Queries service health endpoint for outbox status; verifies pending/failed counts, oldest message age, and broker channel health."
+
+  - id: "SB-RT-05"
+    name: "Controlled Error AIP-193 Probe"
+    domain: "runtime"
+    authority: "live"
+    evaluation_mechanism: "network_probe"
+    doc_ref: "dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md §1, dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md M0-04, dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §11.3"
+    phase: "Phase 1"
+    description: "Issues read-only request with intentionally invalid UUID (00000000-0000-0000-0000-000000000000); verifies AIP-193 ErrorInfo with zero side effects."
