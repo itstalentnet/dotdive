@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "LemmoRulesCatalogSchema",
-  "description": "Authoritative schema for Lemmo microservice blueprint and conformance rules catalog (ADR-024 REV-4).",
+  "description": "Authoritative schema for Lemmo microservice blueprint and conformance rules catalog (ADR-024 REV-5).",
   "type": "object",
   "required": [
     "version",
@@ -22,7 +22,9 @@
       "type": "string"
     },
     "total_rules": {
-      "type": "integer"
+      "type": "integer",
+      "minimum": 50,
+      "maximum": 50
     },
     "rules": {
       "type": "array",
@@ -31,6 +33,7 @@
         "required": [
           "id",
           "name",
+          "requirement",
           "check",
           "scope",
           "applies_to",
@@ -157,9 +160,15 @@
               "ci:event-registry-lint (proposed)",
               "ci:edge-gateway-probe (proposed)"
             ]
+          },
+          "requirement": {
+            "type": "string",
+            "minLength": 10
           }
         }
-      }
+      },
+      "minItems": 50,
+      "maxItems": 50
     }
   }
 }

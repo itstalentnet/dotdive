@@ -1,10 +1,12 @@
-version: 4.0.0
+version: 5.0.0
 adr: ADR-024
 last_updated: '2026-10-18'
 total_rules: 50
 rules:
 - id: SB-DIR-01
-  name: Clean Architecture Layer Structure
+  name: Clean Architecture Layering Standard
+  requirement: وجود پوشه‌های مجزای internal/domain (موجودیت‌های ناب دامنه)، internal/app (یوزکیس‌ها و سرویس‌های کاربردی)،
+    internal/ports (اینترفیس‌های ورودی و خروجی) و internal/adapters (پیاده‌سازی آداپتورهای HTTP، gRPC و پایگاه داده).
   check: static
   scope: service
   applies_to:
@@ -15,12 +17,14 @@ rules:
   evaluation_mechanism: filesystem
   roadmap_stage: 1
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md
-    §3, dotdive/docs/lemmo/03-backend/style-guide.md §3
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md §۳, dotdive/docs/lemmo/03-backend/style-guide.md
+    §3
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-DIR-02
-  name: Thin Entrypoint Main
+  name: Thin Entrypoint Pattern
+  requirement: وجود فایل تک‌منظوره cmd/main.go صرفاً جهت سیم‌کشی وابستگی‌ها و فراخوانی لایف‌سایکل بوت‌استرپ مشترک؛ منع پیاده‌سازی
+    لاجیک بیزینسی، هندلرهای مستقیم یا محاسبات دامنه در این فایل.
   check: static
   scope: service
   applies_to:
@@ -31,12 +35,14 @@ rules:
   evaluation_mechanism: ast
   roadmap_stage: 1
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md
-    §2.1, dotdive/docs/lemmo/03-backend/style-guide.md §3
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md §۲.۱, dotdive/docs/lemmo/03-backend/style-guide.md
+    §3
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-DIR-03
-  name: Independent Go Module Definition
+  name: Independent Go Module Isolation
+  requirement: وجود فایل معتبر go.mod در ریشه سرویس با ماژول مستقل و پیشوند رسمی github.com/lemmo-lab/api/services/<name>
+    بدون وابستگی مستقیم به کدهای داخلی سایر سرویس‌ها.
   check: static
   scope: service
   applies_to:
@@ -47,12 +53,13 @@ rules:
   evaluation_mechanism: filesystem
   roadmap_stage: 1
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md
-    §2.2, dotdive/docs/lemmo/03-backend/architecture.md §2
+  doc_ref: dotdive/docs/lemmo/03-backend/architecture.md §۱, dotdive/docs/lemmo/03-backend/style-guide.md §3
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-DIR-04
-  name: Database Migration Structure
+  name: Database Migrations Parity
+  requirement: وجود پوشه migrations/ حاوی فایل‌های مهاجرت با نام‌گذاری ترتیبی صفرپرشده عددی ۶رقمی زوج (up.sql و down.sql)
+    یا وجود نشانگر صریح migrations/.no_migration در غیاب دیتابیس.
   check: static
   scope: service
   applies_to:
@@ -63,12 +70,14 @@ rules:
   evaluation_mechanism: filesystem
   roadmap_stage: 1
   gate: ratchet
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md
-    §3, dotdive/docs/lemmo/03-backend/style-guide.md §6
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md §۳, dotdive/docs/lemmo/03-backend/style-guide.md
+    §6
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-DOC-01
-  name: Service Architectural Specification
+  name: Service Architectural Identity File
+  requirement: وجود فایل service.md در ریشه سرویس جهت شرح معماری، اهداف، مسئولیت‌های دامنه و مرزها؛ متادیتای فنی ماشین‌خوان
+    منحصراً از مانیفست سرویس استخراج می‌شود.
   check: static
   scope: service
   applies_to:
@@ -81,12 +90,13 @@ rules:
   evaluation_mechanism: frontmatter_parse
   roadmap_stage: 1
   gate: ratchet
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md
-    §3, dotdive/docs/lemmo/03-backend/services.md
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md §۳, dotdive/docs/lemmo/03-backend/services.md
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-MAN-01
   name: Machine-Readable Service Manifest
+  requirement: وجود فایل مانیفست معتبر service.manifest.yaml در ریشه سرویس منطبق بر اسکیمای استاندارد مانیفست به عنوان مرجع
+    حقیقت (SSOT) متادیتای ماشینی سرویس و برقراری انطباق چهارجانبه.
   check: static
   scope: service
   applies_to:
@@ -99,12 +109,13 @@ rules:
   evaluation_mechanism: json_schema
   roadmap_stage: 1
   gate: ratchet
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-024-service-blueprint-and-conformance.md
-    §3
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-024-service-blueprint-and-conformance.md §۳
   doc_status: draft_source
   enforced_by: lemmo-cli check
 - id: SB-CFG-01
   name: Versioned Configuration Default File
+  requirement: وجود فایل config/default.yaml در ریشه سرویس برای نگه‌داری پیش‌فرض‌های غیرحساس و تغییرپذیر و بارگذاری انحصاری
+    کانفیگ از طریق پکیج متمرکز core/config.
   check: static
   scope: service
   applies_to:
@@ -115,11 +126,13 @@ rules:
   evaluation_mechanism: filesystem
   roadmap_stage: 1
   gate: ratchet
-  doc_ref: dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md §2
+  doc_ref: dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md §۱.۲
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-CFG-02
   name: Startup Fail-Fast Validation
+  requirement: پیاده‌سازی اینترفیس config.Validator بر روی ساختار پیکربندی سرویس جهت توقف فوری فرآیند استارت سرویس با ثبت
+    لاگ ساختاریافته خطا و کد خروج ۱ در صورت کانفیگ نامعتبر.
   check: static
   scope: service
   applies_to:
@@ -130,11 +143,13 @@ rules:
   evaluation_mechanism: ast
   roadmap_stage: 1
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md §3
+  doc_ref: dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md §۲
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-CFG-03
   name: Secret Hardcoding Fallback Ban
+  requirement: ممنوعیت مطلق قرار دادن مقادیر پیش‌فرض یا fallback در سورس‌کد برای سکرت‌های حساس (رمز دیتابیس، کلید S3، توکن
+    JWT و API Keyها) و الزام توقف فوری سرویس در غیاب آن‌ها.
   check: static
   scope: service
   applies_to:
@@ -145,11 +160,14 @@ rules:
   evaluation_mechanism: ast
   roadmap_stage: 1
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md §1
+  doc_ref: dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md §۲, dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md
+    §۳
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-CFG-04
   name: Network Literal Constants Ban
+  requirement: ممنوعیت استفاده از پورت‌ها یا آدرس‌های هاست هاردکدشده لیترال در فراخوانی‌های Listen و Dial در سورس‌کد؛ مقادیر
+    متغیر محیطی باید از ساختار تایپ‌شده کانفیگ خوانده شوند.
   check: static
   scope: service
   applies_to:
@@ -160,12 +178,14 @@ rules:
   evaluation_mechanism: ast_and_manual_review
   roadmap_stage: 1
   gate: ratchet
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md
-    §2.4, dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md §1
+  doc_ref: dotdive/docs/lemmo/01-architecture/configuration-and-secrets.md §۳, dotdive/docs/lemmo/01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md
+    §۲.۴
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-DEP-01
   name: Service-Owned Deployment Composition
+  requirement: وجود مانیفست deploy/compose.yaml و پوشه تنظیمات deploy/config/ در ریشه سرویس جهت ادغام اختصاصی در کامپوز ریشه
+    پروژه از طریق دستور بومی include:.
   check: static
   scope: service
   applies_to:
@@ -177,12 +197,14 @@ rules:
   evaluation_mechanism: filesystem
   roadmap_stage: 1
   gate: ratchet
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md
-    §2.1, dotdive/docs/lemmo/07-devops/docker-spec.md §3.3
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md §۲.۱, dotdive/docs/lemmo/07-devops/docker-spec.md
+    §۳.۳
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-DEP-02
   name: Single Multi-Stage Dockerfile
+  requirement: وجود دقیقاً یک فایل با نام Dockerfile در ریشه سرویس بر پایه الگوی چندمرحله‌ای (Multi-Stage) جهت تضمین ایمیج
+    نهایی مینیمال و امن؛ منع داکرفایلهای موازی مانند dev.
   check: static
   scope: service
   applies_to:
@@ -193,11 +215,13 @@ rules:
   evaluation_mechanism: filesystem
   roadmap_stage: 1
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/07-devops/docker-spec.md §4
+  doc_ref: dotdive/docs/lemmo/07-devops/docker-spec.md §۴
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-DEP-03
-  name: Container Role-Based Naming
+  name: Role-Based Container Naming
+  requirement: تنظیم صریح container_name با الگوی الزامی lemmo-svc-<name> در deploy/compose.yaml؛ ممنوعیت کاربرد نام ابزارها،
+    برندهای ثالث یا نام‌های تجاری در نام کانتینر.
   check: static
   scope: service
   applies_to:
@@ -209,12 +233,14 @@ rules:
   evaluation_mechanism: compose_lint
   roadmap_stage: 1
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md
-    §2.3, dotdive/docs/lemmo/07-devops/docker-spec.md §3.2
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md §۲.۳, dotdive/docs/lemmo/07-devops/docker-spec.md
+    §۳.۲
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-DEP-04
-  name: Build Provenance Logging in Startup
+  name: Build Provenance Startup Logging
+  requirement: تزریق آرگومان‌های ARG GIT_COMMIT و ARG BUILD_TIME در زمان بیلد داکر و ثبت الزامی شناسه کامیت و زمان بیلد در
+    اولین خط لاگ خروجی استارت سرویس در main.go.
   check: static
   scope: service
   applies_to:
@@ -225,11 +251,13 @@ rules:
   evaluation_mechanism: content_match
   roadmap_stage: 1
   gate: ratchet
-  doc_ref: dotdive/docs/lemmo/07-devops/docker-spec.md §4
+  doc_ref: dotdive/docs/lemmo/07-devops/docker-spec.md §۴
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-VER-01
-  name: Human-Curated Changelog
+  name: Authoritative Human Changelog
+  requirement: وجود فایل CHANGELOG.md در ریشه هر سرویس بر مبنای استاندارد Keep a Changelog همراه با دسته‌بندی‌های رسمی مجاز
+    (Added, Changed, Deprecated, Removed, Fixed, Security).
   check: static
   scope: service
   applies_to:
@@ -240,12 +268,13 @@ rules:
   evaluation_mechanism: filesystem
   roadmap_stage: 1
   gate: ratchet
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md
-    §2.6, dotdive/docs/lemmo/03-backend/style-guide.md §7
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md §۲.۶
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-VER-02
-  name: Semantic Versioning and Module Git Tags
+  name: Semantic Versioning & Multi-Module Git Tag
+  requirement: تبعیت نسخه سرویس از SemVer 2.0.0 و انطباق سیستم تگ‌گذاری گیت با الگوی چندماژوله services/<name>/vX.Y.Z جهت
+    تفکیک چرخه‌های انتشار مستقل در مونوریپو.
   check: static
   scope: service
   applies_to:
@@ -256,13 +285,14 @@ rules:
   evaluation_mechanism: git_tags
   roadmap_stage: 1
   gate: ratchet
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md
-    §2.3, dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md
-    §2.1
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md §۲.۳, dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md
+    §۲.۱
   doc_status: draft_source
   enforced_by: lemmo-cli check
 - id: SB-IMG-01
-  name: Source-Derived Image Tagging & Retention
+  name: Version-Derived Docker Image Tagging
+  requirement: استخراج تگ ایمیج داکر از نسخه سرویس با فرمت lemmo/svc-<name>:vX.Y.Z و اعمال سیاست نگه‌داری ۳ نسخه آخر و هرس
+    ایمیج‌های آویزان (Dangling Images Pruning).
   check: static
   scope: service
   applies_to:
@@ -273,12 +303,14 @@ rules:
   evaluation_mechanism: compose_lint
   roadmap_stage: 1
   gate: ratchet
-  doc_ref: dotdive/docs/lemmo/07-devops/docker-spec.md §4, dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md
-    §2.5
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md
+    §۲.۵
   doc_status: draft_source
   enforced_by: lemmo-cli check
 - id: SB-HDR-01
   name: Generated File Provenance Header
+  requirement: درج هدر چهارگانه غیرقابل‌ویرایش در کلیه فایل‌های تولیدی توسط ژنراتورها (ابزار تولیدکننده، نسخه، دستور و اخطار
+    منع ویرایش دستی) و اعمال گیت تازگی Zero-Diff در خط بیلد.
   check: static
   scope: service
   applies_to:
@@ -288,46 +320,52 @@ rules:
   implementation_status: not_started
   evaluation_mechanism: content_match
   roadmap_stage: 1
-  gate: new_service
+  gate: ratchet
   doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md
-    §2.3
+    §۲.۳
   doc_status: draft_source
   enforced_by: lemmo-cli check
 - id: SB-CTR-01
   name: Protobuf Contracts Centralization & Buf Lint
+  requirement: تمرکز قراردادهای Protobuf در contracts/lemmo/v1/ و ارجاع در مانیفست سرویس؛ ممنوعیت فایل proto محلی در سرویس
+    و برقراری گیت‌های buf lint و buf breaking.
   check: static
   scope: service
   applies_to:
   - go-service
-  applies_when: manifest.contracts.proto.size() > 0
+  applies_when: manifest.networking.inbound_grpc_port != null
   automation: full
   implementation_status: not_started
   evaluation_mechanism: buf_lint_and_breaking
   roadmap_stage: 1
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/03-backend/contracts.md §1, dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md
-    §2
+  doc_ref: dotdive/docs/lemmo/03-backend/contracts.md §۱, dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md
+    §۲
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-CTR-02
-  name: Domain OpenAPI Specification & Single Ownership
+  name: Domain OpenAPI Specification Single Ownership
+  requirement: الزام وجود دقیقاً یک قرارداد contracts/openapi/<domain>/v1/openapi.yaml با مالکیت صریح برای هر سرویس دارای
+    پورت ورودی HTTP؛ منع دور زدن قرارداد با تنظیم openapi_domain به null.
   check: static
   scope: service
   applies_to:
   - go-service
-  applies_when: manifest.contracts.openapi_domain != null
+  applies_when: manifest.networking.inbound_http_port != null
   automation: full
   implementation_status: not_started
   evaluation_mechanism: filesystem
   roadmap_stage: 1
   gate: ratchet
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md
-    §2.14, dotdive/docs/lemmo/01-architecture/decisions/ADR-018-tools-platform-architecture-unified-execution-and-domain-decoupling.md
-    §2
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md §۲.۱۴,
+    dotdive/docs/lemmo/01-architecture/decisions/ADR-018-tools-platform-architecture-unified-execution-and-domain-decoupling.md
+    §۲.۶
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-CTR-03
-  name: OpenAPI Operation Compliance
+  name: OpenAPI Operations Standards
+  requirement: الزام تعیین operationId یکتا در سطح کل سیستم و متادیتای صریح حاکمیت دسترسی x-lemmo-workspace-policy (یکی از
+    مقادیر required, optional, none) برای هر عملیات در OpenAPI.
   check: static
   scope: service
   applies_to:
@@ -338,12 +376,13 @@ rules:
   evaluation_mechanism: openapi_lint
   roadmap_stage: 1
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md
-    §2.2
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md §۲.۲
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-CTR-04
   name: OpenAPI Breaking Changes Gate
+  requirement: ممنوعیت اعمال هرگونه تغییر شکست‌دهنده یا ناسازگار در اندپوینت‌های عمومی OpenAPI بدون معرفی نسخه جدید API و
+    ارزیابی خودکار تغییرات در خط بیلد با باینری oasdiff.
   check: static
   scope: platform
   applies_to:
@@ -355,12 +394,14 @@ rules:
   evaluation_mechanism: oasdiff
   roadmap_stage: 1
   gate: ratchet
-  doc_ref: dotdive/docs/lemmo/03-backend/contracts.md §4, dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md
-    §2.3
+  doc_ref: dotdive/docs/lemmo/03-backend/contracts.md §۴, dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md
+    §۲.۳
   doc_status: approved
   enforced_by: ci:oasdiff (proposed)
 - id: SB-CTR-05
   name: HTTP Error Envelope Conformance & Mapping Ownership
+  requirement: پاسخ‌های خطای HTTP باید به contracts/openapi/shared/errors.yaml (AIP-193 ErrorInfo / RFC 7807 + reason + help_key)
+    ارجاع دهند؛ مالکیت انحصاری ترجمه خطای gRPC به HTTP در اختیار پکیج api/core/transport/http و پلاگین درگاه لبه Kong است.
   check: static
   scope: service
   applies_to:
@@ -371,28 +412,30 @@ rules:
   evaluation_mechanism: ast_and_contract_test
   roadmap_stage: 1
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/03-backend/style-guide.md §4, dotdive/docs/lemmo/03-backend/contracts.md
-    §5.3
+  doc_ref: dotdive/docs/lemmo/03-backend/style-guide.md §4, dotdive/docs/lemmo/03-backend/contracts.md §۵
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-CTR-06
-  name: Mutating Operation Idempotency Key
+  name: Idempotency-Key Header Enforcement
+  requirement: کلیه عملیات‌های تغییردهنده وضعیت (POST/PUT/PATCH) در سرویس دارای پورت ورودی HTTP موظف به اعلام هدر Idempotency-Key
+    در قرارداد و سیم‌کشی میدل‌ور متمرکز core/idempotency هستند.
   check: static
   scope: service
   applies_to:
   - go-service
-  applies_when: manifest.contracts.openapi_domain != null
+  applies_when: manifest.networking.inbound_http_port != null
   automation: partial
   implementation_status: not_started
   evaluation_mechanism: ast_and_contract_test
   roadmap_stage: 1
   gate: ratchet
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md
-    §2.10
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md §۲.۱۰
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-CTR-07
-  name: Gateway Route ↔ OpenAPI Contract Parity
+  name: Two-Way Gateway-Contract Route Conformance
+  requirement: 'انطباق دوطرفه روت‌های شبکه درگاه ورودی Kong با قراردادهای OpenAPI سرویس‌ها: هیچ روت گیت‌وی بدون قرارداد معتبر
+    و هیچ قرارداد عمومی بدون روت متناظر در Kong مجاز نیست.'
   check: static
   scope: platform
   applies_to:
@@ -404,12 +447,13 @@ rules:
   evaluation_mechanism: contract_lint
   roadmap_stage: 1
   gate: ratchet
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-013-three-tier-edge-gateway-and-bff-architecture.md
-    §2.1
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-013-three-tier-edge-gateway-and-bff-architecture.md §۲.۱
   doc_status: approved
   enforced_by: ci:gateway-route-conformance (proposed)
 - id: SB-CTR-08
-  name: Frontend SDK Freshness Zero-Diff
+  name: Frontend SDK Client Freshness Zero-Diff Gate
+  requirement: کدهای کلاینت تایپ‌اسکریپت تولیدی با Orval در مسیر app/src/sdk/generated/ نسبت به قراردادهای OpenAPI باید ۱۰۰٪
+    بدون تغییر و انحراف باشند و در CI گیت Zero-Diff اجرا شود.
   check: static
   scope: platform
   applies_to:
@@ -420,13 +464,15 @@ rules:
   evaluation_mechanism: zero_diff
   roadmap_stage: 1
   gate: ratchet
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md
-    §2.14, dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md
-    §2.4
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md §۲.۱۴,
+    dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md
+    §۲.۴
   doc_status: draft_source
   enforced_by: ci:frontend-sdk-zero-diff (proposed)
 - id: SB-EVT-01
-  name: Transactional Outbox Publishing
+  name: Transactional Outbox Pattern Mandate
+  requirement: انتشار رویدادهای دامنه منحصراً از طریق پکیج core/outbox با درج اتمیک در دیتابیس محلی سرویس در همان تراکنش؛
+    ممنوعیت ارسال مستقیم پیام به بروکر در هندلرهای وب.
   check: static
   scope: service
   applies_to:
@@ -436,13 +482,15 @@ rules:
   implementation_status: not_started
   evaluation_mechanism: ast
   roadmap_stage: 1
-  gate: new_service
-  doc_ref: dotdive/docs/lemmo/03-backend/architecture.md §2, dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md
-    §2
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/03-backend/architecture.md §۳, dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md
+    §بند ۲
   doc_status: draft_source
   enforced_by: lemmo-cli check
 - id: SB-EVT-02
-  name: Standard Event Envelope Conformance
+  name: Standard EventEnvelope Packing
+  requirement: بسته‌بندی پیام‌های رویداد درون پاکت استاندارد platform.v1.EventEnvelope همراه با نام‌گذاری سه‌بخشی نسخه‌دار
+    و فیلدهای شناسه، منبع، زمان و پی‌لود ساختاریافته.
   check: static
   scope: service
   applies_to:
@@ -457,24 +505,27 @@ rules:
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-EVT-03
-  name: Traceparent Propagation in Async Events
+  name: Traceparent Context Propagation in Events (F-7)
+  requirement: تزریق الزامی هدر استاندارد W3C traceparent در فیلد متادیتای هدر پیام‌های Outbox و استخراج مجدد آن در کانسومرها
+    جهت حفظ زنجیره رهگیری در مرزهای ناهمگام (F-7).
   check: static
   scope: service
   applies_to:
   - go-service
-  applies_when: manifest.events.published.size() > 0 || manifest.events.consumed.size()
-    > 0
+  applies_when: manifest.events.published.size() > 0 || manifest.events.consumed.size() > 0
   automation: full
   implementation_status: not_started
   evaluation_mechanism: ast
   roadmap_stage: 1
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/09-governance/current-path.md#f-7, dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md
-    §۱۱.۲
+  doc_ref: dotdive/docs/lemmo/09-governance/current-path.md#f-7, dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md
+    §بند ۲
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-EVT-04
-  name: Central Event Catalog Registration
+  name: Central Event Registry Registration
+  requirement: کلیه نام‌های رویداد اعلام‌شده در لیست رویدادهای منتشره باید در contracts/lemmo/v1/events.proto و کاتالوگ متمرکز
+    رویدادهای پلتفرم ثبت و اعتبارسنجی شده باشند.
   check: static
   scope: platform
   applies_to:
@@ -489,24 +540,27 @@ rules:
   doc_status: approved
   enforced_by: ci:event-registry-lint (proposed)
 - id: SB-SEC-01
-  name: Service Identity & Auth Interceptor
+  name: Inbound Server Identity & Principal Context Interceptor
+  requirement: ثبت اینترسپتور احراز هویت در بوت‌استرپ سرور ورودی، استخراج متادیتای هویت کلاینت و انتشار امن اطلاعات احرازشده
+    به عنوان Principal در کانتکست درخواست‌های داخلی.
   check: static
   scope: service
   applies_to:
   - go-service
-  applies_when: manifest.networking.inbound_http_port != null || manifest.networking.inbound_grpc_port
-    != null
+  applies_when: manifest.networking.inbound_http_port != null || manifest.networking.inbound_grpc_port != null
   automation: full
   implementation_status: not_started
   evaluation_mechanism: ast
   roadmap_stage: 1
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/03-backend/iam-service-spec.md §۱, dotdive/docs/lemmo/01-architecture/secure-system-design.md
+  doc_ref: dotdive/docs/lemmo/03-backend/iam-service-spec.md §1.3, dotdive/docs/lemmo/01-architecture/secure-system-design.md
     §الگوی ۱
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-RES-01
-  name: Call Resilience & Non-blocking Dials
+  name: Client Call Resilience & Non-Blocking Dial
+  requirement: تنظیم صریح مهلت زمانی (Timeout)، بودجه تلاش مجدد و بریکر در فایل کانفیگ نسخه‌دار؛ ممنوعیت قطعی فراخوانی Dial
+    مسدودکننده بدون کانتکست و زمان انقضا.
   check: static
   scope: service
   applies_to:
@@ -516,13 +570,14 @@ rules:
   implementation_status: not_started
   evaluation_mechanism: ast
   roadmap_stage: 1
-  gate: new_service
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md
-    §۵
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md §بند ۵
   doc_status: draft_source
   enforced_by: lemmo-cli check
 - id: SB-RES-02
-  name: Graceful Shutdown Lifecycle
+  name: Graceful Shutdown Protocol
+  requirement: هندلینگ سیگنال‌های SIGTERM/SIGINT، تخلیه درخواست‌های فعال در بازه مهلت کانفیگ (Grace Period پیش‌فرض ۱۵ ثانیه)
+    و بستن امن اتصالات دیتابیس و صف پیام.
   check: static
   scope: service
   applies_to:
@@ -532,13 +587,14 @@ rules:
   implementation_status: not_started
   evaluation_mechanism: ast_and_runtime_probe
   roadmap_stage: 1
-  gate: new_service
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md
-    §۹
+  gate: ratchet
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md §بند ۹
   doc_status: draft_source
   enforced_by: lemmo-cli check
 - id: SB-LOG-01
   name: Standard Structured JSON Logging
+  requirement: صدور کلیه لاگ‌ها روی stdout در قالب استاندارد ساختاریافته JSON از طریق پکیج متمرکز core/bootstrap یا slog؛
+    منع قطعی استفاده از fmt.Print یا لاگ متنی غیرساختاریافته.
   check: static
   scope: service
   applies_to:
@@ -549,11 +605,14 @@ rules:
   evaluation_mechanism: ast
   roadmap_stage: 1
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §۱۱.۱, dotdive/docs/lemmo/09-governance/decision-register.md#d-01
+  doc_ref: dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §۱۱.۱, dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md
+    §بند ۲
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-LOG-02
-  name: Contextual Request & Hop Logging
+  name: Contextual Tracing Logging & PII Sanitization
+  requirement: 'درج فیلدهای الزامی request_id، hop، user_id و workspace_id در لاگ‌های بازمینه و منع اکید ثبت اطلاعات هویتی
+    و حساس (PII: پسورد، توکن، کوکی، پرامپت خام).'
   check: static
   scope: service
   applies_to:
@@ -564,12 +623,14 @@ rules:
   evaluation_mechanism: ast_and_manual_review
   roadmap_stage: 1
   gate: ratchet
-  doc_ref: dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §۱۱.۲, dotdive/docs/lemmo/01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md
-    §۲.۲, dotdive/docs/lemmo/01-architecture/secure-system-design.md §الگوی ۱
+  doc_ref: dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §۱۱.۱, dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md
+    §۱۱.۲, dotdive/docs/lemmo/01-architecture/secure-system-design.md §الگوی ۱
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-TRC-01
-  name: W3C Distributed Tracing
+  name: W3C Traceparent Ingress & Egress Propagation
+  requirement: سیم‌کشی میدل‌ور core/middleware.TraceInterceptor جهت استخراج، اعتبارسنجی و بازتاب هدر استاندارد W3C traceparent
+    در ارتباطات ورودی و خروجی شبکه.
   check: static
   scope: service
   applies_to:
@@ -580,11 +641,14 @@ rules:
   evaluation_mechanism: ast
   roadmap_stage: 1
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §۱۱.۲, dotdive/docs/lemmo/09-governance/decision-register.md#d-02
+  doc_ref: dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §۱۱.۲, dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md
+    §بند ۲
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-ERR-01
-  name: Central Error Catalog AIP-193 Conformance
+  name: Canonical AIP-193 Error Envelope Conformance
+  requirement: بازگرداندن خطاهای سرویس در قالب استاندارد google.rpc.Status حاوی ErrorInfo دامنه‌ای متصل به کاتالوگ متمرکز
+    خطاهای پلتفرم با فیلدهای reason و domain.
   check: static
   scope: service
   applies_to:
@@ -595,12 +659,14 @@ rules:
   evaluation_mechanism: ast
   roadmap_stage: 1
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md
-    §۱, dotdive/docs/lemmo/03-backend/style-guide.md §۴.۱
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md §۱, dotdive/docs/lemmo/03-backend/style-guide.md
+    §4.1
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-TST-01
-  name: Live Test Directory & Makefile Targets
+  name: Testing Hygiene & Makefile Targets Standard
+  requirement: قرارگیری آزمون‌های زنده اختصاصی در tests/live/ و وجود تارگت‌های استاندارد test و verify-live در Makefile ریشه
+    سرویس جهت اجرای بررسی‌های یکپارچه.
   check: static
   scope: service
   applies_to:
@@ -611,11 +677,13 @@ rules:
   evaluation_mechanism: filesystem
   roadmap_stage: 1
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/03-backend/style-guide.md §۳
+  doc_ref: dotdive/docs/lemmo/03-backend/style-guide.md §3
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-CND-JSON
-  name: JSON Schema Validation for Dynamic Payloads
+  name: Dynamic Payload JSON Schema Conformance
+  requirement: اعتبارسنجی ورودی‌های دارای ساختار منعطف یا داینامیک بر مبنای اسکیماهای JSON نسخه ۲ در contracts/schemas/ برای
+    سرویس‌های فعال‌کننده قابلیت dynamic_payload.
   check: static
   scope: service
   applies_to:
@@ -626,11 +694,13 @@ rules:
   evaluation_mechanism: json_schema
   roadmap_stage: 2
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/03-backend/contracts.md §۳.۲
+  doc_ref: dotdive/docs/lemmo/03-backend/contracts.md §۳
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-CND-SSRF
-  name: SSRF-Safe Outbound Client
+  name: External Outbound SSRF-Safe HTTP Client
+  requirement: استفاده اجباری از کلاینت HTTP امن با بلک‌لیست IPهای خصوصی/لوکال و DNS Pinning جهت پیشگیری از حملات جعل درخواست
+    سمت سرور (SSRF) برای سرویس‌های دارای خروجی وب.
   check: static
   scope: service
   applies_to:
@@ -638,15 +708,17 @@ rules:
   applies_when: manifest.networking.external_outbound == true
   automation: partial
   implementation_status: not_started
-  evaluation_mechanism: ast_and_manual_review
+  evaluation_mechanism: ast_and_contract_test
   roadmap_stage: 2
   gate: new_service
   doc_ref: dotdive/docs/lemmo/01-architecture/secure-system-design.md §الگوی ۴, dotdive/docs/lemmo/03-backend/style-guide.md
-    §۸
+    §8
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-CND-TENANT
-  name: Storage Tenant Prefix Isolation
+  name: Multi-Tenant Object Storage Path Scoping
+  requirement: الزام آغاز کلیه کلیدهای اشیاء چندمستأجری در MinIO/S3 با پیشوند رسمی tenants/{workspaceID}/* و بررسی تطابق مالکیت
+    دیتابیسی پیش از صدور Presigned URL.
   check: static
   scope: service
   applies_to:
@@ -658,11 +730,13 @@ rules:
   roadmap_stage: 2
   gate: new_service
   doc_ref: dotdive/docs/lemmo/01-architecture/secure-system-design.md §الگوی ۳, dotdive/docs/lemmo/03-backend/style-guide.md
-    §۸
+    §8
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-CND-RATE
-  name: Billable Usage Reporting
+  name: Billable Service Rate-Card Integration
+  requirement: 'گزارش‌گیری دقیق میزان مصرف منابع و اتصال به Rate-Card رسمی جهت اعتبارسنجی سهمیه و کسر اعتبار برای سرویس‌های
+    علامت‌خورده با billable: true.'
   check: static
   scope: service
   applies_to:
@@ -673,11 +747,13 @@ rules:
   evaluation_mechanism: ast_and_contract_test
   roadmap_stage: 2
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/03-backend/credit-and-ledger.md §۱
+  doc_ref: dotdive/docs/lemmo/03-backend/credit-and-ledger.md §1
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-CND-REF
-  name: Reference Data Architectural Pattern
+  name: Static Catalog Reference Data Registry Conformance
+  requirement: تبعیت داده‌های استاتیک کاتالوگ از رجیستری مرکزی داده‌های مرجع و کش دو سطحی کلاینت؛ ممنوعیت هاردکد کردن اطلاعات
+    کاتالوگ در سورس‌کد سرویس.
   check: static
   scope: service
   applies_to:
@@ -688,12 +764,13 @@ rules:
   evaluation_mechanism: ast_and_manual_review
   roadmap_stage: 2
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-012-reference-data-registry-and-client-cache.md
-    §۲.۱
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-012-reference-data-registry-and-client-cache.md §2
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-RT-01
-  name: Honest Dependency Readiness Probe
+  name: Live Honest Readiness Dependency Probe
+  requirement: پینگ ران‌تایم و واقعی وابستگی‌های حیاتی در اندپوینت /readyz؛ منع بازگرداندن پاسخ کاذب UP در صورت قطع اتصال
+    یا عدم سلامت پایگاه داده و ردیس.
   check: live
   scope: service
   applies_to:
@@ -704,11 +781,14 @@ rules:
   evaluation_mechanism: network_probe
   roadmap_stage: 1
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §۱۱.۱, dotdive/docs/lemmo/09-governance/decision-register.md#d-01
+  doc_ref: dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §۴, dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md
+    §بند ۳
   doc_status: approved
   enforced_by: make verify-live
 - id: SB-RT-02
-  name: Runtime Version, Commit & Container Digest Parity
+  name: Live Running Version & Provenance Audit Probe
+  requirement: استعلام نسخه ران‌تایم، هش کامیت گیت و دایجست ایمیج داکر از پروب زنده سرویس و تطبیق ریاضی با متادیتای بیلد و
+    تگ گیت سورس‌کد.
   check: live
   scope: service
   applies_to:
@@ -719,12 +799,14 @@ rules:
   evaluation_mechanism: network_probe
   roadmap_stage: 1
   gate: ratchet
-  doc_ref: dotdive/docs/lemmo/07-devops/docker-spec.md §۴, dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md
     §۲.۱-§۲.۵
   doc_status: draft_source
   enforced_by: make verify-live
 - id: SB-RT-03
-  name: Live W3C Traceparent Echo Probe
+  name: Live Traceparent Header Reflection Probe
+  requirement: ارسال درخواست آزمایشی با هدر traceparent؛ اعتبارسنجی بازگشت همان TraceID در هدر پاسخ شبکه و ثبت لاگ همگام بر
+    روی خروجی stdout.
   check: live
   scope: service
   applies_to:
@@ -735,11 +817,14 @@ rules:
   evaluation_mechanism: network_probe
   roadmap_stage: 1
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §۱۱.۲, dotdive/docs/lemmo/09-governance/decision-register.md#d-02
+  doc_ref: dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §۱۱.۲, dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md
+    §بند ۲
   doc_status: approved
   enforced_by: make verify-live
 - id: SB-RT-04
   name: Live Outbox Health & Broker Connectivity Probe
+  requirement: استعلام وضعیت پیام‌های معلق و شکست‌خورده Outbox و اتصال بروکر پیام از طریق متادیتای اندپوینت آمادگی خود سرویس
+    بدون اتصال مستقیم کوئری SQL به دیتابیس.
   check: live
   scope: service
   applies_to:
@@ -750,11 +835,14 @@ rules:
   evaluation_mechanism: network_probe
   roadmap_stage: 1
   gate: ratchet
-  doc_ref: dotdive/docs/lemmo/09-governance/current-path.md#f-7
+  doc_ref: dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §۴, dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md
+    §۱۱.۴
   doc_status: approved
   enforced_by: make verify-live
 - id: SB-RT-05
-  name: Controlled Read-Only AIP-193 Error Probe
+  name: Live AIP-193 Error Handling Conformance Probe
+  requirement: ارسال درخواست خواندنی با شناسه نامعتبر؛ اعتبارسنجی پاسخ بر مبنای انولوپ استاندارد خطا و کدهای AIP-193 بدون
+    ایجاد اثر جانبی مالی یا داده‌ای.
   check: live
   scope: service
   applies_to:
@@ -765,29 +853,32 @@ rules:
   evaluation_mechanism: network_probe
   roadmap_stage: 1
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md
-    §۱, dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §۱۱.۴
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md §۱, dotdive/docs/lemmo/03-backend/style-guide.md
+    §4.1
   doc_status: approved
   enforced_by: make verify-live
 - id: SB-RT-06
-  name: Live Security & IDOR Tenant Isolation Probe
+  name: Live Anti-IDOR Workspace Isolation Probe
+  requirement: ارسال درخواست آزمایشی بدون توکن (انتظار کد ۴۰۱) و با توکن به منبع ورک‌اسپیس بیگانه (انتظار رفتار Fail-Closed
+    و کدهای ۴۰۳/۴۰۴ بدون نشت داده).
   check: live
   scope: service
   applies_to:
   - go-service
-  applies_when: manifest.networking.inbound_http_port != null || manifest.networking.inbound_grpc_port
-    != null
+  applies_when: manifest.networking.inbound_http_port != null || manifest.networking.inbound_grpc_port != null
   automation: full
   implementation_status: not_started
   evaluation_mechanism: network_probe
   roadmap_stage: 2
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/01-architecture/secure-system-design.md §الگوی ۲, dotdive/docs/lemmo/01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md
-    §۲.۲-§۲.۴
+  doc_ref: dotdive/docs/lemmo/01-architecture/secure-system-design.md §الگوی ۲, dotdive/docs/lemmo/03-backend/style-guide.md
+    §9.4
   doc_status: approved
   enforced_by: make verify-live
 - id: SB-RT-07
-  name: Edge Gateway Route Accessibility Probe
+  name: Live Edge Gateway Route Availability Probe
+  requirement: آزمون سرتاسری و لایو دسترسی به روت‌های عمومی سرویس از طریق درگاه خارجی Kong Edge Gateway و تایید صحت مسیریابی
+    ترافیک بیرونی.
   check: live
   scope: platform
   applies_to:
@@ -799,7 +890,6 @@ rules:
   evaluation_mechanism: network_probe
   roadmap_stage: 5
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-013-three-tier-edge-gateway-and-bff-architecture.md
-    §۲.۱
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-013-three-tier-edge-gateway-and-bff-architecture.md §۲.۱
   doc_status: approved
   enforced_by: ci:edge-gateway-probe (proposed)
