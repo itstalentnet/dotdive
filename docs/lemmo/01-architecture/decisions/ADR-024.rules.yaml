@@ -1,4 +1,4 @@
-version: 6.0.0
+version: 7.0.0
 adr: ADR-024
 last_updated: '2026-10-18'
 total_rules: 50
@@ -51,9 +51,9 @@ rules:
   implementation_status: not_started
   evaluation_mechanism: filesystem
   roadmap_stage: 1
-  gate: new_service
+  gate: ratchet
   doc_ref: dotdive/docs/lemmo/03-backend/architecture.md §۱, dotdive/docs/lemmo/03-backend/style-guide.md §3
-  doc_status: approved
+  doc_status: gap
   enforced_by: lemmo-cli check
 - id: SB-DIR-04
   name: Database Migrations Parity
@@ -482,9 +482,9 @@ rules:
   evaluation_mechanism: ast
   roadmap_stage: 1
   gate: ratchet
-  doc_ref: dotdive/docs/lemmo/07-devops/platform-reliability-observability.md §۱, dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md
-    §بند ۹
-  doc_status: draft_source
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-018-tools-platform-architecture-unified-execution-and-domain-decoupling.md
+    §۲.۲, dotdive/docs/lemmo/03-backend/architecture.md §۳
+  doc_status: gap
   enforced_by: lemmo-cli check
 - id: SB-EVT-02
   name: Standard EventEnvelope Packing
@@ -552,7 +552,7 @@ rules:
   evaluation_mechanism: ast
   roadmap_stage: 1
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/03-backend/iam-service-spec.md §1.3, dotdive/docs/lemmo/01-architecture/secure-system-design.md
+  doc_ref: dotdive/docs/lemmo/03-backend/iam-service-spec.md §1.2, dotdive/docs/lemmo/01-architecture/secure-system-design.md
     §الگوی ۱
   doc_status: approved
   enforced_by: lemmo-cli check
@@ -800,7 +800,7 @@ rules:
   gate: ratchet
   doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md
     §۲.۱, dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md §۲.۵
-  doc_status: draft_source
+  doc_status: gap
   enforced_by: make verify-live
 - id: SB-RT-03
   name: Live Traceparent Header Reflection Probe

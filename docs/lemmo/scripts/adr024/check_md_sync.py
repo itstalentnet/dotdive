@@ -82,6 +82,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--catalog", default=DEFAULT_CATALOG)
     ap.add_argument("--doc", default=DEFAULT_DOC)
+    ap.add_argument(
+        "--md-dir",
+        default=None,
+        help="Directory used to resolve the relative links inside the Markdown doc. "
+        "Defaults to the directory of --doc. Pass the real decisions/ folder when "
+        "--doc is a copy in a temporary directory (REV-7 R7-1).",
+    )
     args = ap.parse_args()
 
     with open(args.catalog, "r", encoding="utf-8") as f:
@@ -90,7 +97,8 @@ def main():
         md_content = f.read()
 
     rules = sorted(catalog.get("rules", []), key=lambda r: r["id"])
-    md_rows, malformed = parse_md(md_content, os.path.dirname(args.doc))
+    md_dir = args.md_dir if args.md_dir else os.path.dirname(args.doc)
+    md_rows, malformed = parse_md(md_content, md_dir)
 
     mismatches = []
     for rid in sorted(malformed):
@@ -137,7 +145,7 @@ def main():
         print("RESULT: MD_SYNC=FAIL", file=sys.stderr)
         return 1
 
-    print("All 10 columns of all 50 rules are in zero-diff parity.")
+    print("All 10 columns of all %d rules are in zero-diff parity." % len(rules))
     print("RESULT: MD_SYNC=PASS")
     return 0
 

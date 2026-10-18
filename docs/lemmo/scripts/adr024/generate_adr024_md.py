@@ -65,6 +65,16 @@ def main():
     rules = catalog.get("rules", [])
     rule_map = {r["id"]: r for r in rules}
 
+    # REV-7 R7-4: gate counts are DERIVED from the catalog, never hand-written.
+    def fa(n):
+        return str(n).translate(str.maketrans("0123456789", "۰۱۲۳۴۵۶۷۸۹"))
+
+    gate_new = [r for r in rules if r["gate"] == "new_service"]
+    gate_new_s1 = [r for r in gate_new if r["roadmap_stage"] == 1]
+    gate_new_s2 = [r for r in gate_new if r["roadmap_stage"] == 2]
+    gate_new_s5 = [r for r in gate_new if r["roadmap_stage"] == 5]
+    gate_ratchet_s1 = [r for r in rules if r["gate"] == "ratchet" and r["roadmap_stage"] == 1]
+
     dir_rules = [rule_map[k] for k in ["SB-DIR-01", "SB-DIR-02", "SB-DIR-03", "SB-DIR-04", "SB-DOC-01", "SB-MAN-01"]]
     cfg_rules = [rule_map[k] for k in ["SB-CFG-01", "SB-CFG-02", "SB-CFG-03", "SB-CFG-04"]]
     dep_rules = [rule_map[k] for k in ["SB-DEP-01", "SB-DEP-02", "SB-DEP-03", "SB-DEP-04", "SB-VER-01", "SB-VER-02", "SB-IMG-01", "SB-HDR-01"]]
@@ -242,9 +252,9 @@ not_applicable: []
 
 ### ۴.۱. تعاریف گیت‌های ارزیابی (`gate`)
 - **`gate: new_service` (الزام سرویس‌های جدید):**  
-  تمامی قواعد دارای این برچسب (۲۷ قاعده شامل ۲۰ قاعده مصوب مرحله ۱، ۶ قاعده شرطی مرحله ۲ و ۱ پروب زنده لبه مرحله ۵) برای هر سرویس جدیدی که به مخزن افزوده می‌شود از روز نخست الزامی بوده و تخطی از آن‌ها موجب شکست قطعی بیلد (`FAIL`) می‌گردد. قواعد با منبع پیش‌نویس (draft_source) یا با شکاف سند (gap) حق انتصاب به new_service در مرحله ۱ را ندارند.
+  تمامی قواعد دارای این برچسب ({fa(len(gate_new))} قاعده شامل {fa(len(gate_new_s1))} قاعده مصوب مرحله ۱، {fa(len(gate_new_s2))} قاعده شرطی مرحله ۲ و {fa(len(gate_new_s5))} پروب زنده لبه مرحله ۵) برای هر سرویس جدیدی که به مخزن افزوده می‌شود از روز نخست الزامی بوده و تخطی از آن‌ها موجب شکست قطعی بیلد (`FAIL`) می‌گردد. قواعد با منبع پیش‌نویس (draft_source) یا با شکاف سند (gap) حق انتصاب به new_service در مرحله ۱ را ندارند.
 - **`gate: ratchet` (سیاست کاهش تدریجی سرویس‌های موجود):**  
-  برای ۲۳ قاعده مرحله ۱ در سرویس‌های پیاده‌سازی‌شده موجود، انحرافات شناخته‌شده در فایل خط مبنا ثبت گردیده و در هر چرخه کاری، تعداد این انحرافات منحصراً می‌تواند کاهش یابد (سیاست کاهش یک‌طرفه - Monotonic Reduction).
+  برای {fa(len(gate_ratchet_s1))} قاعده مرحله ۱ در سرویس‌های پیاده‌سازی‌شده موجود، انحرافات شناخته‌شده در فایل خط مبنا ثبت گردیده و در هر چرخه کاری، تعداد این انحرافات منحصراً می‌تواند کاهش یابد (سیاست کاهش یک‌طرفه - Monotonic Reduction).
 
 ### ۴.۲. ساختار و جایگاه فایل خط مبنا (`api/conformance/ratchet.yaml` — R4-9 / R5-3)
 پیرو دستور مدیر پروژه، فایل خط مبنای Ratchet درون مخزن کد `api/` مستقر می‌گردد:
