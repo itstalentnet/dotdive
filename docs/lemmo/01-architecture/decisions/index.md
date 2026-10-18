@@ -40,3 +40,4 @@ slug: "lemmo-adr"
 
 - **[ADR-022: قابلیت اطمینان، مشاهده‌پذیری و مرز تحویل MVP](./ADR-022-platform-reliability-and-observability.md)** — **Draft / Proposed**؛ telemetry مستقل، recovery در سرویس مالک، سلامت قابل اثبات و تحویل مرحله‌ای STB/REL.
 - **[ADR-023: استاندارد انتشار، چنج‌لاگ هر سرویس، تگ‌گذاری ایمیج و شناسنامه فایل‌های خودتولید](./ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md)** — **Draft / Proposed**؛ گسترش SemVer به سرویس‌ها و فرانت (D-16)، تگ ایمیج و نگه‌داری (D-17)، هدر شناسنامه فایل خودتولید (D-18) و پیشنهاد گیت zero-diff.
+- **[ADR-024: الگوی استاندارد میکروسرویس‌ها، اسکلت مرجع و موتور اعتبارسنجی انطباق](./ADR-024-service-blueprint-and-conformance.md)** — **Draft / Proposed**؛ تدوین الگوی رسمی میکروسرویس‌ها (قواعد SB-xx)، ارزیابی ایستای lemmo-cli check، ارزیابی زنده make verify-live تجمیع‌شده در make doctor (D-13)، مدیریت بدهی Ratchet و گیت ورود سرویس جدید.
