@@ -16,7 +16,7 @@
 # ADR-024: الگوی استاندارد میکروسرویس، اسکلت مرجع، مانیفست سرویس و اعتبارسنج انطباق
 
 > 📖 **منبع یگانه حقیقت قواعد (SSOT):**  
-> کاتالوگ جامع و رسمی کلیه قواعد این تصمیم در فایل داده‌ای ماشین‌خوان [`ADR-024.rules.yaml`](./ADR-024.rules.yaml) (منطبق بر اسکیمای [`rules-catalog.schema.json`](./rules-catalog.schema.json)) تعریف شده است. ابزار `lemmo-cli` مستقیماً این فایل را مصرف کرده و به عنوان مجری استانداردهای مستند عمل می‌نماید (تولید سند از کد ملغی است).
+> کاتالوگ جامع و رسمی کلیه قواعد این سند در فایل داده‌ای ماشین‌خوان [`ADR-024.rules.yaml`](./ADR-024.rules.yaml) (منطبق بر اسکیمای [`rules-catalog.schema.json`](./rules-catalog.schema.json)) تعریف شده است. ابزار `lemmo-cli` مستقیماً این فایل را مصرف کرده و به عنوان مجری استانداردهای مستند عمل می‌نماید (تولید سند از کد ملغی است). این سند در وضعیت **پیش‌نویس (Draft)** قرار دارد و تا زمان تصویب رسمی توسط مالک محصول، به عنوان مرجع طراحی معماری عمل می‌کند.
 
 ---
 
@@ -29,97 +29,129 @@
 
 ---
 
-## ۲. متن تصمیم مصوب (Decision)
+## ۲. متن تصمیم پیشنهادی (Proposed Decision)
 
-استاندارد میکروسرویس‌های پلتفرم لیمو مشتمل بر **۵۰ قاعده اعتبارسنجی** (۴۳ قاعده ایستا/شرطی در `lemmo-cli check` و ۷ آزمون ران‌تایم زنده در `make verify-live`) و **مانیفست ماشین‌خوان سرویس** به شرح زیر تصویب می‌گردد:
+استاندارد میکروسرویس‌های پلتفرم لیمو مشتمل بر **۵۰ قاعده اعتبارسنجی** (۴۳ قاعده ایستا/شرطی در `lemmo-cli check` و ۷ آزمون ران‌تایم زنده در `make verify-live`) و **مانیفست ماشین‌خوان سرویس** به شرح زیر پیشنهاد می‌گردد:
 
 ### ۲.۱. قواعد ایستای ساختار، لایه‌ها و پکیج‌ها (Directory & Packaging)
 
-| شناسه | شرح الزام فنی | نوع ارزیابی | مرجع سندی مصوب |
-| :---: | :--- | :---: | :--- |
-| **`SB-DIR-01`** | **لایه‌های Clean Architecture:** وجود پوشه‌های مجزای `internal/domain` (موجودیت‌های ناب)، `internal/app` (یوزکیس‌ها)، `internal/ports` (اینترفیس‌ها) و `internal/adapters` (آداپتورهای HTTP/gRPC/DB). | `filesystem` | [ADR-007 §3](./ADR-007-backend-contracts-and-tooling-standards.md)، [DOC-BE-004 §3](../../03-backend/style-guide.md) |
-| **`SB-DIR-02`** | **نقطه ورود باریک (Thin Entrypoint):** وجود فایل تک‌منظوره `cmd/main.go` صرفاً جهت سیم‌کشی و فراخوانی لایف‌سایکل بوت‌استرپ مشترک؛ منع پیاده‌سازی لاجیک بیزینسی در این فایل. | `ast` | [ADR-008 §2.1](./ADR-008-internal-tooling-and-versioning-governance.md)، [DOC-BE-004 §3](../../03-backend/style-guide.md) |
-| **`SB-DIR-03`** | **ماژول مستقل Go:** وجود فایل معتبر `go.mod` در ریشه سرویس با پیشوند رسمی `github.com/lemmo-lab/api/services/<name>`. | `filesystem` | [ADR-008 §2.2](./ADR-008-internal-tooling-and-versioning-governance.md)، [DOC-BE-001 §2](../../03-backend/architecture.md) |
-| **`SB-DIR-04`** | **مایگریشن‌های دیتابیس:** وجود پوشه `migrations/` حاوی زوج‌فایل‌های SQL ۶رقمی یا نشانگر صریح `migrations/.no_migration`. | `filesystem` | [ADR-007 §3](./ADR-007-backend-contracts-and-tooling-standards.md)، [DOC-BE-004 §6](../../03-backend/style-guide.md) |
-| **`SB-DOC-01`** | **شناسنامه انسانی سرویس (`service.md`):** وجود فایل مستندات در ریشه سرویس جهت شرح معماری، اهداف و مرزهای سرویس؛ متادیتای فنی به مانیفست سرویس (SSOT) ارجاع می‌دهد (تک‌منبعی متادیتا). | `frontmatter_parse` | [ADR-007 §3](./ADR-007-backend-contracts-and-tooling-standards.md)، [DOC-BE-002](../../03-backend/services.md) |
-| **`SB-MAN-01`** | **مانیفست ماشین‌خوان سرویس (A15):** وجود فایل مانیفست معتبر منطبق بر اسکیمای `contracts/schemas/service-manifest.json` (طراحی در §۳) به عنوان مرجع حقیقت (SSOT) متادیتای ماشینی سرویس و برقراری انطباق چهارجانبه. | `json_schema` | [ADR-024 §۳](./ADR-024-service-blueprint-and-conformance.md) |
+| شناسه | نام قاعده و شرح الزام فنی | شرط اعمال (CEL) | خودکاری | وضعیت | ارزیابی | گیت / مرحله | مجری | منبع | مرجع سندی |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| `SB-DIR-01` | **Clean Architecture Layer Structure** | `always` | `full` | `not_started` | `filesystem` | new_service (M1) | `lemmo-cli check` | مصوب | [ADR-007-backend-contracts-and-tooling-standards §3](./ADR-007-backend-contracts-and-tooling-standards.md)، [style-guide §3](../../03-backend/style-guide.md) |
+| `SB-DIR-02` | **Thin Entrypoint Main** | `always` | `full` | `not_started` | `ast` | new_service (M1) | `lemmo-cli check` | مصوب | [ADR-008-internal-tooling-and-versioning-governance §2.1](./ADR-008-internal-tooling-and-versioning-governance.md)، [style-guide §3](../../03-backend/style-guide.md) |
+| `SB-DIR-03` | **Independent Go Module Definition** | `always` | `full` | `not_started` | `filesystem` | new_service (M1) | `lemmo-cli check` | مصوب | [ADR-008-internal-tooling-and-versioning-governance §2.2](./ADR-008-internal-tooling-and-versioning-governance.md)، [architecture §2](../../03-backend/architecture.md) |
+| `SB-DIR-04` | **Database Migration Structure** | `manifest.storage.postgres == true` | `full` | `not_started` | `filesystem` | ratchet (M1) | `lemmo-cli check` | مصوب | [ADR-007-backend-contracts-and-tooling-standards §3](./ADR-007-backend-contracts-and-tooling-standards.md)، [style-guide §6](../../03-backend/style-guide.md) |
+| `SB-DOC-01` | **Service Architectural Specification** | `always` | `full` | `not_started` | `frontmatter_parse` | ratchet (M1) | `lemmo-cli check` | مصوب | [ADR-007-backend-contracts-and-tooling-standards §3](./ADR-007-backend-contracts-and-tooling-standards.md)، [services](../../03-backend/services.md) |
+| `SB-MAN-01` | **Machine-Readable Service Manifest** | `always` | `full` | `not_started` | `json_schema` | ratchet (M1) | `lemmo-cli check` | پیش‌نویس | [ADR-024-service-blueprint-and-conformance §3](./ADR-024-service-blueprint-and-conformance.md) |
 
 ### ۲.۲. قواعد پیکربندی، سکرت‌ها و انضباط کد (Configuration & Secrets)
 
-| شناسه | شرح الزام فنی | نوع ارزیابی | مرجع سندی مصوب |
-| :---: | :--- | :---: | :--- |
-| **`SB-CFG-01`** | **کانفیگ نسخه‌بندی‌شده:** وجود فایل `config/default.yaml` برای پیش‌فرض‌های غیرحساس و بارگذاری انحصاری از طریق `core/config`. | `filesystem` | [DOC-ARCH-009 §2](../configuration-and-secrets.md)، [RULES.md §۲.۵](../../09-governance/rules.md) |
-| **`SB-CFG-02`** | **اعتبارسنجی Fail-Fast:** پیاده‌سازی اینترفیس `config.Validator` بر روی Struct پیکربندی جهت توقف استارت با کد خروج ۱ در صورت کانفیگ نامعتبر. | `ast` | [DOC-ARCH-009 §3](../configuration-and-secrets.md) |
-| **`SB-CFG-03`** | **منع فال‌بک هاردکد سکرت‌ها:** ممنوعیت قطعی مقادیر پیش‌فرض برای سکرت‌ها (پسورد، JWT Secret، API Key) در سورس‌کد و توقف استارت در صورت غیاب سکرت. | `ast` | [DOC-ARCH-009 §1](../configuration-and-secrets.md)، [RULES.md §۲.۲](../../09-governance/rules.md) |
-| **`SB-CFG-04`** | **منع ثوابت هاردکد شبکه:** ممنوعیت آدرس‌ها یا پورت‌های لیترال هاردکد در فراخوانی‌های listen/dial؛ سایر ثوابت متغیر تحت بازبینی دستی. | `ast` | [ADR-009 §2.4](./ADR-009-service-owned-deployment-and-financial-ledger.md)، [DOC-ARCH-009 §1](../configuration-and-secrets.md) |
+| شناسه | نام قاعده و شرح الزام فنی | شرط اعمال (CEL) | خودکاری | وضعیت | ارزیابی | گیت / مرحله | مجری | منبع | مرجع سندی |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| `SB-CFG-01` | **Versioned Configuration Default File** | `always` | `full` | `not_started` | `filesystem` | ratchet (M1) | `lemmo-cli check` | مصوب | [configuration-and-secrets §2](../configuration-and-secrets.md) |
+| `SB-CFG-02` | **Startup Fail-Fast Validation** | `always` | `full` | `not_started` | `ast` | new_service (M1) | `lemmo-cli check` | مصوب | [configuration-and-secrets §3](../configuration-and-secrets.md) |
+| `SB-CFG-03` | **Secret Hardcoding Fallback Ban** | `always` | `full` | `not_started` | `ast` | new_service (M1) | `lemmo-cli check` | مصوب | [configuration-and-secrets §1](../configuration-and-secrets.md) |
+| `SB-CFG-04` | **Network Literal Constants Ban** | `always` | `partial` | `not_started` | `ast_and_manual_review` | ratchet (M1) | `lemmo-cli check` | مصوب | [ADR-009-service-owned-deployment-and-financial-ledger §2.4](./ADR-009-service-owned-deployment-and-financial-ledger.md)، [configuration-and-secrets §1](../configuration-and-secrets.md) |
 
 ### ۲.۳. قواعد استقرار سرویس‌محور و داکر (Deployment & Docker Hygiene)
 
-| شناسه | شرح الزام فنی | نوع ارزیابی | مرجع سندی مصوب |
-| :---: | :--- | :---: | :--- |
-| **`SB-DEP-01`** | **استقرار اختصاصی سرویس:** وجود مانیفست `deploy/compose.yaml` و پوشه `deploy/config/` جهت ادغام در Compose ریشه با `include:`. | `filesystem` | [ADR-009 §2.1](./ADR-009-service-owned-deployment-and-financial-ledger.md)، [DOC-OPS-001 §3.3](../../07-devops/docker-spec.md) |
-| **`SB-DEP-02`** | **داکرفایل چندمرحله‌ای واحد:** وجود دقیقاً یک فایل `Dockerfile` در ریشه سرویس به صورت Multi-Stage؛ ممنوعیت فایل‌های موازی نظیر `.dev`. | `filesystem` | [DOC-OPS-001 §4.3](../../07-devops/docker-spec.md) |
-| **`SB-DEP-03`** | **نام‌گذاری کانتینر و نقش‌محوری:** تنظیم صریح `container_name: lemmo-svc-<name>` در کامپوز؛ ممنوعیت کاربرد نام ابزار یا برندهای ثالث. | `yaml_lint` | [ADR-009 §2.3](./ADR-009-service-owned-deployment-and-financial-ledger.md)، [DOC-OPS-001 §3.1-§3.2](../../07-devops/docker-spec.md) |
-| **`SB-DEP-04`** | **شناسنامه بیلد در لاگ استارت:** تزریق `ARG GIT_COMMIT` و `ARG BUILD_TIME` در داکرفایل و ثبت الزامی در اولین خط لاگ استارت در `main.go`. | `content_match` | [DOC-OPS-001 §4.5](../../07-devops/docker-spec.md) |
-| **`SB-VER-01`** | **چنج‌لاگ انسان‌نویس:** وجود فایل `CHANGELOG.md` در ریشه سرویس مطابق استاندارد Keep a Changelog با دسته‌بندی‌های رسمی مجاز. | `filesystem` | [ADR-008 §2.6](./ADR-008-internal-tooling-and-versioning-governance.md)، [ADR-023 §2.1](./ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md) (D-16) |
-| **`SB-VER-02`** | **نسخه معنایی و تگ گیت چندماژوله:** پیروی از SemVer 2.0.0 و الگوی تگ‌گذاری گیت پیشونددار `services/<name>/vX.Y.Z`. | `git_tags` | [ADR-008 §2.3-§2.4](./ADR-008-internal-tooling-and-versioning-governance.md)، [ADR-023 §2.1](./ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md) |
-| **`SB-IMG-01`** | **تگ ایمیج مبتنی بر نسخه سورس:** استخراج تگ ایمیج داکر از نسخه سرویس (`lemmo/svc-<name>:vX.Y.Z`) و سیاست نگه‌داری ۳ نسخه آخر. | `compose_lint` | [ADR-023 §2.5](./ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md) (D-17)، [DOC-OPS-001 §4.6](../../07-devops/docker-spec.md) |
-| **`SB-HDR-01`** | **هدر شناسنامه فایل خودتولید:** درج هدر ۴گانه غیرقابل‌ویرایش در فایل‌های تولیدی توسط ژنراتورها و برقراری گیت Zero-Diff در CI. | `content_match` | [ADR-023 §2.3-§2.4](./ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md) (D-18) |
+| شناسه | نام قاعده و شرح الزام فنی | شرط اعمال (CEL) | خودکاری | وضعیت | ارزیابی | گیت / مرحله | مجری | منبع | مرجع سندی |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| `SB-DEP-01` | **Service-Owned Deployment Composition** | `always` | `full` | `not_started` | `filesystem` | ratchet (M1) | `lemmo-cli check` | مصوب | [ADR-009-service-owned-deployment-and-financial-ledger §2.1](./ADR-009-service-owned-deployment-and-financial-ledger.md)، [docker-spec §3.3](../../07-devops/docker-spec.md) |
+| `SB-DEP-02` | **Single Multi-Stage Dockerfile** | `always` | `full` | `not_started` | `filesystem` | new_service (M1) | `lemmo-cli check` | مصوب | [docker-spec §4](../../07-devops/docker-spec.md) |
+| `SB-DEP-03` | **Container Role-Based Naming** | `always` | `full` | `not_started` | `compose_lint` | new_service (M1) | `lemmo-cli check` | مصوب | [ADR-009-service-owned-deployment-and-financial-ledger §2.3](./ADR-009-service-owned-deployment-and-financial-ledger.md)، [docker-spec §3.2](../../07-devops/docker-spec.md) |
+| `SB-DEP-04` | **Build Provenance Logging in Startup** | `always` | `full` | `not_started` | `content_match` | ratchet (M1) | `lemmo-cli check` | مصوب | [docker-spec §4](../../07-devops/docker-spec.md) |
+| `SB-VER-01` | **Human-Curated Changelog** | `always` | `full` | `not_started` | `filesystem` | ratchet (M1) | `lemmo-cli check` | مصوب | [ADR-008-internal-tooling-and-versioning-governance §2.6](./ADR-008-internal-tooling-and-versioning-governance.md)، [style-guide §7](../../03-backend/style-guide.md) |
+| `SB-VER-02` | **Semantic Versioning and Module Git Tags** | `always` | `full` | `not_started` | `git_tags` | ratchet (M1) | `lemmo-cli check` | پیش‌نویس | [ADR-008-internal-tooling-and-versioning-governance §2.3](./ADR-008-internal-tooling-and-versioning-governance.md)، [ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance §2.1](./ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md) |
+| `SB-IMG-01` | **Source-Derived Image Tagging & Retention** | `always` | `full` | `not_started` | `compose_lint` | ratchet (M1) | `lemmo-cli check` | پیش‌نویس | [docker-spec §4](../../07-devops/docker-spec.md)، [ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance §2.5](./ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md) |
+| `SB-HDR-01` | **Generated File Provenance Header** | `always` | `full` | `not_started` | `content_match` | new_service (M1) | `lemmo-cli check` | پیش‌نویس | [ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance §2.3](./ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md) |
 
 ### ۲.۴. قراردادها، OpenAPI و کلاینت SDK (Contracts & OpenAPI)
 
-| شناسه | شرح الزام فنی | نوع ارزیابی | مرجع سندی مصوب |
-| :---: | :--- | :---: | :--- |
-| **`SB-CTR-01`** | **تراکم قراردادهای Protobuf و لینت با Buf:** قراردادهای proto در `contracts/lemmo/v1/` مستقر و از مانیفست سرویس (`contracts.proto`) ارجاع شوند؛ بدون proto محلی در سرویس؛ گیت `buf lint` و `buf breaking`. | `filesystem_and_buf` | [DOC-BE-003 §1, §4](../../03-backend/contracts.md)، [ADR-007 §2](./ADR-007-backend-contracts-and-tooling-standards.md) |
-| **`SB-CTR-02`** | **قرارداد OpenAPI دامنه‌ای با مالکیت یگانه:** هر سرویس دارای HTTP عمومی دارای دقیقاً یک فایل `contracts/openapi/<domain>/v1/openapi.yaml` با مالک اعلام‌شده است («یک مسیر، یک قرارداد، یک مالک»). | `filesystem` | [ADR-016 §2.14](./ADR-016-request-context-governance-and-workspace-policy.md)، [ADR-018 §2.6](./ADR-018-tools-platform-architecture-unified-execution-and-domain-decoupling.md) |
-| **`SB-CTR-03`** | **قواعد Operation در OpenAPI:** هر operation در OpenAPI باید دارای `operationId` یکتا و متادیتای `x-lemmo-workspace-policy` معتبر باشد. | `openapi_lint` | [ADR-016 §2.2](./ADR-016-request-context-governance-and-workspace-policy.md) |
-| **`SB-CTR-04`** | **گیت تغییرات ناسازگار OpenAPI:** هرگونه شکستن سازگاری در اندپوینت‌های موجود بدون معرفی نسخه جدید API ممنوع است؛ ارزیابی با `oasdiff` در CI. | `oasdiff` | [DOC-BE-003 §3.2](../../03-backend/contracts.md)، [ADR-008 §2.3](./ADR-008-internal-tooling-and-versioning-governance.md) |
-| **`SB-CTR-05`** | **انطباق انولوپ خطای HTTP و مالکیت نگاشت:** پاسخ‌های خطای HTTP باید به `contracts/openapi/shared/errors.yaml` (RFC 7807 + `reason` + `help_key`) ارجاع دهند؛ مالکیت نگاشت AIP-193 به RFC 7807 منحصراً در اختیار `api/core/transport/http` و درگاه لبه Kong است. | `openapi_lint` | [DOC-BE-004 §4.3](../../03-backend/style-guide.md)، [DOC-BE-003 §5.3](../../03-backend/contracts.md) |
-| **`SB-CTR-06`** | **الزام کلید هرزپذیری (Idempotency):** کلیه عملیات تغییردهنده (POST/PUT/PATCH) هدر `Idempotency-Key` را در OpenAPI اعلام کرده و میدل‌ور `core/idempotency` را سیم‌کشی نمایند. | `openapi_and_ast` | [ADR-016 §2.10](./ADR-016-request-context-governance-and-workspace-policy.md) |
-| **`SB-CTR-07`** | **انطباق دوطرفه روت‌های Kong با قرارداد:** هیچ روت گیت‌وی بدون قرارداد OpenAPI و هیچ قرارداد عمومی بدون روت در Kong وجود ندارد. | `contract_lint` | [ADR-013 §2.1](./ADR-013-three-tier-edge-gateway-and-bff-architecture.md) |
-| **`SB-CTR-08`** | **تازگی کلاینت فرانت‌اند و گیت Zero-Diff:** کدهای تولیدی کلاینت استودیو با Orval (`app/src/sdk/generated`) نسبت به قراردادهای OpenAPI بدون diff هستند. | `zero_diff` | [ADR-023 §2.4](./ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md)، [ADR-016 §2.14](./ADR-016-request-context-governance-and-workspace-policy.md) |
+| شناسه | نام قاعده و شرح الزام فنی | شرط اعمال (CEL) | خودکاری | وضعیت | ارزیابی | گیت / مرحله | مجری | منبع | مرجع سندی |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| `SB-CTR-01` | **Protobuf Contracts Centralization & Buf Lint** | `manifest.contracts.proto.size() > 0` | `full` | `not_started` | `buf_lint_and_breaking` | new_service (M1) | `lemmo-cli check` | مصوب | [contracts §1](../../03-backend/contracts.md)، [ADR-007-backend-contracts-and-tooling-standards §2](./ADR-007-backend-contracts-and-tooling-standards.md) |
+| `SB-CTR-02` | **Domain OpenAPI Specification & Single Ownership** | `manifest.contracts.openapi_domain != null` | `full` | `not_started` | `filesystem` | ratchet (M1) | `lemmo-cli check` | مصوب | [ADR-016-request-context-governance-and-workspace-policy §2.14](./ADR-016-request-context-governance-and-workspace-policy.md)، [ADR-018-tools-platform-architecture-unified-execution-and-domain-decoupling §2](./ADR-018-tools-platform-architecture-unified-execution-and-domain-decoupling.md) |
+| `SB-CTR-03` | **OpenAPI Operation Compliance** | `manifest.contracts.openapi_domain != null` | `full` | `not_started` | `openapi_lint` | new_service (M1) | `lemmo-cli check` | مصوب | [ADR-016-request-context-governance-and-workspace-policy §2.2](./ADR-016-request-context-governance-and-workspace-policy.md) |
+| `SB-CTR-04` | **OpenAPI Breaking Changes Gate** | `manifest.contracts.openapi_domain != null` | `full` | `not_started` | `oasdiff` | ratchet (M1) | `ci:oasdiff (proposed)` | مصوب | [contracts §4](../../03-backend/contracts.md)، [ADR-008-internal-tooling-and-versioning-governance §2.3](./ADR-008-internal-tooling-and-versioning-governance.md) |
+| `SB-CTR-05` | **HTTP Error Envelope Conformance & Mapping Ownership** | `manifest.networking.inbound_http_port != null` | `partial` | `not_started` | `ast_and_contract_test` | new_service (M1) | `lemmo-cli check` | مصوب | [style-guide §4](../../03-backend/style-guide.md)، [contracts §5.3](../../03-backend/contracts.md) |
+| `SB-CTR-06` | **Mutating Operation Idempotency Key** | `manifest.contracts.openapi_domain != null` | `partial` | `not_started` | `ast_and_contract_test` | ratchet (M1) | `lemmo-cli check` | مصوب | [ADR-016-request-context-governance-and-workspace-policy §2.10](./ADR-016-request-context-governance-and-workspace-policy.md) |
+| `SB-CTR-07` | **Gateway Route ↔ OpenAPI Contract Parity** | `manifest.contracts.openapi_domain != null` | `full` | `not_started` | `contract_lint` | ratchet (M1) | `ci:gateway-route-conformance (proposed)` | مصوب | [ADR-013-three-tier-edge-gateway-and-bff-architecture §2.1](./ADR-013-three-tier-edge-gateway-and-bff-architecture.md) |
+| `SB-CTR-08` | **Frontend SDK Freshness Zero-Diff** | `manifest.contracts.openapi_domain != null` | `full` | `not_started` | `zero_diff` | ratchet (M1) | `ci:frontend-sdk-zero-diff (proposed)` | پیش‌نویس | [ADR-016-request-context-governance-and-workspace-policy §2.14](./ADR-016-request-context-governance-and-workspace-policy.md)، [ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance §2.4](./ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md) |
 
 ### ۲.۵. رویدادها، امنیت، تاب‌آوری و مشاهده‌پذیری (Events, Security & Observability)
 
-| شناسه | شرح الزام فنی | نوع ارزیابی | مرجع سندی مصوب |
-| :---: | :--- | :---: | :--- |
-| **`SB-EVT-01`** | **الگوی Transactional Outbox:** انتشار رویدادهای دامنه منحصراً از طریق `core/outbox` و ثبت اتمیک در دیتابیس محلی؛ منع ارسال مستقیم به صف در وب. | `ast` | [DOC-BE-001 §2](../../03-backend/architecture.md)، [ADR-022 §2](./ADR-022-platform-reliability-and-observability.md) |
-| **`SB-EVT-02`** | **پاکت استاندارد EventEnvelope:** قراردادن پیام‌های رویداد درون `platform.v1.EventEnvelope` همراه با نام‌گذاری سه‌بخشی نسخه‌دار. | `ast` | [DOC-BE-003 §2](../../03-backend/contracts.md) |
-| **`SB-EVT-03`** | **انتقال Traceparent در رویدادها (F-7):** الزام تزریق W3C `traceparent` در هدر پیام‌های Outbox و استخراج مجدد در کانسومرها (مرحله ۱). | `ast` | [DOC-GOV-002 §F-7](../../09-governance/current-path.md#f-7)، [ADR-022 §M0-02](./ADR-022-platform-reliability-and-observability.md) |
-| **`SB-EVT-04`** | **ثبت رویداد در رجیستری متمرکز:** هر نام رویداد منتشرشده در `contracts/lemmo/v1/events.proto` / رجیستری رویدادها ثبت شده باشد. | `contract_lint` | [DOC-BE-003 §2.1-§2.2](../../03-backend/contracts.md) |
-| **`SB-SEC-01`** | **احراز هویت سرویس و متادیتای کانتکست:** ثبت اینترسپتور auth در بوت‌استرپ و انتشار متادیتای هویت در RPCهای داخلی. | `ast` | [DOC-BE-007 §1.3, §6](../../03-backend/iam-service-spec.md)، [DOC-ARCH-007 §الگوی ۱](../secure-system-design.md) |
-| **`SB-RES-01`** | **تاب‌آوری و منع Dialهای مسدودکننده:** تنظیم مهلت و سیاست تلاش مجدد در کانفیگ نسخه‌دار؛ ممنوعیت دیال بدون timeout/context. | `ast` | [ADR-022 §5](./ADR-022-platform-reliability-and-observability.md) |
-| **`SB-RES-02`** | **توقف تمیز (Graceful Shutdown):** هندلینگ سیگنال‌های SIGTERM/SIGINT، تخلیه درخواست‌های فعال با مهلت کانفیگ و بستن امن اتصالات. | `ast` | [ADR-022 §متن تصمیم پیشنهادی، بند ۹](./ADR-022-platform-reliability-and-observability.md) |
-| **`SB-LOG-01`** | **لاگ استاندارد ساخت‌یافته JSON:** صدور لاگ‌ها روی stdout در فرمت JSON از طریق `core/bootstrap` / `slog`؛ منع `fmt.Print`. | `ast` | [ADR-022 §M0-03](./ADR-022-platform-reliability-and-observability.md)، [DOC-BE-005 §11.1](../../03-backend/mvp-operational-readiness.md) |
-| **`SB-LOG-02`** | **لاگ با زمینه و رهگیری درخواست:** درج `request_id`، تعداد گام‌ها (`hop`) و شناسه کاربر/ورک‌اسپیس با حذف اکید PII. | `ast` | [DOC-BE-005 §11.2](../../03-backend/mvp-operational-readiness.md)، [ADR-016 §2.2](./ADR-016-request-context-governance-and-workspace-policy.md)، [DOC-ARCH-007 §الگوی ۱](../secure-system-design.md) |
-| **`SB-TRC-01`** | **انتشار W3C traceparent:** سیم‌کشی `core/middleware.TraceInterceptor()` جهت استخراج و بازتاب هدر استاندارد `traceparent`. | `ast` | [ADR-022 §M0-02](./ADR-022-platform-reliability-and-observability.md) |
-| **`SB-ERR-01`** | **انطباق کاتالوگ خطا با AIP-193:** بازگرداندن خطاها در قالب `google.rpc.Status` متصل به `contracts/platform/errors.proto`. | `ast` | [ADR-007 §1](./ADR-007-backend-contracts-and-tooling-standards.md)، [DOC-BE-004 §4.1](../../03-backend/style-guide.md) |
-| **`SB-TST-01`** | **بهداشت تست‌ها و Makefile:** قرارگیری تست‌های زنده در `tests/live/` و وجود تارگت‌های `test` و `verify-live` در Makefile. | `filesystem` | [DOC-BE-004 §3](../../03-backend/style-guide.md) |
+| شناسه | نام قاعده و شرح الزام فنی | شرط اعمال (CEL) | خودکاری | وضعیت | ارزیابی | گیت / مرحله | مجری | منبع | مرجع سندی |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| `SB-EVT-01` | **Transactional Outbox Publishing** | `manifest.events.published.size() > 0` | `full` | `not_started` | `ast` | new_service (M1) | `lemmo-cli check` | پیش‌نویس | [architecture §2](../../03-backend/architecture.md)، [ADR-022-platform-reliability-and-observability §2](./ADR-022-platform-reliability-and-observability.md) |
+| `SB-EVT-02` | **Standard Event Envelope Conformance** | `manifest.events.published.size() > 0` | `partial` | `not_started` | `ast_and_contract_test` | new_service (M1) | `lemmo-cli check` | مصوب | [contracts §۲](../../03-backend/contracts.md) |
+| `SB-EVT-03` | **Traceparent Propagation in Async Events** | `manifest.events.published.size() > 0 || manifest.events.consumed.size() > 0` | `full` | `not_started` | `ast` | new_service (M1) | `lemmo-cli check` | مصوب | [current-path#f-7](../../09-governance/current-path.md#f-7)، [mvp-operational-readiness §۱۱.۲](../../03-backend/mvp-operational-readiness.md) |
+| `SB-EVT-04` | **Central Event Catalog Registration** | `manifest.events.published.size() > 0` | `full` | `not_started` | `contract_lint` | ratchet (M1) | `ci:event-registry-lint (proposed)` | مصوب | [contracts §۲.۱](../../03-backend/contracts.md) |
+| `SB-SEC-01` | **Service Identity & Auth Interceptor** | `manifest.networking.inbound_http_port != null || manifest.networking.inbound_grpc_port != null` | `full` | `not_started` | `ast` | new_service (M1) | `lemmo-cli check` | مصوب | [iam-service-spec §۱](../../03-backend/iam-service-spec.md)، [secure-system-design §الگوی ۱](../secure-system-design.md) |
+| `SB-RES-01` | **Call Resilience & Non-blocking Dials** | `always` | `full` | `not_started` | `ast` | new_service (M1) | `lemmo-cli check` | پیش‌نویس | [ADR-022-platform-reliability-and-observability §۵](./ADR-022-platform-reliability-and-observability.md) |
+| `SB-RES-02` | **Graceful Shutdown Lifecycle** | `always` | `partial` | `not_started` | `ast_and_runtime_probe` | new_service (M1) | `lemmo-cli check` | پیش‌نویس | [ADR-022-platform-reliability-and-observability §۹](./ADR-022-platform-reliability-and-observability.md) |
+| `SB-LOG-01` | **Standard Structured JSON Logging** | `always` | `full` | `not_started` | `ast` | new_service (M1) | `lemmo-cli check` | مصوب | [mvp-operational-readiness §۱۱.۱](../../03-backend/mvp-operational-readiness.md)، [decision-register#d-01](../../09-governance/decision-register.md#d-01) |
+| `SB-LOG-02` | **Contextual Request & Hop Logging** | `always` | `partial` | `not_started` | `ast_and_manual_review` | ratchet (M1) | `lemmo-cli check` | مصوب | [mvp-operational-readiness §۱۱.۲](../../03-backend/mvp-operational-readiness.md)، [ADR-016-request-context-governance-and-workspace-policy §۲.۲](./ADR-016-request-context-governance-and-workspace-policy.md)، [secure-system-design §الگوی ۱](../secure-system-design.md) |
+| `SB-TRC-01` | **W3C Distributed Tracing** | `always` | `full` | `not_started` | `ast` | new_service (M1) | `lemmo-cli check` | مصوب | [mvp-operational-readiness §۱۱.۲](../../03-backend/mvp-operational-readiness.md)، [decision-register#d-02](../../09-governance/decision-register.md#d-02) |
+| `SB-ERR-01` | **Central Error Catalog AIP-193 Conformance** | `always` | `full` | `not_started` | `ast` | new_service (M1) | `lemmo-cli check` | مصوب | [ADR-007-backend-contracts-and-tooling-standards §۱](./ADR-007-backend-contracts-and-tooling-standards.md)، [style-guide §۴.۱](../../03-backend/style-guide.md) |
+| `SB-TST-01` | **Live Test Directory & Makefile Targets** | `always` | `full` | `not_started` | `filesystem` | new_service (M1) | `lemmo-cli check` | مصوب | [style-guide §۳](../../03-backend/style-guide.md) |
 
-### ۲.۶. قواعد شرطی بر مبنای نوع و قابلیت‌های سرویس (Conditional Rules — B3)
+### ۲.۶. قواعد شرطی بر مبنای نوع و قابلیت‌های سرویس (Conditional Rules)
 
-این قواعد بر اساس فیلدهای اعلام‌شده در مانیفست سرویس (`service.manifest.yaml`) فعال می‌گردند:
-1. **`SB-CND-JSON`:** اعتبارسنجی اسکیمای JSON برای سرویس‌های با پی‌لود پویا (پروژه‌ها و افزونه‌ها) در [DOC-BE-003 §3.2](../../03-backend/contracts.md).
-2. **`SB-CND-SSRF`:** استفاده اجباری از کلاینت HTTP امن با بلک‌لیست IPهای داخلی و DNS Pinning برای سرویس‌های دارای فراخوانی بیرونی در [DOC-ARCH-007 §الگوی ۴](../secure-system-design.md) و [DOC-BE-004 §8.4](../../03-backend/style-guide.md).
-3. **`SB-CND-TENANT`:** الزام درج پیشوند ورک‌اسپیس (`workspace_id/`) در کلیه مسیرهای ذخیره‌سازی شیء در MinIO/S3 در [ADR-016 §2.8](./ADR-016-request-context-governance-and-workspace-policy.md).
-4. **`SB-CND-RATE`:** گزارش‌گیری مصرف و اتصال به Rate-Card رسمی برای سرویس‌های مشمول کسر سهمیه (Billable Services) در [DOC-BE-006 §1](../../03-backend/credit-and-ledger.md) و [ADR-018 §2.6](./ADR-018-tools-platform-architecture-unified-execution-and-domain-decoupling.md).
-5. **`SB-CND-REF`:** تبعیت از الگوی داده مرجع ([ADR-012 §2](./ADR-012-reference-data-registry-and-client-cache.md)) برای داده‌های کاتالوگ استاتیک.
+| شناسه | نام قاعده و شرح الزام فنی | شرط اعمال (CEL) | خودکاری | وضعیت | ارزیابی | گیت / مرحله | مجری | منبع | مرجع سندی |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| `SB-CND-JSON` | **JSON Schema Validation for Dynamic Payloads** | `manifest.capabilities.dynamic_payload == true` | `full` | `not_started` | `json_schema` | new_service (M2) | `lemmo-cli check` | مصوب | [contracts §۳.۲](../../03-backend/contracts.md) |
+| `SB-CND-SSRF` | **SSRF-Safe Outbound Client** | `manifest.networking.external_outbound == true` | `partial` | `not_started` | `ast_and_manual_review` | new_service (M2) | `lemmo-cli check` | مصوب | [secure-system-design §الگوی ۴](../secure-system-design.md)، [style-guide §۸](../../03-backend/style-guide.md) |
+| `SB-CND-TENANT` | **Storage Tenant Prefix Isolation** | `manifest.storage.object_storage == true` | `full` | `not_started` | `ast` | new_service (M2) | `lemmo-cli check` | مصوب | [secure-system-design §الگوی ۳](../secure-system-design.md)، [style-guide §۸](../../03-backend/style-guide.md) |
+| `SB-CND-RATE` | **Billable Usage Reporting** | `manifest.billable == true` | `partial` | `not_started` | `ast_and_contract_test` | new_service (M2) | `lemmo-cli check` | مصوب | [credit-and-ledger §۱](../../03-backend/credit-and-ledger.md) |
+| `SB-CND-REF` | **Reference Data Architectural Pattern** | `manifest.capabilities.reference_data == true` | `partial` | `not_started` | `ast_and_manual_review` | new_service (M2) | `lemmo-cli check` | مصوب | [ADR-012-reference-data-registry-and-client-cache §۲.۱](./ADR-012-reference-data-registry-and-client-cache.md) |
 
-### ۲.۷. مشخصات آزمون زنده ران‌تایم (`make verify-live` / `make doctor` — D3b, B1, B2)
+### ۲.۷. مشخصات آزمون زنده ران‌تایم (`make verify-live` / `make doctor`)
 
-| شناسه | حوزه پروب زنده | مکانیزم ارزیابی | شرح آزمون ران‌تایم | مرجع سندی مصوب | مرحله |
-| :---: | :--- | :---: | :--- | :--- | :---: |
-| **`SB-RT-01`** | سلامت وابستگی‌ها (Honest Readiness) | `network_probe` | پینگ لایو وابستگی‌های حیاتی در `/readyz`؛ منع Fake UP در غیاب اتصال. | [ADR-022 §3](./ADR-022-platform-reliability-and-observability.md) | **مرحله ۱** |
-| **`SB-RT-02`** | تطبیق نسخه، کامیت و Digest | `network_probe` | مقایسه نسخه، کامیت و داکر ایمیج دایجست در حال اجرا با مخزن و داکر اینسپکت. | [ADR-023 §2.1-§2.5](./ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md) | **مرحله ۱** |
-| **`SB-RT-03`** | بازتاب و همگامی Traceparent | `network_probe` | ارسال درخواست با `traceparent`؛ تایید بازگشت همان TraceID در پاسخ و لاگ stdout. | [ADR-022 §M0-02](./ADR-022-platform-reliability-and-observability.md) | **مرحله ۱** |
-| **`SB-RT-04`** | سلامت Outbox و اتصال بروکر | `network_probe` | استعلام وضعیت پیام‌های pending/failed و کانال بروکر از طریق پاسخ متادیتای اندپوینت آمادگی خودِ سرویس بدون اتصال مستقیم SQL به دیتابیس (F-7). | [DOC-GOV-002 §F-7](../../09-governance/current-path.md#f-7) | **مرحله ۱ (F-7)** |
-| **`SB-RT-05`** | انطباق خطای کنترل‌شده AIP-193 | `network_probe` | ارسال درخواست خواندنی با شناسه نامعتبر؛ اعتبارسنجی پاسخ بر مبنای انولوپ استاندارد خطا بدون عارضه مالی یا داده‌ای. | [ADR-007 §1](./ADR-007-backend-contracts-and-tooling-standards.md) | **مرحله ۱** |
-| **`SB-RT-06`** | امنیت و ایزولاسیون ورک‌اسپیس (IDOR) | `network_probe` | ارسال درخواست بدون توکن (انتظار ۴۰۱) و با توکن به منبع ورک‌اسپیس دیگر (انتظار ۴۰۴/۴۰۳ Fail-Closed). | [DOC-ARCH-007 §الگوی ۲](../secure-system-design.md)، [ADR-016 §2.2-§2.4](./ADR-016-request-context-governance-and-workspace-policy.md) | **مرحله ۲** |
-| **`SB-RT-07`** | مسیریابی لبه از گیت‌وی Kong | `network_probe` | آزمون سرتاسری دسترسی به روت‌های سرویس از طریق درگاه خارجی Kong Edge Gateway. | [ADR-013 §2.1](./ADR-013-three-tier-edge-gateway-and-bff-architecture.md) | **مرحله ۵** |
+| شناسه | نام قاعده و شرح الزام فنی | شرط اعمال (CEL) | خودکاری | وضعیت | ارزیابی | گیت / مرحله | مجری | منبع | مرجع سندی |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| `SB-RT-01` | **Honest Dependency Readiness Probe** | `always` | `full` | `not_started` | `network_probe` | new_service (M1) | `make verify-live` | مصوب | [mvp-operational-readiness §۱۱.۱](../../03-backend/mvp-operational-readiness.md)، [decision-register#d-01](../../09-governance/decision-register.md#d-01) |
+| `SB-RT-02` | **Runtime Version, Commit & Container Digest Parity** | `always` | `full` | `not_started` | `network_probe` | ratchet (M1) | `make verify-live` | پیش‌نویس | [docker-spec §۴](../../07-devops/docker-spec.md)، [ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance §۲.۱-§۲.۵](./ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md) |
+| `SB-RT-03` | **Live W3C Traceparent Echo Probe** | `always` | `full` | `not_started` | `network_probe` | new_service (M1) | `make verify-live` | مصوب | [mvp-operational-readiness §۱۱.۲](../../03-backend/mvp-operational-readiness.md)، [decision-register#d-02](../../09-governance/decision-register.md#d-02) |
+| `SB-RT-04` | **Live Outbox Health & Broker Connectivity Probe** | `manifest.events.published.size() > 0` | `full` | `not_started` | `network_probe` | ratchet (M1) | `make verify-live` | مصوب | [current-path#f-7](../../09-governance/current-path.md#f-7) |
+| `SB-RT-05` | **Controlled Read-Only AIP-193 Error Probe** | `always` | `full` | `not_started` | `network_probe` | new_service (M1) | `make verify-live` | مصوب | [ADR-007-backend-contracts-and-tooling-standards §۱](./ADR-007-backend-contracts-and-tooling-standards.md)، [mvp-operational-readiness §۱۱.۴](../../03-backend/mvp-operational-readiness.md) |
+| `SB-RT-06` | **Live Security & IDOR Tenant Isolation Probe** | `manifest.networking.inbound_http_port != null || manifest.networking.inbound_grpc_port != null` | `full` | `not_started` | `network_probe` | new_service (M2) | `make verify-live` | مصوب | [secure-system-design §الگوی ۲](../secure-system-design.md)، [ADR-016-request-context-governance-and-workspace-policy §۲.۲-§۲.۴](./ADR-016-request-context-governance-and-workspace-policy.md) |
+| `SB-RT-07` | **Edge Gateway Route Accessibility Probe** | `manifest.contracts.openapi_domain != null` | `full` | `not_started` | `network_probe` | new_service (M5) | `ci:edge-gateway-probe (proposed)` | مصوب | [ADR-013-three-tier-edge-gateway-and-bff-architecture §۲.۱](./ADR-013-three-tier-edge-gateway-and-bff-architecture.md) |
 
 ---
 
-## ۳. طراحی جامع مانیفست استاندارد سرویس (Service Manifest — A15)
+### ۲.۸. انتصاب زبان بیان مشترک (CEL - Common Expression Language) و دلایل انتخاب
+
+جهت فرموله‌سازی شرایط اعمال قواعد (`applies_when`)، زبان استاندارد **CEL (Common Expression Language)** انتخاب شده است. دلایل فنی این تصمیم عبارتند از:
+1. **سرعت بسیار بالا و سربار نزدیک به صفر:** کامپایل و ارزیابی عبارات CEL در زمان بسیار کوتاه (میکروثانیه) انجام می‌شود و مناسب گیت‌های پرسرعت CI است.
+2. **ایمنی حافظه و قطعیت اجرایی (Deterministic & Sandboxed):** CEL فاقد قابلیت اجرای کد دلخواه یا لوپ‌های بی‌پایان (Turing Incomplete by design) است و هیچ‌گونه Side-Effect امنیتی در محیط CI ایجاد نمی‌کند.
+3. **استاندارد صنعتی ابری:** CEL زبان رسمی اعتبارسنجی در Kubernetes Admission Controllers، Envoy Gateway و ابزارهای مانیتورینگ مدرن است.
+4. **پشتیبانی بومی در اکوسیستم Go:** کتابخانه رسمی `github.com/google/cel-go` به سادگی در ابزار `lemmo-cli` ادغام می‌گردد.
+5. **ساختار صریح و یکپارچه:** امکان بررسی وجود فیلدها و توابع سایز بدون نیاز به مفسرهای سنگین اسکریپتی (مانند `manifest.networking.inbound_http_port != null` یا `manifest.contracts.proto.size() > 0`).
+
+---
+
+### ۲.۹. تفکیک مفهومی سطح خودکاری (`automation`) از وضعیت پیاده‌سازی (`implementation_status`)
+
+پیرو تصمیم مدیریت پروژه (REV-4)، دو مفهوم خودکاری و پیاده‌سازی با دو فیلد کاملاً تفکیک‌شده تعریف می‌شوند:
+- **`automation: full | partial | manual` (طراحی):** بیانگر ماهیت ذاتی قاعده است که تا چه اندازه قابل اتوماسیون قطعی ماشینی است. قواعدی نظیر `SB-CFG-04`، `SB-CTR-05`، `SB-LOG-02` و `SB-CND-REF` به دلیل ماهیت ترکیبی معنایی، به عنوان `partial` (نیازمند AST جزئی + بازبینی دستی یا تست قراردادی) اعلام شده‌اند.
+- **`implementation_status: not_started | implemented` (واقعیت کد):** بیانگر وجود واقعی مجری قاعده در کد فعلی است. در زمان تدوین این پیش‌نویس، از آنجا که دستورات `lemmo-cli check`، تارگت `make verify-live` و پایپ‌لاین‌های `ci:*` هنوز در فاز اجرایی پیاده‌سازی نشده‌اند، **تمامی ۵۰ قاعده در وضعیت `not_started` ثبت شده‌اند.** گیت zero-diff در آینده وضعیت این فیلد را همگام با کدهای پیاده‌شده به روز خواهد کرد.
+
+---
+
+### ۲.۱۰. اصل پیشگیری از خودمعافی قواعد امنیتی و تاب‌آوری (Security Self-Exemption Ban)
+
+> **قانون قطعی:** هیچ قاعده امنیتی، احراز هویت یا تاب‌آوری نباید با پرچم قابلیتی که خودش الزام می‌کند فعال گردد.  
+یک مقدار `false` در مانیفست نباید آزمون‌های حیاتی احراز هویت، گارد IDOR، هرزپذیری (Idempotency) یا خروج تمیز (Graceful Shutdown) را دور بزند.
+
+- **قواعد امنیتی (`SB-SEC-01`, `SB-RT-06`):** بر مبنای واقعیت شبکه (وجود پورت ورودی HTTP یا gRPC در مانیفست) فعال می‌شوند. اگر سرویسی پورت ورودی باز کند، ملزم به احراز هویت و بررسی ایزولاسیون ورک‌اسپیس است.
+- **قاعده هرزپذیری (`SB-CTR-06`):** بر مبنای حضور OpenAPI سرویس فعال می‌گردد و اعتبارسنجی می‌کند که عملیات‌های جهش‌دهنده دارای کلید هرزپذیری باشند.
+- **قاعده توقف تمیز (`SB-RES-02`):** برای تمامی سرویس‌ها بدون استثناء به صورت `always` فعال است.
+- هرگونه معافیت استثنایی صرفاً از طریق بخش `not_applicable` با ارائه دلیل مکتوب و امضای رسمی مالک/ناظر پروژه در بازبینی PR امکان‌پذیر است.
+
+---
+
+## ۳. طراحی جامع مانیفست استاندارد سرویس (Service Manifest)
 
 ### ۳.۱. اصل حاکم بر مانیفست
 > **اصل:** ADR-024 مرجع استاندارد است (چه قواعدی وجود دارند). مانیفست مرجع هویت سرویس است (کدام قواعد شامل این سرویس می‌شوند). خروجی `check` و `verify-live` اثبات است. **مانیفست ادعاست، نه اثبات.**
@@ -162,6 +194,8 @@ capabilities:
   outbox: true
   auth_interceptor: true
   graceful_shutdown: true
+  dynamic_payload: false # پشتیبانی از اعتبارسنجی اسکیمای JSON پویا
+  reference_data: false # تبعیت از رجیستری داده‌های مرجع استاتیک
 
 not_applicable: []
 ```
@@ -178,13 +212,30 @@ not_applicable: []
 - **تغییرات نیازمند بازبینی:** افزودن هر مورد به `not_applicable` یا تغییر سطح دسترسی نیازمند بازبینی و امضای ناظر/مالک پروژه است (با قاعده CODEOWNERS).
 - **فرمان ارتقای مانیفست:** افزودن قواعد جدید به ADR-024 از طریق دستور `lemmo-cli manifest upgrade` کلیدهای جدید را با مقدار `null` به مانیفست سرویس‌ها تزریق می‌کند تا سرویس‌ها به صورت هدایت‌شده وضعیت خود را تعیین کنند.
 
+### ۳.۵. مانیفست به عنوان مرجع یگانه حقیقت متادیتای سرویس‌ها (تصمیم مصوب، R4-10)
+پیرو تصمیم رسمی مالک پروژه مورخ ۲۰۲۶-۱۰-۱۸:
+> **مانیفست سرویس مرجع یگانه حقیقت (SSOT) متادیتای سرویس‌هاست.**  
+> بخش متادیتای سرویس در جدول جامع مستندات [`services.md` (DOC-BE-002)](../../03-backend/services.md) (شامل نوع، مرزها، پورت‌ها و فاز استقرار) منحصراً از روی مانیفست‌های معتبر سرویس‌ها به وسیله فرمان `lemmo-cli doc-sync` تولید می‌گردد و در خط بیلد تحت گیت Zero-Diff محافظت می‌شود. ویرایش دستی این بخش در مستندات ممنوع است.  
+> متن روایی و تشریحی سند معماری (چرایی مرزبندی سرویس و مسئولیت‌های دامنه) به صورت دستی توسط تیم معماری نگهداری و توسعه می‌یابد.
+
 ---
 
 ## ۴. استراتژی گیت‌های خط بیلد (CI Gates) و قاعده Ratchet
 
-1. **گیت ورود سرویس جدید (New Service Gate):**  
-   هیچ سرویس جدیدی (از جمله سرویس Access/Promo فاز ۲) مجاز به ادغام نیست مگر آنکه در خط بیلد آزمون `lemmo-cli check <service>` را با **۱۰۰٪ امتیاز سبز (Zero Exceptions)** بگذراند و مانیفست معتبر ارائه دهد.
-2. **قاعده Ratchet برای سرویس‌های موجود:**  
-   انحرافات سرویس‌های موجود در فایل رسمی `.task/governance/conformance-ratchet.yaml` با شناسه بدهی مستند می‌شود. فهرست استثناهای هر سرویس منحصراً می‌تواند کوچک شود (حرکت یک‌طرفه).
-3. **سرویس‌های استاب فریز‌شده (`token-service` و `notification-service`):**  
-   پیرو تایید مالک محصول (گزینه الف)، این دو سرویس با `Status: Planned` فریز شده و در رجیستری ratchet از گیت‌های جاری معاف می‌گردند تا در فاز اختصاصی‌شان با آخرین نسخه اسکلت اسکافولد شوند.
+### ۴.۱. تعاریف گیت‌های ارزیابی (`gate`)
+- **`gate: new_service` (الزام سرویس‌های جدید):**  
+  تمامی قواعد دارای این برچسب (۳۱ قاعده) برای هر سرویس جدیدی که به مخزن افزوده می‌شود (از جمله سرویس Access/Promo فاز ۲) از روز نخست الزامی بوده و تخطی از آن‌ها موجب شکست قطعی بیلد (`FAIL`) می‌گردد.
+- **`gate: ratchet` (سیاست کاهش تدریجی سرویس‌های موجود):**  
+  برای سرویس‌های پیاده‌سازی‌شده موجود، انحرافات شناخته‌شده در فایل خط مبنا ثبت گردیده و در هر چرخه کاری، تعداد این انحرافات منحصراً می‌تواند کاهش یابد (سیاست کاهش یک‌طرفه - Monotonic Reduction).
+
+### ۴.۲. ساختار و جایگاه فایل خط مبنا (`api/conformance/ratchet.yaml` — R4-9)
+پیرو دستور مدیر پروژه، فایل خط مبنای Ratchet درون مخزن کد `api/` مستقر می‌گردد:
+- **مسیر رسمی:** `api/conformance/ratchet.yaml`
+- **حاکمیت دسترسی:** محافظت‌شده توسط CODEOWNERS منحصراً با امضای `@tech-lead` یا معمار پلتفرم.
+- **قانون قطعی کاهش یک‌طرفه:** خط بیلد اجازه افزایش هیچ انحرافی را نسبت به مقدار ثبت‌شده در این فایل نمی‌دهد. هر PR که انحرافی را برطرف کند، موظف به کاهش مقدار خط مبنا در همان PR است.
+
+### ۴.۳. سرویس‌های استاب فریز‌شده (`token-service` و `notification-service`)
+پیرو تایید مالک محصول، این دو سرویس با وضعیت `Status: Planned` فریز شده و در رجیستری ratchet از گیت‌های جاری معاف می‌گردند تا در فاز اختصاصی‌شان با آخرین نسخه اسکلت و الگوهای ADR-024 اسکافولد شوند.
+
+### ۴.۴. وضعیت پیشنهادی مجری‌های پلتفرمی (`enforced_by`)
+قواعدی که در سطح کل پلتفرم یا خط بیلد تعریف شده‌اند (مانند `ci:oasdiff (proposed)`، `ci:gateway-route-conformance (proposed)`، `ci:frontend-sdk-zero-diff (proposed)` و `ci:event-registry-lint (proposed)`) صرفاً به عنوان پیشنهاد معماری در این پیش‌نویس ثبت شده‌اند. مالکیت نهایی، طراحی دقیق اسکریپت‌ها و ادغام آن‌ها در پایپ‌لاین CI منوط به تصمیم و تایید مسئولین محترم هر بخش و مدیر زیرساخت خواهد بود.

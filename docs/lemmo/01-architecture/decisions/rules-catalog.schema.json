@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "LemmoRulesCatalogSchema",
-  "description": "Authoritative schema for Lemmo microservice blueprint and conformance rules catalog (ADR-024).",
+  "description": "Authoritative schema for Lemmo microservice blueprint and conformance rules catalog (ADR-024 REV-4).",
   "type": "object",
   "required": [
     "version",
@@ -30,14 +30,18 @@
         "type": "object",
         "required": [
           "id",
+          "name",
           "check",
           "scope",
           "applies_to",
           "applies_when",
           "automation",
+          "implementation_status",
+          "evaluation_mechanism",
           "roadmap_stage",
           "gate",
           "doc_ref",
+          "doc_status",
           "enforced_by"
         ],
         "additionalProperties": false,
@@ -45,6 +49,10 @@
           "id": {
             "type": "string",
             "pattern": "^SB-[A-Z0-9-]+$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 3
           },
           "check": {
             "type": "string",
@@ -70,18 +78,48 @@
                 "planned-stub"
               ]
             },
-            "minItems": 1
+            "minItems": 1,
+            "uniqueItems": true
           },
           "applies_when": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^(always|manifest\\.[a-zA-Z0-9_.!=><()|& -]+)$"
           },
           "automation": {
             "type": "string",
             "enum": [
               "full",
               "partial",
-              "manual",
-              "not_implemented"
+              "manual"
+            ]
+          },
+          "implementation_status": {
+            "type": "string",
+            "enum": [
+              "not_started",
+              "implemented"
+            ]
+          },
+          "evaluation_mechanism": {
+            "type": "string",
+            "enum": [
+              "filesystem",
+              "ast",
+              "ast_and_manual_review",
+              "ast_and_runtime_probe",
+              "ast_and_contract_test",
+              "frontmatter_parse",
+              "json_schema",
+              "yaml_lint",
+              "compose_lint",
+              "content_match",
+              "git_tags",
+              "buf_lint_and_breaking",
+              "openapi_lint",
+              "oasdiff",
+              "contract_lint",
+              "zero_diff",
+              "network_probe"
             ]
           },
           "roadmap_stage": {
@@ -97,10 +135,28 @@
             ]
           },
           "doc_ref": {
-            "type": "string"
+            "type": "string",
+            "minLength": 5
+          },
+          "doc_status": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "draft_source"
+            ]
           },
           "enforced_by": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "lemmo-cli check",
+              "make verify-live",
+              "make doctor",
+              "ci:oasdiff (proposed)",
+              "ci:gateway-route-conformance (proposed)",
+              "ci:frontend-sdk-zero-diff (proposed)",
+              "ci:event-registry-lint (proposed)",
+              "ci:edge-gateway-probe (proposed)"
+            ]
           }
         }
       }
