@@ -109,7 +109,7 @@
 ```
 
 #### تعمیم حاکمیتی بر مبنای باگ حل‌شده P-7:
-در پی کشف باگ مسیر ایمپورت در `lemmo-cli service` برای سرویس‌های چندکلمه‌ای (موضوع اقدام بسته P-7 که در تسک [TASK_GOV_02](../../../../../.task/active/TASK_GOV_02_FIX_LEMMO_CLI_SCAFFOLD_IMPORT_PATH.md) برطرف شد)، این سند یک اصل کلی معماری برقرار می‌سازد:  
+در پی کشف باگ مسیر ایمپورت در `lemmo-cli service` برای سرویس‌های چندکلمه‌ای (موضوع اقدام بسته P-7 که در تسک [TASK_GOV_02](../../../../../.task/completed/TASK_GOV_02_FIX_LEMMO_CLI_SCAFFOLD_IMPORT_PATH.md) برطرف شد)، این سند یک اصل کلی معماری برقرار می‌سازد:  
 هیچ ابزار اسکافولدینگ یا ژنراتوری مجاز نیست بدون وجود تست‌های خودکارِ سنجش انطباق مسیر ایمپورت با ماژول (`go.mod`) و هدر شناسنامه، در خط بیلد پلتفرم فعال باشد.
 
 ---
@@ -153,4 +153,4 @@
 - **DOC-OPS-001:** [Docker Naming & Build Hygiene](../../07-devops/docker-spec.md) (الحاقیه D-17)
 - **ماتریس تصمیمات MVP:** [Decision Register (D-16, D-17, D-18, P-7)](../../09-governance/decision-register.md)
 - **دفترچه بدهی‌ها:** [STB Post-MVP Debt (STB-DEBT-06, STB-DEBT-08)](../../../../../.task/active/STB_POST_MVP_DEBT.md)
-- **تسک اجرایی رفع باگ CLI:** [TASK_GOV_02](../../../../../.task/active/TASK_GOV_02_FIX_LEMMO_CLI_SCAFFOLD_IMPORT_PATH.md)
+- **تسک اجرایی رفع باگ CLI:** [TASK_GOV_02](../../../../../.task/completed/TASK_GOV_02_FIX_LEMMO_CLI_SCAFFOLD_IMPORT_PATH.md)
