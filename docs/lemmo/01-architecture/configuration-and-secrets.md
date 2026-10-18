@@ -88,10 +88,18 @@ flowchart TD
 
 ## ۴. الزام پوشش جامع بر تمام سرویس‌ها (Universal Monorepo Coverage)
 
-این استراتژی یک استاندارد فراگیر است و هیچ استثنایی برای سرویس‌های قدیمی یا جدید وجود ندارد:
-- کلیه سرویس‌های مستقر فعلی: `core/`, `project-service`, `node-registry-service`, `orchestrator-service`, `storage-service`, `job-service`.
-- کلیه سرویس‌های آتی فازهای ۷ و ۸: `model-router-service`, `image-service`, `quota-service`, `usage-service`, `workspace-service`.
-- اپلیکیشن‌های فرانت‌اند: `app/` و `auth/` (پیکربندی کلاینت صرفاً از طریق متغیرهای رسمی با پیشوند `NEXT_PUBLIC_` و کانفیگ‌های بدون سکرت).
+این استراتژی یک استاندارد فراگیر است و هیچ استثنایی برای هیچ سرویسی (قدیمی، جدید یا ابزار ثالث) وجود ندارد. موجودی رسمی سرویس‌ها منطبق بر سند جامع کاتالوگ پلتفرم ([DOC-BE-002](../03-backend/services.md)) به شرح زیر است:
+- **سرویس‌های اختصاصی Go (Core Go Services):**  
+  `project-service`, `workflow-service`, `job-service`, `node-registry-service`, `storage-service`, `image-service`, `model-router-service`, `quota-service`, `usage-service`, `workspace-service`, `auth-service`, `feed-service`, `context-service`, `content-service`, `tools-service`, `reference-data-service`.
+- **موتورهای زیرساختی و ابزارهای ثالث (Packaged Engines):**  
+  `financial-ledger` (موتور دفاتر مالی TigerBeetle) و `gateway` (درگاه Kong Edge Gateway) که ملزم به داشتن کانفیگ نسخه‌دار در `deploy/config/` و انطباق متغیرها هستند.
+- **سرویس‌های استاب فریز‌شده (Status: Planned):**  
+  `token-service` و `notification-service` (موقتاً معاف از گیت‌های رچت فاز ۱ تا آغاز فاز توسعه).
+- **اپلیکیشن‌های کاربری فرانت‌اند:**  
+  `app/` (استودیو) و `auth/` (میکروفرانت‌اند احراز هویت) — پیکربندی کلاینت صرفاً از طریق متغیرهای رسمی با پیشوند `NEXT_PUBLIC_` و کانفیگ‌های بدون سکرت.
+
+> 🔒 **جایگزینی فهرست دستی با مانیفست ماشین‌خوان (مصوبه ADR-024 / A15):**  
+> نگه‌داری دستی این فهرست در آینده با استقرار فایل مانیفست استاندارد سرویس‌ها (`service.manifest.yaml`) جایگزین شده و ابزار `lemmo-cli check --all` پوشش صددرصدی قوانین کانفیگ و سکرت را به صورت ماشینی ارزیابی می‌نماید.
 
 ---
 

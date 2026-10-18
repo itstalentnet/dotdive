@@ -99,16 +99,15 @@ The Go team's own guidance, "Organizing a Go module," is the canonical starting 
 *Source: [go.dev/doc/modules/layout](https://go.dev/doc/modules/layout)*
 
 ### Service Layout Standard
-For services in `api/`:
-- `/cmd` — One subdirectory per binary (e.g. `/cmd/service-name`); keep `main.go` thin, wiring and bootstrap only.
-- `/internal` — Private application and library code; the Go compiler enforces the import boundary.
-- `/pkg` — Code that is explicitly safe/intended for external modules to import (use sparingly).
-- `/api` — OpenAPI/Swagger specs, JSON schema files, or protocol definition files (`.proto` sources).
-- `/migrations` — Database migration SQL files (see §6).
-- `/configs` — Configuration file templates or default configs.
-- `/build`, `/deployments` — Packaging and deployment manifests (Dockerfiles, CI, Docker Compose configurations).
-- `/scripts` — Build, install, and analysis scripts.
-- `/test` — Extra external integration test apps and test data.
+For services in `api/services/<name>` (ratified in [ADR-008](../01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md), [ADR-009](../01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md) and [ADR-024](../01-architecture/decisions/ADR-024-service-blueprint-and-conformance.md)):
+- `cmd/main.go` — Single thin entrypoint responsible exclusively for configuration loading, dependency injection, and bootstrap lifecycle; no domain logic or direct transport handlers.
+- `internal/` — Private application layers partitioned into `domain/` (entities), `app/` (use-cases), `ports/` (interfaces), and `adapters/` (HTTP/gRPC transport, repository implementations).
+- `config/` — Versioned non-sensitive defaults in `config/default.yaml` loaded via `core/config`.
+- `deploy/` — Service-owned deployment boundary with `deploy/compose.yaml` (included into root dev compose) and `deploy/config/`.
+- `migrations/` — Ordered SQL migration pairs (`000001_init.up.sql` / `.down.sql`) or `.no_migration` sentinel for databaseless services.
+- `tests/live/` — Read-only live runtime integration probes for `make verify-live`; temporary or test binaries inside `cmd/` are strictly banned.
+- `service.md` / `service.manifest.yaml` — Service specification and machine-readable capability manifest.
+- **Contract Boundary Notice:** Individual services NEVER own a local `/api` directory for `.proto` or `openapi.yaml` specs. All contracts reside exclusively in the centralized `api/contracts/` repository ([DOC-BE-003](./contracts.md)).
 
 ### Internal Architecture: Feature/Module-Based
 Internal package structure for services is **modular, feature-based** rather than horizontal technical layers. Each capability owns a self-contained module under `internal/`, holding its domain logic, service layer, transport handlers, and repository code; modules communicate through explicit exported interfaces:
@@ -149,8 +148,14 @@ For cross-service gRPC communication and external client error envelopes, Lemmo 
      - `google.rpc.BadRequest`: Holds granular field-level violations (`field_violations`).
 2. **Localization Policy:**
    - Localization is 100% the frontend's responsibility. The server never returns localized Persian or English strings. The client maps `ErrorInfo.reason` (e.g., `WORKSPACE_QUOTA_EXCEEDED`) to the localized UI string.
-3. **REST Boundary Translation (RFC 7807):**
-   - At REST gateways, `google.rpc.Status` translates into an RFC-7807 Problem Details JSON format while **strictly preserving `ErrorInfo.reason`** in `details`:
+3. **REST Boundary Translation (RFC 7807) & Mapping Ownership (C4 Resolution):**
+   - **Ownership & Location:** The mapping between Google AIP-193 (`google.rpc.Status`) and HTTP RFC 7807 Problem Details is owned centrally by the `api/core/transport/http` package (for Go services serving HTTP/REST directly) and by the Edge Gateway translation layer (`gateway` / Kong edge plugin for external routing). Services must never implement bespoke, uncoordinated error envelopes.
+   - **Canonical Contract Reference:** All HTTP error representations must strictly conform to the shared contract schema at [`contracts/openapi/shared/errors.yaml`](./contracts.md) (defining `ProblemDetails` with required fields `type`, `title`, `status`, `detail`, `code`, `reason`, `request_id`, and `help_key`).
+   - **Mapping Rules & Traceability:**
+     - `google.rpc.Code` maps 1:1 to standard HTTP status codes (`INVALID_ARGUMENT (3)` → `400`, `UNAUTHENTICATED (16)` → `401`, `PERMISSION_DENIED (7)` → `403`, `NOT_FOUND (5)` → `404`, `ALREADY_EXISTS (6)` → `409`, `RESOURCE_EXHAUSTED (8)` → `429`, `INTERNAL (13)` → `500`).
+     - `google.rpc.ErrorInfo.reason` is promoted directly to the root `reason` field as well as preserved in `details`.
+     - `request_id` is populated from the incoming W3C `traceparent` (TraceID) or generated request ID.
+     - `type` is set to `https://errors.lemmo.net/<REASON>` and `help_key` provides a localized developer reference token.
 
 ```json
 {
@@ -159,6 +164,9 @@ For cross-service gRPC communication and external client error envelopes, Lemmo 
   "status": 400,
   "detail": "Field 'email' must be a valid email address",
   "code": "INVALID_ARGUMENT",
+  "reason": "INVALID_EMAIL_FORMAT",
+  "request_id": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
+  "help_key": "err.invalid_email_format",
   "details": [
     {
       "@type": "type.googleapis.com/google.rpc.ErrorInfo",

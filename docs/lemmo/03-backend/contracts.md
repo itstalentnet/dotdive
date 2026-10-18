@@ -40,9 +40,17 @@ contracts/
 │   │   ├── usage.proto     ← ثبت مصرف منابع و سهمیه‌ها
 │   │   └── events.proto    ← رویدادهای دامنه لیمو (Domain Events)
 │
-└── schemas/                ← تعاریف JSON Schema برای ساختارهای داده آزاد و پویا
+├── openapi/                ← قراردادهای OpenAPI 3.1 به‌ازای هر دامنه تجاری (یک مسیر، یک قرارداد، یک مالک)
+│   ├── <domain>/v1/
+│   │   └── openapi.yaml    ← قرارداد REST عمومی دامنه (auth, projects, jobs, ...)
+│   └── shared/
+│       ├── errors.yaml     ← اینولوپ خطای استاندارد HTTP (RFC 7807 + reason + help_key)
+│       └── pagination.yaml ← مدل استاندارد صفحه‌بندی مشترک پلتفرم
+│
+└── schemas/                ← تعاریف JSON Schema برای ساختارهای داده آزاد، پویا و مانیفست‌ها
     ├── project-graph.json  ← اعتبارسنجی ساختار JSON گراف نودها و ارتباطات
-    └── plugin-manifest.json← مانیفست رجیستری و قابلیت‌های هر پلاگین
+    ├── plugin-manifest.json← مانیفست رجیستری و قابلیت‌های هر پلاگین
+    └── service-manifest.json ← اسکیمای ماشین‌خوان مانیفست استاندارد سرویس‌ها
 ```
 
 ---
