@@ -145,7 +145,8 @@
             "type": "string",
             "enum": [
               "approved",
-              "draft_source"
+              "draft_source",
+              "gap"
             ]
           },
           "enforced_by": {

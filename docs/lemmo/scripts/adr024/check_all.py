@@ -1,60 +1,74 @@
 #!/usr/bin/env python3
 """
-Single authoritative runner that executes all ADR-024 conformance checkers:
-  1. validate_catalog.py (JSON Schema Draft-07, count equality, draft_source gate constraints)
-  2. check_doc_refs.py (Exact heading/band/anchor verification across all 50 rules)
-  3. check_manifest_paths.py (CEL path validation against service-manifest schema)
-  4. check_md_sync.py (Zero-diff parity between ADR-024.rules.yaml and ADR-024 Markdown tables)
+ADR-024 unified conformance runner (REV-6).
 
-Exit code: 0 if ALL pass, non-zero if ANY fails.
+Single authoritative command that a reviewer/PM can run independently, from the
+repository root, without reading any report. Executes every gate and the
+committed negative tests:
+
+  1. validate_catalog.py      (real jsonschema Draft-07 + governance gates)
+  2. check_doc_refs.py        (strict, deterministic section/anchor resolution)
+  3. check_manifest_paths.py  (manifest.* paths declared in the manifest schema)
+  4. check_md_sync.py         (all-column parity YAML <-> Markdown)
+  5. negative_tests.py        (each gate must reject a deliberate mutation)
+
+Usage:
+    python3 dotdive/docs/lemmo/scripts/adr024/check_all.py
+
+Exit code: 0 only if EVERY gate passes. Output is deterministic for any
+PYTHONHASHSEED.
 """
-import sys
 import os
 import subprocess
+import sys
 
-def run_script(script_path):
-    print(f"\n>>> Running: {os.path.basename(script_path)} ...")
-    res = subprocess.run([sys.executable, script_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    if res.stdout:
-        print(res.stdout.strip())
-    if res.returncode != 0:
-        if res.stderr:
-            print(res.stderr.strip(), file=sys.stderr)
-        print(f"FAILED: {os.path.basename(script_path)} exited with code {res.returncode}", file=sys.stderr)
-        return False
-    return True
+HERE = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.normpath(os.path.join(HERE, "..", "..", "..", "..", ".."))
+
+GATES = [
+    ("validate_catalog.py", "catalog schema + architectural constraints"),
+    ("check_doc_refs.py", "strict document reference resolution"),
+    ("check_manifest_paths.py", "manifest.* path declarations"),
+    ("check_md_sync.py", "all-column Markdown/YAML parity"),
+    ("negative_tests.py", "mutation-rejection self-test"),
+]
+
 
 def main():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    scripts = [
-        os.path.join(script_dir, "validate_catalog.py"),
-        os.path.join(script_dir, "check_doc_refs.py"),
-        os.path.join(script_dir, "check_manifest_paths.py"),
-        os.path.join(script_dir, "check_md_sync.py"),
-    ]
+    print("=" * 65)
+    print("LEMMO ADR-024 UNIFIED CONFORMANCE RUNNER (REV-6)")
+    print("=" * 65)
+    print("Repo root: %s" % REPO_ROOT)
 
-    print("=================================================================")
-    print("LEMMO ADR-024 UNIFIED CONFORMANCE RUNNER (REV-5)")
-    print("=================================================================")
+    failed = []
+    for script, label in GATES:
+        print("\n>>> Running: %s (%s) ..." % (script, label))
+        res = subprocess.run(
+            [sys.executable, os.path.join(HERE, script)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            cwd=REPO_ROOT,
+        )
+        out = res.stdout.rstrip("\n")
+        err = res.stderr.rstrip("\n")
+        if out:
+            print(out)
+        if err:
+            print(err, file=sys.stderr)
+        if res.returncode != 0:
+            print("FAILED: %s exited with code %d" % (script, res.returncode), file=sys.stderr)
+            failed.append(script)
 
-    all_passed = True
-    for s in scripts:
-        if not os.path.exists(s):
-            print(f"ERROR: Missing script {s}", file=sys.stderr)
-            sys.exit(1)
-        if not run_script(s):
-            all_passed = False
-            break
+    print("\n" + "=" * 65)
+    if failed:
+        print("RESULT: %d/%d GATES FAILED (%s)" % (len(failed), len(GATES), ", ".join(failed)), file=sys.stderr)
+        print("=" * 65, file=sys.stderr)
+        return 1
+    print("RESULT: ALL %d ADR-024 GATES PASSED (including negative tests)" % len(GATES))
+    print("=" * 65)
+    return 0
 
-    print("\n=================================================================")
-    if all_passed:
-        print("RESULT: ALL 4 ADR-024 VERIFICATION GATES PASSED (100% GREEN)")
-        print("=================================================================")
-        sys.exit(0)
-    else:
-        print("RESULT: CONFORMANCE SUITE FAILED", file=sys.stderr)
-        print("=================================================================")
-        sys.exit(1)
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

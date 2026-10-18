@@ -1,4 +1,4 @@
-version: 5.0.0
+version: 6.0.0
 adr: ADR-024
 last_updated: '2026-10-18'
 total_rules: 50
@@ -35,8 +35,7 @@ rules:
   evaluation_mechanism: ast
   roadmap_stage: 1
   gate: new_service
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md §۲.۱, dotdive/docs/lemmo/03-backend/style-guide.md
-    §3
+  doc_ref: dotdive/docs/lemmo/03-backend/style-guide.md §3
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-DIR-03
@@ -396,7 +395,7 @@ rules:
   gate: ratchet
   doc_ref: dotdive/docs/lemmo/03-backend/contracts.md §۴, dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md
     §۲.۳
-  doc_status: approved
+  doc_status: gap
   enforced_by: ci:oasdiff (proposed)
 - id: SB-CTR-05
   name: HTTP Error Envelope Conformance & Mapping Ownership
@@ -447,8 +446,8 @@ rules:
   evaluation_mechanism: contract_lint
   roadmap_stage: 1
   gate: ratchet
-  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-013-three-tier-edge-gateway-and-bff-architecture.md §۲.۱
-  doc_status: approved
+  doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-013-three-tier-edge-gateway-and-bff-architecture.md §۲.۱, dotdive/docs/lemmo/03-backend/contracts.md §۵
+  doc_status: gap
   enforced_by: ci:gateway-route-conformance (proposed)
 - id: SB-CTR-08
   name: Frontend SDK Client Freshness Zero-Diff Gate
@@ -483,8 +482,8 @@ rules:
   evaluation_mechanism: ast
   roadmap_stage: 1
   gate: ratchet
-  doc_ref: dotdive/docs/lemmo/03-backend/architecture.md §۳, dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md
-    §بند ۲
+  doc_ref: dotdive/docs/lemmo/07-devops/platform-reliability-observability.md §۱, dotdive/docs/lemmo/01-architecture/decisions/ADR-022-platform-reliability-and-observability.md
+    §بند ۹
   doc_status: draft_source
   enforced_by: lemmo-cli check
 - id: SB-EVT-02
@@ -623,8 +622,8 @@ rules:
   evaluation_mechanism: ast_and_manual_review
   roadmap_stage: 1
   gate: ratchet
-  doc_ref: dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §۱۱.۱, dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md
-    §۱۱.۲, dotdive/docs/lemmo/01-architecture/secure-system-design.md §الگوی ۱
+  doc_ref: dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §۳, dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md
+    §۱۱.۱, dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §۱۱.۲
   doc_status: approved
   enforced_by: lemmo-cli check
 - id: SB-TRC-01
@@ -800,7 +799,7 @@ rules:
   roadmap_stage: 1
   gate: ratchet
   doc_ref: dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md
-    §۲.۱-§۲.۵
+    §۲.۱, dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md §۲.۵
   doc_status: draft_source
   enforced_by: make verify-live
 - id: SB-RT-03
@@ -837,7 +836,7 @@ rules:
   gate: ratchet
   doc_ref: dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md §۴, dotdive/docs/lemmo/03-backend/mvp-operational-readiness.md
     §۱۱.۴
-  doc_status: approved
+  doc_status: gap
   enforced_by: make verify-live
 - id: SB-RT-05
   name: Live AIP-193 Error Handling Conformance Probe

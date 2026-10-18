@@ -1,95 +1,146 @@
 #!/usr/bin/env python3
 """
-Validates 100% synchronization and zero-diff between ADR-024.rules.yaml and ADR-024-service-blueprint-and-conformance.md.
-Exit code: 0 on success, non-zero on failure.
+ADR-024 Markdown/YAML parity gate (REV-6).
+
+Compares EVERY column of the ADR-024 Markdown rule tables against the machine
+catalog ADR-024.rules.yaml and detects both missing rules and extra rows.
+
+Compared columns (REV-6 §A-3):
+  id, name, requirement, applies_when, automation, implementation_status,
+  evaluation_mechanism, gate/roadmap_stage, enforced_by, doc_status, doc_ref.
+
+Deterministic output. Exit code: 0 on parity, 1 otherwise.
+
+Usage:
+    python3 docs/lemmo/scripts/adr024/check_md_sync.py [--catalog PATH] [--doc PATH]
 """
-import sys
+import argparse
 import os
 import re
+import sys
+
 import yaml
 
+HERE = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.normpath(os.path.join(HERE, "..", "..", "..", "..", ".."))
+DECISIONS = "dotdive/docs/lemmo/01-architecture/decisions"
+DEFAULT_CATALOG = os.path.join(REPO_ROOT, DECISIONS, "ADR-024.rules.yaml")
+DEFAULT_DOC = os.path.join(REPO_ROOT, DECISIONS, "ADR-024-service-blueprint-and-conformance.md")
+
+DOC_STATUS_LABEL = {"approved": "مصوب", "draft_source": "پیش‌نویس", "gap": "شکاف سند"}
+
+ROW_RE = re.compile(
+    r"^\|\s*`(?P<id>[A-Z0-9-]+)`\s*\|\s*\*\*(?P<name>[^*]+)\*\*\s*\|(?P<rest>.+)$"
+)
+
+
+def md_doc_ref_to_catalog(cell, md_dir):
+    """Reverse the generator's link rendering back into `path §spec, path §spec`."""
+    refs = []
+    for label, target in re.findall(r"\[([^\]]+)\]\(([^)]+)\)", cell):
+        abspath = os.path.normpath(os.path.join(md_dir, target.strip()))
+        rel = os.path.relpath(abspath, REPO_ROOT)
+        base = os.path.basename(rel)
+        clean = base[:-3] if base.endswith(".md") else base
+        spec = label.strip()[len(clean):].strip()
+        refs.append((rel + " " + spec).strip() if spec else rel)
+    return ", ".join(refs)
+
+
+def parse_md(md_content, md_dir):
+    rows = {}
+    extra = []
+    for line in md_content.split("\n"):
+        m = ROW_RE.match(line)
+        if not m:
+            continue
+        rest = m.group("rest").rstrip()
+        if rest.endswith("|"):
+            rest = rest[:-1]
+        # Split on table separators only (a bare `|`), never on the logical OR `||`
+        # that appears inside CEL expressions such as `... > 0 || ... > 0`.
+        cols = [c.strip() for c in re.split(r"(?<!\|)\|(?!\|)", rest)]
+        if len(cols) != 9:
+            extra.append(m.group("id"))
+            continue
+        rows[m.group("id")] = {
+            "name": m.group("name").strip(),
+            "requirement": cols[0],
+            "applies_when": cols[1].strip("`"),
+            "automation": cols[2].strip("`"),
+            "implementation_status": cols[3].strip("`"),
+            "evaluation_mechanism": cols[4].strip("`"),
+            "gate_stage": cols[5],
+            "enforced_by": cols[6].strip("`"),
+            "doc_status": cols[7],
+            "doc_ref": md_doc_ref_to_catalog(cols[8], md_dir),
+        }
+    return rows, extra
+
+
 def main():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    repo_root = os.path.normpath(os.path.join(script_dir, "../../../../.."))
-    catalog_path = os.path.join(repo_root, "dotdive/docs/lemmo/01-architecture/decisions/ADR-024.rules.yaml")
-    doc_path = os.path.join(repo_root, "dotdive/docs/lemmo/01-architecture/decisions/ADR-024-service-blueprint-and-conformance.md")
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--catalog", default=DEFAULT_CATALOG)
+    ap.add_argument("--doc", default=DEFAULT_DOC)
+    args = ap.parse_args()
 
-    with open(catalog_path, "r", encoding="utf-8") as f:
+    with open(args.catalog, "r", encoding="utf-8") as f:
         catalog = yaml.safe_load(f)
-
-    with open(doc_path, "r", encoding="utf-8") as f:
+    with open(args.doc, "r", encoding="utf-8") as f:
         md_content = f.read()
 
-    rules = catalog.get("rules", [])
+    rules = sorted(catalog.get("rules", []), key=lambda r: r["id"])
+    md_rows, malformed = parse_md(md_content, os.path.dirname(args.doc))
+
     mismatches = []
-    found_rules = set()
-
-    # Match rows like: | `SB-DIR-01` | **Clean Architecture Layering Standard** | ... |
-    row_pattern = r"^\|\s*`([A-Z0-9-]+)`\s*\|\s*\*\*([^*]+)\*\*\s*\|\s*([^|]+)\s*\|\s*`([^`]+)`\s*\|\s*`([^`]+)`\s*\|\s*`([^`]+)`\s*\|\s*`([^`]+)`\s*\|\s*([^|]+)\s*\|\s*`([^`]+)`\s*\|\s*([^|]+)\s*\|\s*([^|]+)\s*\|"
-
-    matches = re.findall(row_pattern, md_content, re.MULTILINE)
-    md_rule_map = {}
-    for m in matches:
-        rid = m[0].strip()
-        md_rule_map[rid] = {
-            "name": m[1].strip(),
-            "requirement": m[2].strip(),
-            "applies_when": m[3].strip(),
-            "automation": m[4].strip(),
-            "implementation_status": m[5].strip(),
-            "evaluation_mechanism": m[6].strip(),
-            "gate_stage": m[7].strip(),
-            "enforced_by": m[8].strip(),
-            "doc_status": m[9].strip(),
-            "doc_ref": m[10].strip(),
-        }
+    for rid in sorted(malformed):
+        mismatches.append("Rule %s: malformed markdown row" % rid)
 
     for r in rules:
         rid = r["id"]
-        if rid not in md_rule_map:
-            mismatches.append(f"Rule {rid} not found in Markdown tables!")
+        if rid not in md_rows:
+            mismatches.append("Rule %s not found in Markdown tables" % rid)
             continue
+        md = md_rows[rid]
+        checks = [
+            ("name", r["name"]),
+            ("requirement", r["requirement"]),
+            ("applies_when", r["applies_when"]),
+            ("automation", r["automation"]),
+            ("implementation_status", r["implementation_status"]),
+            ("evaluation_mechanism", r["evaluation_mechanism"]),
+            ("gate_stage", "%s (M%d)" % (r["gate"], r["roadmap_stage"])),
+            ("enforced_by", r["enforced_by"]),
+            ("doc_status", DOC_STATUS_LABEL.get(r["doc_status"], r["doc_status"])),
+            ("doc_ref", r["doc_ref"]),
+        ]
+        for col, expected in checks:
+            if md[col] != expected:
+                mismatches.append("Rule %s %s mismatch: MD=%r YAML=%r" % (rid, col, md[col], expected))
 
-        md_r = md_rule_map[rid]
-        if md_r["name"] != r["name"]:
-            mismatches.append(f"Rule {rid} name mismatch: MD='{md_r['name']}', YAML='{r['name']}'")
+    yaml_ids = {r["id"] for r in rules}
+    for rid in sorted(set(md_rows) - yaml_ids):
+        mismatches.append("Extra Markdown row not present in YAML: %s" % rid)
 
-        if md_r["requirement"] != r["requirement"]:
-            mismatches.append(f"Rule {rid} requirement mismatch!")
+    print("=" * 65)
+    print("ADR-024 MARKDOWN-YAML SYNCHRONIZATION REPORT (REV-6)")
+    print("=" * 65)
+    print("Catalog Rules: %d" % len(rules))
+    print("Markdown Table Rules Found: %d" % len(md_rows))
+    print("Columns Compared per Rule: 10 (all columns)")
+    print("-" * 65)
 
-        if md_r["applies_when"] != r["applies_when"]:
-            mismatches.append(f"Rule {rid} applies_when mismatch: MD='{md_r['applies_when']}', YAML='{r['applies_when']}'")
+    if mismatches:
+        print("FAILED: %d discrepancy(ies) found between MD and YAML:" % len(mismatches), file=sys.stderr)
+        for mis in sorted(mismatches):
+            print("  %s" % mis, file=sys.stderr)
+        print("RESULT: MD_SYNC=FAIL", file=sys.stderr)
+        return 1
 
-        if md_r["automation"] != r["automation"]:
-            mismatches.append(f"Rule {rid} automation mismatch: MD='{md_r['automation']}', YAML='{r['automation']}'")
+    print("All 10 columns of all 50 rules are in zero-diff parity.")
+    print("RESULT: MD_SYNC=PASS")
+    return 0
 
-        if md_r["implementation_status"] != r["implementation_status"]:
-            mismatches.append(f"Rule {rid} implementation_status mismatch: MD='{md_r['implementation_status']}', YAML='{r['implementation_status']}'")
-
-        if md_r["enforced_by"] != r["enforced_by"]:
-            mismatches.append(f"Rule {rid} enforced_by mismatch: MD='{md_r['enforced_by']}', YAML='{r['enforced_by']}'")
-
-        expected_gate_stage = f"{r['gate']} (M{r['roadmap_stage']})"
-        if md_r["gate_stage"] != expected_gate_stage:
-            mismatches.append(f"Rule {rid} gate_stage mismatch: MD='{md_r['gate_stage']}', YAML='{expected_gate_stage}'")
-
-        found_rules.add(rid)
-
-    print("=================================================================")
-    print("ADR-024 MARKDOWN-YAML SYNCHRONIZATION REPORT (REV-5)")
-    print("=================================================================")
-    print(f"Catalog Rules: {len(rules)}")
-    print(f"Markdown Table Rules Found: {len(found_rules)}")
-    print("-----------------------------------------------------------------")
-
-    if mismatches or len(found_rules) != len(rules):
-        print(f"FAILED: {len(mismatches)} discrepancies found between MD and YAML!", file=sys.stderr)
-        for mis in mismatches:
-            print(f"  {mis}", file=sys.stderr)
-        sys.exit(1)
-    else:
-        print("SUCCESS: 100% zero-diff synchronization between Markdown and YAML verified!")
-        print("=================================================================")
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -1,181 +1,241 @@
 #!/usr/bin/env python3
 """
-Checks that every doc_ref in ADR-024.rules.yaml points to an existing file and valid section/heading.
-Deterministic output (sorted by rule ID), no reliance on hash/dict order.
-Exit code: 0 on success, non-zero on failure.
+ADR-024 doc_ref gate (REV-6).
+
+Deterministic, strict verification that every `doc_ref` in ADR-024.rules.yaml
+points to an EXISTING file and an EXISTING, exactly-numbered section/heading,
+explicit anchor, or (ADR-022 decision text) numbered clause.
+
+Guarantees required by REV-6 §A-1:
+  * 100% deterministic output (no set()/dict-order dependence; identical for any
+    PYTHONHASHSEED).
+  * Exact section matching: the heading/paragraph number must be equal to the
+    requested spec (not merely "a digit appears somewhere in a heading").
+  * `#anchor` is accepted only when a real HTML anchor (`id=`/`name=`) or a real
+    GitHub heading slug exists in the target file.
+  * All paths are resolved relative to the repository root, never the cwd.
+
+Exit code: 0 if every reference resolves, 1 otherwise.
+
+Usage:
+    python3 docs/lemmo/scripts/adr024/check_doc_refs.py
+    python3 docs/lemmo/scripts/adr024/check_doc_refs.py --dump   # quotes for report
 """
 import sys
 import os
 import re
 import yaml
 
+NUM = r"[۰-۹0-9]+(?:\.[۰-۹0-9]+)*"
 FA_DIGITS = "۰۱۲۳۴۵۶۷۸۹"
 EN_DIGITS = "0123456789"
-fa_to_en = str.maketrans(FA_DIGITS, EN_DIGITS)
-en_to_fa = str.maketrans(EN_DIGITS, FA_DIGITS)
+_TRANS = str.maketrans(FA_DIGITS, EN_DIGITS)
 
-def digit_variants(s):
-    v = {s, s.translate(fa_to_en), s.translate(en_to_fa)}
-    return list(v)
 
-def verify_single_ref(ref_str, repo_root):
-    if "#" in ref_str:
-        doc_path, anchor = ref_str.split("#", 1)
-        anchor = anchor.split(" ")[0]
-    else:
-        parts = ref_str.split(" ")
-        doc_path = parts[0]
-        anchor = " ".join(parts[1:]) if len(parts) > 1 else ""
+def norm(s):
+    return s.translate(_TRANS)
 
-    resolved_path = doc_path
-    if not os.path.exists(resolved_path):
-        alt = os.path.join(repo_root, doc_path)
-        if os.path.exists(alt):
-            resolved_path = alt
 
-    if not os.path.exists(resolved_path):
-        return {"ref": ref_str, "file_exists": False, "section_found": False, "error": f"File not found: {doc_path}"}
+def read_lines(path):
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read().split("\n")
 
-    with open(resolved_path, "r", encoding="utf-8") as f:
-        content = f.read()
 
-    if not anchor:
-        return {"ref": ref_str, "file_exists": True, "section_found": True, "match": "File-level ref"}
+def parse_headings(lines):
+    """Return list of (lineno, level, text, num) in file order."""
+    out = []
+    for i, line in enumerate(lines, start=1):
+        m = re.match(r"^(#{1,6})\s+(.*)$", line)
+        if not m:
+            continue
+        level = len(m.group(1))
+        text = m.group(2).strip()
+        num = None
+        m2 = re.match(r"^(" + NUM + r")\.?(\s|$)", text)
+        if m2:
+            num = norm(m2.group(1))
+        else:
+            m3 = re.match(r"^Blueprint\s+(" + NUM + r")\b", text)
+            if m3:
+                num = norm(m3.group(1))
+            else:
+                m4 = re.match(r"^الگوی\s+([۰-۹0-9]+)", text)
+                if m4:
+                    num = "الگوی " + norm(m4.group(1))
+        out.append((i, level, text, num))
+    return out
 
-    found = False
-    matched_str = ""
 
-    # Case 1: HTML or markdown anchor
-    if re.search(r'id=["\']' + re.escape(anchor) + r'["\']', content, re.IGNORECASE) or \
-       re.search(r'name=["\']' + re.escape(anchor) + r'["\']', content, re.IGNORECASE) or \
-       re.search(r'#' + re.escape(anchor) + r'\b', content, re.IGNORECASE) or \
-       re.search(r'\*\*' + re.escape(anchor) + r'\*\*', content, re.IGNORECASE):
-        found = True
-        matched_str = f"Anchor #{anchor}"
+def section_bounds(lines, headings, idx):
+    level = headings[idx][1]
+    start = headings[idx][0]
+    end = len(lines)
+    for j in range(idx + 1, len(headings)):
+        if headings[j][1] <= level:
+            end = headings[j][0] - 1
+            break
+    return start, end
 
-    # Case 2: Section marker §
-    if not found and "§" in anchor:
-        sec_term = anchor.replace("§", "").strip()
-        if "-" in sec_term:
-            sec_term = sec_term.split("-")[0].replace("§", "").strip()
 
-        search_terms = []
-        for v in digit_variants(sec_term):
-            search_terms.append(v)
-            if "(" in v:
-                search_terms.append(v.split("(")[0].strip())
-                search_terms.append(v.split("(")[1].replace(")", "").strip())
-            if v.startswith("بند "):
-                band_num = v.replace("بند ", "").strip()
-                search_terms.extend(digit_variants(band_num))
+def github_slug(text):
+    s = text.strip().lower()
+    s = re.sub(r"[^0-9a-z\u0600-\u06FF\- ]+", "", s)
+    s = s.replace(" ", "-")
+    return s
 
-        for st in search_terms:
-            if not st:
-                continue
-            pattern = r"^#+\s+.*(?:\b|[^\w])" + re.escape(st) + r"(?:[\.\s:]|[^\w]|$).*$"
-            matches = re.findall(pattern, content, re.MULTILINE)
-            if matches:
-                found = True
-                matched_str = matches[0].strip()
-                break
 
-            num_match = re.search(r"^\s*" + re.escape(st) + r"[\.\s].*$", content, re.MULTILINE)
-            if num_match:
-                found = True
-                matched_str = num_match.group(0).strip()
-                break
+def resolve(lines, headings, spec):
+    """Resolve a single section spec. Returns (ok, lineno, literal, kind)."""
+    s = spec.strip()
+    if s == "":
+        return True, None, "(file-level reference)", "file"
+    if s.startswith("#"):
+        anchor = s[1:].strip().lower()
+        for i, line in enumerate(lines, start=1):
+            if re.search(r'(?:id|name)=["\']' + re.escape(anchor) + r'["\']', line, re.IGNORECASE):
+                return True, i, line.strip(), "anchor"
+        for (i, _lvl, text, _num) in headings:
+            if github_slug(text) == anchor:
+                return True, i, text, "slug"
+        return False, None, "anchor '%s' not found" % anchor, "anchor-miss"
+    if not s.startswith("§"):
+        return False, None, "spec '%s' has no '§' or '#' prefix" % s, "bad-spec"
+    body = s[1:].strip()
 
-            pattern_loose = r"^#+\s+.*" + re.escape(st) + r".*$"
-            matches_loose = re.findall(pattern_loose, content, re.MULTILINE)
-            if matches_loose:
-                found = True
-                matched_str = matches_loose[0].strip()
-                break
+    # ADR decision-text clause: "§بند N" (decision-list items of ADR-022/ADR-023)
+    if body.startswith("بند"):
+        n = norm(body.replace("بند", "").strip())
+        has_decision = any("متن تصمیم" in (h[2] or "") for h in headings)
+        if not has_decision:
+            return False, None, "no 'متن تصمیم' section to host 'بند %s'" % n, "band-nohost"
+        for i, line in enumerate(lines, start=1):
+            if re.match(r"^\s*" + re.escape(n) + r"[.)]\s", norm(line)):
+                return True, i, line.strip(), "band"
+        return False, None, "'بند %s' clause not found" % n, "band-miss"
 
-            # Hierarchical search for X.Y (linear line-by-line scanner, zero regex backtracking)
-            if "." in st:
-                parts_xy = st.split(".")
-                if len(parts_xy) == 2 and parts_xy[0].isdigit() and parts_xy[1].isdigit():
-                    x_variants = digit_variants(parts_xy[0])
-                    y_variants = digit_variants(parts_xy[1])
-                    in_sec_x = False
-                    for line in content.splitlines():
-                        if line.startswith("#"):
-                            is_sec_x = any(re.search(r"^#+\s+.*(?:\b|[^\w])" + re.escape(xv) + r"(?:[\.\s:]|[^\w])", line) for xv in x_variants)
-                            if is_sec_x:
-                                in_sec_x = True
-                                continue
-                            elif in_sec_x and re.match(r"^##\s+", line):
-                                # Hit another level-2 heading, stop section X
-                                break
-                        if in_sec_x:
-                            is_item_y = any(re.search(r"^#+\s+.*(?:\b|[^\w])" + re.escape(yv) + r"(?:[\.\s:]|[^\w]|$)", line) or re.search(r"^\s*" + re.escape(yv) + r"[\.\s]", line) for yv in y_variants)
-                            if is_item_y:
-                                found = True
-                                matched_str = line.strip()
-                                break
-            if found:
-                break
+    m = re.match(r"^الگوی\s+([۰-۹0-9]+)$", body)
+    if m:
+        key = "الگوی " + norm(m.group(1))
+        for (i, _lvl, text, num) in headings:
+            if num == key:
+                return True, i, text, "heading"
+        return False, None, "heading '%s' not found" % key, "heading-miss"
 
-    # Case 3: Heading text search
-    if not found:
-        clean_term = anchor.replace("(", "").replace(")", "").strip()
-        for v in digit_variants(clean_term):
-            pattern = r"^#+\s+.*" + re.escape(v) + r".*$"
-            matches = re.findall(pattern, content, re.MULTILINE | re.IGNORECASE)
-            if matches:
-                found = True
-                matched_str = matches[0].strip()
-                break
+    n = norm(body)
+    if not re.match(r"^[0-9]+(?:\.[0-9]+)*$", n):
+        return False, None, "invalid numeric spec '%s'" % body, "bad-spec"
 
-    return {
-        "ref": ref_str,
-        "file_exists": True,
-        "section_found": found,
-        "match": matched_str if found else "NOT FOUND"
-    }
+    for (i, _lvl, text, num) in headings:
+        if num == n:
+            return True, i, text, "heading"
 
-def main():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    repo_root = os.path.normpath(os.path.join(script_dir, "../../../../.."))
-    catalog_path = os.path.join(repo_root, "dotdive/docs/lemmo/01-architecture/decisions/ADR-024.rules.yaml")
+    # Sub-item reference "§X.Y" -> list item Y inside heading X (e.g. iam-service-spec §1.3)
+    if "." in n:
+        x, y = n.rsplit(".", 1)
+        for idx, (i, _lvl, _text, num) in enumerate(headings):
+            if num == x:
+                start, end = section_bounds(lines, headings, idx)
+                for ln in range(start, end + 1):
+                    if re.match(r"^\s*" + re.escape(y) + r"[.)]\s", lines[ln - 1]):
+                        return True, ln, lines[ln - 1].strip(), "subitem"
+        return False, None, "no heading/item for '%s'" % n, "item-miss"
 
-    with open(catalog_path, "r", encoding="utf-8") as f:
-        catalog = yaml.safe_load(f)
+    return False, None, "heading '%s' not found" % n, "heading-miss"
 
+
+DEFAULT_CATALOG = "dotdive/docs/lemmo/01-architecture/decisions/ADR-024.rules.yaml"
+
+
+def load_catalog(repo_root, catalog_path):
+    path = catalog_path if os.path.isabs(catalog_path) else os.path.join(repo_root, catalog_path)
+    with open(path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+def check(repo_root, dump=False, catalog_path=DEFAULT_CATALOG):
+    catalog = load_catalog(repo_root, catalog_path)
     rules = sorted(catalog.get("rules", []), key=lambda r: r["id"])
+    cache = {}
     failures = []
-    
-    print("=================================================================")
-    print("ADR-024 DOCUMENT REFERENCES VERIFICATION REPORT (REV-5)")
-    print("=================================================================")
-    print(f"Total Rules Verified: {len(rules)} (sorted deterministically)")
-    print("-----------------------------------------------------------------")
+    quoted = []
+
+    if not dump:
+        print("=" * 65)
+        print("ADR-024 DOCUMENT REFERENCE GATE (REV-6 — strict/deterministic)")
+        print("=" * 65)
+        print("Rules: %d" % len(rules))
+        print("-" * 65)
 
     for r in rules:
-        refs = [x.strip() for x in r["doc_ref"].split(",")]
-        rule_passed = True
-        matched_details = []
+        refs = [x.strip() for x in r["doc_ref"].split(",") if x.strip()]
+        rule_failed = False
         for ref in refs:
-            res = verify_single_ref(ref, repo_root)
-            if not res["file_exists"] or not res["section_found"]:
-                rule_passed = False
-                failures.append((r["id"], res))
+            parts = ref.split(" ")
+            doc_path = parts[0]
+            spec = " ".join(parts[1:])
+            if "#" in doc_path:  # "path#anchor" form
+                doc_path, anchor = doc_path.split("#", 1)
+                spec = ("#" + anchor).strip()
+            abspath = os.path.join(repo_root, doc_path)
+            if doc_path not in cache:
+                if os.path.isfile(abspath):
+                    lines = read_lines(abspath)
+                    cache[doc_path] = (lines, parse_headings(lines))
+                else:
+                    cache[doc_path] = None
+            cached = cache[doc_path]
+            if cached is None:
+                failures.append((r["id"], ref, "file not found"))
+                rule_failed = True
+                if not dump:
+                    print("[FAIL] %-14s file not found: %s" % (r["id"], doc_path))
+                continue
+            lines, headings = cached
+            ok, lineno, literal, kind = resolve(lines, headings, spec)
+            if not ok:
+                failures.append((r["id"], ref, literal))
+                rule_failed = True
+                if not dump:
+                    print("[FAIL] %-14s %s  ->  %s" % (r["id"], spec or "(none)", literal))
             else:
-                matched_details.append(res["match"])
-        status = "PASS" if rule_passed else "FAIL"
-        summary_match = " | ".join(matched_details[:2])
-        print(f"[{status}] {r['id']:<14} -> {summary_match}")
+                shown = doc_path if lineno is None else "%s:%d" % (doc_path, lineno)
+                quoted.append((r["id"], ref, shown, literal))
+                if not dump:
+                    print("[PASS] %-14s %-28s -> %s" % (r["id"], spec or "(file)", shown))
+        if dump and rule_failed:
+            pass
 
-    print("-----------------------------------------------------------------")
+    if dump:
+        for (rid, ref, shown, literal) in quoted:
+            line = "%s\t%s\t%s" % (rid, shown, literal)
+            print(line)
+        if failures:
+            for f in failures:
+                print("FAIL\t%s\t%s\t%s" % f, file=sys.stderr)
+        return 0 if not failures else 1
+
+    print("-" * 65)
     if failures:
-        print(f"FAILED: {len(failures)} reference checks failed!", file=sys.stderr)
-        for rid, fail in failures:
-            print(f"  {rid}: {fail}", file=sys.stderr)
-        sys.exit(1)
-    else:
-        print(f"SUCCESS: 100% of doc_refs across all {len(rules)} rules verified successfully!")
-        print("=================================================================")
+        print("FAILED: %d doc_ref(s) unresolved:" % len(failures), file=sys.stderr)
+        for rid, ref, why in failures:
+            print("  %s: %s -> %s" % (rid, ref, why), file=sys.stderr)
+        print("RESULT: DOC_REF_GATE=FAIL", file=sys.stderr)
+        return 1
+    print("PASSED: %d doc_refs across %d rules resolved exactly." % (len(quoted), len(rules)))
+    print("RESULT: DOC_REF_GATE=PASS")
+    return 0
+
+
+def main():
+    argv = sys.argv[1:]
+    dump = "--dump" in argv
+    catalog_path = DEFAULT_CATALOG
+    if "--catalog" in argv:
+        catalog_path = argv[argv.index("--catalog") + 1]
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    repo_root = os.path.normpath(os.path.join(script_dir, "..", "..", "..", "..", ".."))
+    sys.exit(check(repo_root, dump=dump, catalog_path=catalog_path))
+
 
 if __name__ == "__main__":
     main()
