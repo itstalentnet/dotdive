@@ -1,3 +1,14 @@
+# ==============================================================================
+# FROZEN COPY — DO NOT EDIT MANUALLY / ویرایش دستی ممنوع
+# ==============================================================================
+# Source Repository: lemmo-api (api/)
+# Source File: api/conformance/rules.yaml
+# Source Commit: 8976d2b9948bf850cd051159c05bfde890acae6d
+# Catalog Version: 7.0.0
+# Synchronized by: dotdive/scripts/adr024/sync_catalog.py
+# Reference: Decision D-21 (Inter-Repository Independence Governance)
+# ==============================================================================
+
 version: 7.0.0
 adr: ADR-024
 last_updated: '2026-10-18'

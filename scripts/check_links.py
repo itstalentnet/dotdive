@@ -1,23 +1,22 @@
 #!/usr/bin/env python3
 """
-Documentation link-integrity gate (REV-6).
+Documentation link-integrity gate — Dotdive Repository (D-21 / REV-6).
 
 Verifies that every local (non-URL, non-anchor) Markdown link under
 `dotdive/docs/lemmo/` resolves to an existing file. Committed so that the link
-count published in any report is reproducible from the repository alone
-(REV-6 §P-8: a check is either committed or its claim is removed).
+count published in any report is reproducible from the repository alone.
 
 Deterministic output. Exit code: 0 if no broken links, 1 otherwise.
 
 Usage:
-    python3 dotdive/docs/lemmo/scripts/check_links.py
+    python3 dotdive/scripts/check_links.py
 """
 import os
 import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DOC_ROOT = os.path.normpath(os.path.join(HERE, "..", "..", "lemmo"))
+DOC_ROOT = os.path.normpath(os.path.join(HERE, "..", "docs", "lemmo"))
 
 LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 SKIP_PREFIXES = ("http://", "https://", "mailto:", "#", "tel:", "file://")

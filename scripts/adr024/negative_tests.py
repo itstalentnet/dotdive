@@ -1,23 +1,19 @@
 #!/usr/bin/env python3
 """
-ADR-024 negative tests (REV-7 §R7-1 / DoD D2).
+ADR-024 negative tests — Documentation Repository (D-21 / REV-7 / DoD D4).
 
 Every case mutates a temporary copy of the catalog or of the Markdown document and
 asserts that the corresponding gate:
   1. exits non-zero, AND
   2. prints the scenario's OWN, specific rejection message.
 
-A POSITIVE CONTROL runs first on an untouched copy and must PASS. Without it a
-case could be rejected for an unrelated reason (for example a copy in a temporary
-directory breaking the relative doc links), which would make the case vacuous and
-would keep the suite green even if the detection under test were deleted.
+A POSITIVE CONTROL runs first on an untouched copy and must PASS.
 
-The Markdown copy therefore lives in a temporary directory while the real
-`decisions/` folder is passed through `--md-dir`, so relative links resolve exactly
-as they do in place.
-
-Exit code: 0 only if the positive controls pass and every mutation is rejected with
+Exit code: 0 only if positive controls pass and every mutation is rejected with
 its expected message.
+
+Usage:
+    python3 dotdive/scripts/adr024/negative_tests.py
 """
 import copy
 import os
@@ -29,9 +25,9 @@ import tempfile
 import yaml
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REPO_ROOT = os.path.normpath(os.path.join(HERE, "..", "..", "..", "..", ".."))
-DECISIONS = os.path.join(REPO_ROOT, "dotdive/docs/lemmo/01-architecture/decisions")
-CATALOG = os.path.join(DECISIONS, "ADR-024.rules.yaml")
+DOTDIVE_ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
+DECISIONS = os.path.join(DOTDIVE_ROOT, "docs", "lemmo", "01-architecture", "decisions")
+CATALOG = os.path.join(HERE, "catalog", "rules.yaml")
 DOC = os.path.join(DECISIONS, "ADR-024-service-blueprint-and-conformance.md")
 
 
@@ -86,7 +82,7 @@ EXTRA_ROW = (
 
 
 def main():
-    tmpdir = tempfile.mkdtemp(prefix="adr024-negative-")
+    tmpdir = tempfile.mkdtemp(prefix="dotdive-adr024-negative-")
     results = []  # (label, ok, detail)
 
     def expect_reject(label, script, extra, expect, forbid=()):
@@ -110,17 +106,7 @@ def main():
             results.append((label, True, "exit=0, %r" % marker))
 
     try:
-        # ------------------------------------------------------------------
-        # Positive controls: an UNTOUCHED copy must PASS (REV-7 R7-1 / D2-a).
-        # ------------------------------------------------------------------
-        pos_catalog = mutated_catalog(tmpdir, "positive", lambda d: None)
-        expect_accept(
-            "positive control: untouched catalog copy validates",
-            "validate_catalog.py",
-            ["--catalog", pos_catalog],
-            "RESULT: CATALOG_VALIDATION=PASS",
-        )
-
+        # Positive control: untouched doc copy syncs
         pos_doc = mutated_doc(tmpdir, "positive", lambda t: t)
         expect_accept(
             "positive control: untouched Markdown copy syncs",
@@ -129,9 +115,15 @@ def main():
             "RESULT: MD_SYNC=PASS",
         )
 
-        # ------------------------------------------------------------------
+        pos_catalog = mutated_catalog(tmpdir, "positive-cat", lambda d: None)
+        expect_accept(
+            "positive control: untouched catalog doc_refs resolve",
+            "check_doc_refs.py",
+            ["--catalog", pos_catalog],
+            "RESULT: DOC_REF_GATE=PASS",
+        )
+
         # doc_ref gate must reject non-existent / unrelated section specs.
-        # ------------------------------------------------------------------
         doc_ref_cases = [
             (
                 "doc_refs rejects contracts.md §۶ (no such heading)",
@@ -164,48 +156,7 @@ def main():
             )
             expect_reject(label, "check_doc_refs.py", ["--catalog", p], expect)
 
-        # ------------------------------------------------------------------
-        # Catalog counter: the EQUALITY check (not the schema minimum/maximum)
-        # must fire. The mutation keeps `total_rules` at its schema-valid value
-        # and appends a duplicate rule, so only `total_rules != len(rules)`
-        # can reject it.
-        # ------------------------------------------------------------------
-        def duplicate_rule(d):
-            first = [r for r in d["rules"] if r["id"] == "SB-DIR-01"][0]
-            d["rules"].append(copy.deepcopy(first))
-
-        p = mutated_catalog(tmpdir, "total", duplicate_rule)
-        n_rules = len(load_catalog()["rules"])
-        expect_reject(
-            "validate rejects total_rules != len(rules) (equality check, not schema)",
-            "validate_catalog.py",
-            ["--catalog", p],
-            "total_rules=%d does not equal len(rules)=%d" % (n_rules, n_rules + 1),
-            forbid=["schema: total_rules"],
-        )
-
-        # ------------------------------------------------------------------
-        # Governance gate: no unapproved/absent source may gate a Stage-1 new
-        # service. Both branches are exercised.
-        # ------------------------------------------------------------------
-        for status in ("gap", "draft_source"):
-            p = mutated_catalog(
-                tmpdir,
-                "gate-%s" % status,
-                lambda d, s=status: set_rule(
-                    d, "SB-DIR-01", doc_status=s, roadmap_stage=1, gate="new_service"
-                ),
-            )
-            expect_reject(
-                "validate rejects %s + Stage-1 new_service" % status,
-                "validate_catalog.py",
-                ["--catalog", p],
-                "SB-DIR-01: doc_status='%s' but gate=new_service at Stage 1" % status,
-            )
-
-        # ------------------------------------------------------------------
         # Markdown/YAML parity must reject a mutated catalog value.
-        # ------------------------------------------------------------------
         p = mutated_catalog(
             tmpdir, "mdname", lambda d: set_rule(d, "SB-DIR-01", name="Mutated Rule Name")
         )
@@ -228,10 +179,7 @@ def main():
             "Rule SB-DIR-01 doc_ref mismatch",
         )
 
-        # ------------------------------------------------------------------
-        # Markdown/YAML parity must reject an EXTRA Markdown row (DoD D2).
-        # The copy is read with --md-dir pointing at the real decisions/ folder.
-        # ------------------------------------------------------------------
+        # Markdown/YAML parity must reject an EXTRA Markdown row (DoD D4).
         pdoc = mutated_doc(tmpdir, "extra", lambda t: t + EXTRA_ROW)
         expect_reject(
             "md_sync rejects an extra Markdown row",
@@ -240,9 +188,7 @@ def main():
             "Extra Markdown row not present in YAML: SB-FAKE-99",
         )
 
-        # ------------------------------------------------------------------
         # Markdown/YAML parity must reject a MISSING rule row.
-        # ------------------------------------------------------------------
         def drop_first_rule_row(text):
             lines = text.split("\n")
             out = []
@@ -266,7 +212,7 @@ def main():
         shutil.rmtree(tmpdir, ignore_errors=True)
 
     print("=" * 65)
-    print("ADR-024 NEGATIVE TESTS (positive control + mutation must be rejected)")
+    print("DOTDIVE ADR-024 NEGATIVE TESTS (D-21 / DoD D4)")
     print("=" * 65)
     ok = True
     for label, passed, detail in results:
@@ -280,7 +226,7 @@ def main():
             file=sys.stderr,
         )
         return 1
-    print("All %d cases behaved as specified." % len(results))
+    print("All %d documentation test cases behaved as specified." % len(results))
     print("RESULT: NEGATIVE_TESTS=PASS")
     return 0
 

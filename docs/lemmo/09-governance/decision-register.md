@@ -6,7 +6,7 @@
 | **Category** | `governance` |
 | **Status** | `Active` |
 | **Owner** | Senior Architect / Project Management |
-| **Last Updated** | 2026-10-16 |
+| **Last Updated** | 2026-10-19 |
 | **Summary (EN)** | Authoritative registry tracking all architectural decisions (D-01 to D-15), conflict resolutions (C-1 to C-5 approved by PM), and pending action items (P-1 to P-6) for Lemmo MVP. Links directly to SSOT documents and specifies publication targets. |
 | **Summary (FA)** | جدول و ماتریس رسمی کلیه تصمیمات معماری مصوب (D-01 تا D-15)، وضعیت تعارض‌های مصوب (C-1 تا C-5)، مقاصد ثبت و انتشار، و پیگیری بندهای باز (P-1 تا P-6). |
 | **Tags** | `governance`, `decisions`, `adr`, `mvp`, `matrix`, `ssot`, `conflicts` |
@@ -50,6 +50,16 @@
 | <a id="d-18"></a>**D-18** | **هدر فایل خودتولید و گیت تازگی (Freshness Gate):** هر خروجی `buf generate`/`orval`/`lemmo-cli scaffold`/ابزار تجمیع چنج‌لاگ (D-16) باید هدر غیرقابل‌ویرایش (نام ابزار، نسخه SemVer ابزار طبق ADR-008، و در صورت وجود هش کامیت قرارداد منبع) داشته باشد؛ اجرای مجدد ژنراتور باید diff صفر بدهد. این مکمل D-11 (اسکافولد lemmo-cli) است و بدهی باز `STB-DEBT-06`/`STB-DEBT-08` را می‌بندد، نه موضوع جدید می‌سازد. **دامنه تأیید شد (P-7 بسته، ۲۰۲۶-۱۰-۱۷):** باگ گزارش‌شده در `lemmo-cli service <name>` بود (نه buf/orval مستقیماً)؛ رفع کد در `TASK_GOV_02_FIX_LEMMO_CLI_SCAFFOLD_IMPORT_PATH.md` (مجری)، جدا از پیش‌نویس ADR این تسک. | **`تأییدشده (مالک، ۲۰۲۶-۱۰-۱۷)`** | [ADR-023](../01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md) | [`ADR-023`](../01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md) §۲.۳ و §۲.۴ و [`TASK_GOV_02`](../../../../.task/completed/TASK_GOV_02_FIX_LEMMO_CLI_SCAFFOLD_IMPORT_PATH.md) | ۲۰۲۶-۱۰-۱۷ |
 | <a id="d-19"></a>**D-19** | **اصلاح وضعیت تسک Agent Chat Workspace (استیج ۱۷B):** طبق اطلاع مالک محصول، تلاش یکپارچه‌سازی واقعاً شکست خورده و آماده نیست؛ این با وضعیت «پذیرفته‌شده رسمی ✅» در `completed/REPORT_STAGE17_AGENT_CHAT_WORKSPACE_INTEGRATION.md` و ردیف INDEX.md در تناقض است (رجوع C-6). پس از تثبیت مرحله ۱ (D-11/D-13) دوباره تلاش شود. | **`تأیید قطعی شد (مالک، ۲۰۲۶-۱۰-۱۷)`** | رجوع C-6 | [`STOP_C06`](../../../../.task/governance/STOP_C06_AGENT_CHAT_WORKSPACE_CONTRADICTION.md)، [`INDEX.md`](../../../../.task/INDEX.md) و [`current-path.md`](./current-path.md#۵-ماتریس-جامع-اولویت‌بندی-کلیه-آیتم‌های-باز-مهندسی) | ۲۰۲۶-۱۰-۱۷ |
 | <a id="d-20"></a>**D-20** | **بهداشت چرخه حیات تسک‌ها در `.task/`:** تفکیک اسناد مرجع زنده از بریف‌های اجرایی در `active/`، انتقال گزارش‌های در انتظار بازبینی به `review/`، بایگانی تسک‌های منسوخ، تدوین گیت امضای ناظر مستقل پیش از انتقال به `completed/`، و ممیزی نمونه‌ای ریسک‌محور ۹ مورد در `completed/` طبق الگوی `VIOLATIONS_LOG.md` §۳.۲. | **`اجرا شد (تسک GOV-03)`** | [TASK_GOV_03](../../../../.task/completed/TASK_GOV_03_TASK_LIFECYCLE_HYGIENE_AND_COMPLETED_REAUDIT.md) | [`task-template-and-review-rules.md`](./task-template-and-review-rules.md#۵-پروتکل‌های-اعتبارسنجی-ناظر-مستقل-observer-verification-protocol---d-12) §۵.۵ و [`INDEX.md`](../../../../.task/INDEX.md) | ۲۰۲۶-۱۰-۱۷ |
+
+### جدول الحاقی — تصمیم‌های مالک محصول (۲۰۲۶-۱۰-۱۹)
+
+سه تصمیم زیر را مالک محصول پیش از واگذاری TASK_ARCH_02 صادر کرد و مدیر پروژه ثبت کرد. وضعیت: **تأییدشده توسط مالک محصول**.
+
+| شناسه | موضوع تصمیم | وضعیت | پیوند به مرجع تصمیم | ثبت‌شده در (Destination SSOT) | تاریخ ثبت |
+| :---: | :--- | :---: | :--- | :--- | :---: |
+| <a id="d-21"></a>**D-21** | **ممنوعیت وابستگی بین مخازن:** هیچ مخزنی در زمان اجرا یا CI فایلی را از مخزن دیگر نمی‌خواند؛ هر مخزن به‌تنهایی کار می‌کند. داده مشترک یک مرجع دارد و مخزن دیگر یک **کپی ثابت‌شده** با هدر شناسنامه به سبک D-18 (مخزن مبدأ، commit مبدأ، نسخه، هشدار «ویرایش دستی ممنوع») نگه می‌دارد؛ به‌روزرسانی کپی یک گام صریح با اسکریپت همگام‌سازی است، نه خواندن زنده. نمونه اول: کاتالوگ قواعد ADR-024 — مرجع `api/conformance/rules.yaml`، کپی در `dotdive/scripts/adr024/catalog/`. | ✅ تأیید مالک | دستور مالک ۲۰۲۶-۱۰-۱۹ | ADR-024، ADR-026 (Draft)، TASK_ARCH_02 | ۲۰۲۶-۱۰-۱۹ |
+| <a id="d-22"></a>**D-22** | **شماره‌گذاری ADR:** ADR-025 برای مالکیت Access/Promo (P-3) رزرو است (طبق ADR-024 و TASK_ARCH_01). سند معماری ماژولار `lemmo-cli` با شماره **ADR-026** نوشته می‌شود. رزرو در `decisions/index.md` ثبت می‌شود. | ✅ تأیید مالک | دستور مالک ۲۰۲۶-۱۰-۱۹ | `01-architecture/decisions/index.md` | ۲۰۲۶-۱۰-۱۹ |
+| <a id="d-23"></a>**D-23** | **مالکیت فایل (الزام R5 معماری `lemmo-cli`):** هیچ ماژول یا ابزاری به فایل دست‌نویس نمی‌نویسد؛ ابزارها فقط فایل‌های دارای هدر D-18 را می‌سازند یا بازسازی می‌کنند. فایل بدون هدر، حتی اگر ابتدا با `lemmo-cli service` ساخته شده باشد، دست‌نویس است. افزودن قابلیت جدید به سرویس فقط از راه فایل‌های تولیدی جداگانه است و فایل دست‌نویس (مثلاً `main.go`) فقط آن‌ها را فراخوانی می‌کند. | ✅ تأیید مالک | دستور مالک ۲۰۲۶-۱۰-۱۹ | ADR-026 (Draft) | ۲۰۲۶-۱۰-۱۹ |
 
 ---
 

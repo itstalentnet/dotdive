@@ -1,25 +1,16 @@
 #!/usr/bin/env python3
 """
-ADR-024 doc_ref gate (REV-6).
+ADR-024 doc_ref gate — Documentation Repository (D-21 / REV-6).
 
-Deterministic, strict verification that every `doc_ref` in ADR-024.rules.yaml
+Deterministic, strict verification that every `doc_ref` in catalog/rules.yaml
 points to an EXISTING file and an EXISTING, exactly-numbered section/heading,
 explicit anchor, or (ADR-022 decision text) numbered clause.
-
-Guarantees required by REV-6 §A-1:
-  * 100% deterministic output (no set()/dict-order dependence; identical for any
-    PYTHONHASHSEED).
-  * Exact section matching: the heading/paragraph number must be equal to the
-    requested spec (not merely "a digit appears somewhere in a heading").
-  * `#anchor` is accepted only when a real HTML anchor (`id=`/`name=`) or a real
-    GitHub heading slug exists in the target file.
-  * All paths are resolved relative to the repository root, never the cwd.
 
 Exit code: 0 if every reference resolves, 1 otherwise.
 
 Usage:
-    python3 docs/lemmo/scripts/adr024/check_doc_refs.py
-    python3 docs/lemmo/scripts/adr024/check_doc_refs.py --dump   # quotes for report
+    python3 dotdive/scripts/adr024/check_doc_refs.py
+    python3 dotdive/scripts/adr024/check_doc_refs.py --dump   # quotes for report
 """
 import sys
 import os
@@ -30,6 +21,10 @@ NUM = r"[۰-۹0-9]+(?:\.[۰-۹0-9]+)*"
 FA_DIGITS = "۰۱۲۳۴۵۶۷۸۹"
 EN_DIGITS = "0123456789"
 _TRANS = str.maketrans(FA_DIGITS, EN_DIGITS)
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+DOTDIVE_ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
+DEFAULT_CATALOG = os.path.join(HERE, "catalog", "rules.yaml")
 
 
 def norm(s):
@@ -143,17 +138,28 @@ def resolve(lines, headings, spec):
     return False, None, "heading '%s' not found" % n, "heading-miss"
 
 
-DEFAULT_CATALOG = "dotdive/docs/lemmo/01-architecture/decisions/ADR-024.rules.yaml"
-
-
-def load_catalog(repo_root, catalog_path):
-    path = catalog_path if os.path.isabs(catalog_path) else os.path.join(repo_root, catalog_path)
-    with open(path, "r", encoding="utf-8") as f:
+def load_catalog(catalog_path):
+    with open(catalog_path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
+def find_doc_file(doc_path, repo_root):
+    """Resolve doc_path in either umbrella workspace or standalone dotdive clone."""
+    sub_path = doc_path[len("dotdive/"):] if doc_path.startswith("dotdive/") else doc_path
+    candidates = [
+        os.path.join(DOTDIVE_ROOT, sub_path),
+        os.path.join(repo_root, doc_path),
+        os.path.join(repo_root, sub_path),
+        os.path.join(DOTDIVE_ROOT, doc_path),
+    ]
+    for c in candidates:
+        if os.path.isfile(c):
+            return c
+    return None
+
+
 def check(repo_root, dump=False, catalog_path=DEFAULT_CATALOG):
-    catalog = load_catalog(repo_root, catalog_path)
+    catalog = load_catalog(catalog_path)
     rules = sorted(catalog.get("rules", []), key=lambda r: r["id"])
     cache = {}
     failures = []
@@ -161,7 +167,7 @@ def check(repo_root, dump=False, catalog_path=DEFAULT_CATALOG):
 
     if not dump:
         print("=" * 65)
-        print("ADR-024 DOCUMENT REFERENCE GATE (REV-6 — strict/deterministic)")
+        print("ADR-024 DOCUMENT REFERENCE GATE (DOTDIVE / D-21)")
         print("=" * 65)
         print("Rules: %d" % len(rules))
         print("-" * 65)
@@ -176,9 +182,10 @@ def check(repo_root, dump=False, catalog_path=DEFAULT_CATALOG):
             if "#" in doc_path:  # "path#anchor" form
                 doc_path, anchor = doc_path.split("#", 1)
                 spec = ("#" + anchor).strip()
-            abspath = os.path.join(repo_root, doc_path)
+
+            abspath = find_doc_file(doc_path, repo_root)
             if doc_path not in cache:
-                if os.path.isfile(abspath):
+                if abspath and os.path.isfile(abspath):
                     lines = read_lines(abspath)
                     cache[doc_path] = (lines, parse_headings(lines))
                 else:
@@ -202,8 +209,6 @@ def check(repo_root, dump=False, catalog_path=DEFAULT_CATALOG):
                 quoted.append((r["id"], ref, shown, literal))
                 if not dump:
                     print("[PASS] %-14s %-28s -> %s" % (r["id"], spec or "(file)", shown))
-        if dump and rule_failed:
-            pass
 
     if dump:
         for (rid, ref, shown, literal) in quoted:
@@ -232,8 +237,7 @@ def main():
     catalog_path = DEFAULT_CATALOG
     if "--catalog" in argv:
         catalog_path = argv[argv.index("--catalog") + 1]
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    repo_root = os.path.normpath(os.path.join(script_dir, "..", "..", "..", "..", ".."))
+    repo_root = DOTDIVE_ROOT
     sys.exit(check(repo_root, dump=dump, catalog_path=catalog_path))
 
 

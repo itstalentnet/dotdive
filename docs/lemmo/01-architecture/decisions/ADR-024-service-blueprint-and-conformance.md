@@ -7,8 +7,8 @@
 | **Status** | `Draft` |
 | **Owner** | Platform Architecture & Tech Lead |
 | **Last Updated** | 2026-10-18 |
-| **Summary (EN)** | Authoritative specification for Lemmo microservice blueprint, 50 canonical conformance rules codified in machine-readable ADR-024.rules.yaml, service manifest schema, contracts and OpenAPI governance, static AST verification via lemmo-cli, and live runtime probes aggregated into make doctor. |
-| **Summary (FA)** | سند رسمی الگوی استاندارد میکروسرویس‌های لیمو، کاتالوگ ۵۰ گانه قواعد انطباق ماشین‌خوان در ADR-024.rules.yaml، مانیفست سرویس، حاکمیت قراردادها و OpenAPI، اعتبارسنجی ایستا با lemmo-cli و آزمون‌های زنده متصل به make doctor. |
+| **Summary (EN)** | Authoritative specification for Lemmo microservice blueprint, 50 canonical conformance rules codified in machine-readable api/conformance/rules.yaml, service manifest schema, contracts and OpenAPI governance, static AST verification via lemmo-cli, and live runtime probes aggregated into make doctor. |
+| **Summary (FA)** | سند رسمی الگوی استاندارد میکروسرویس‌های لیمو، کاتالوگ ۵۰ گانه قواعد انطباق ماشین‌خوان در api/conformance/rules.yaml، مانیفست سرویس، حاکمیت قراردادها و OpenAPI، اعتبارسنجی ایستا با lemmo-cli و آزمون‌های زنده متصل به make doctor. |
 | **Tags** | `adr`, `blueprint`, `conformance`, `lemmo-cli`, `manifest`, `contracts`, `openapi`, `make-doctor`, `zero-diff` |
 
 ---
@@ -16,7 +16,7 @@
 # ADR-024: الگوی استاندارد میکروسرویس، اسکلت مرجع، مانیفست سرویس و اعتبارسنج انطباق
 
 > 📖 **منبع یگانه حقیقت قواعد (SSOT):**  
-> کاتالوگ جامع و رسمی کلیه قواعد این سند در فایل داده‌ای ماشین‌خوان [`ADR-024.rules.yaml`](./ADR-024.rules.yaml) (منطبق بر اسکیمای [`rules-catalog.schema.json`](./rules-catalog.schema.json)) تعریف شده است. ابزار `lemmo-cli` مستقیماً این فایل را مصرف خواهد کرد و به عنوان مجری استانداردهای مستند عمل می‌نماید (تولید سند از کد ملغی است). این سند در وضعیت **پیش‌نویس (Draft)** قرار دارد و تا زمان تصویب رسمی توسط مالک محصول، به عنوان مرجع طراحی معماری عمل می‌کند.
+> کاتالوگ جامع و رسمی کلیه قواعد این سند در فایل داده‌ای ماشین‌خوان مرجع در مخزن بک‌اند در مسیر [`api/conformance/rules.yaml`](file:///home/behroz/Documents/Git/lemmo/api/conformance/rules.yaml) (منطبق بر اسکیمای [`rules-catalog.schema.json`](file:///home/behroz/Documents/Git/lemmo/api/conformance/schemas/rules-catalog.schema.json)) تعریف شده و کپی ثابت‌شده آن مطابق تصمیم D-21 با هدر شناسنامه در `dotdive/scripts/adr024/catalog/rules.yaml` نگهداری می‌شود. ابزار `lemmo-cli` مستقیماً این فایل را در مخزن کد مصرف خواهد کرد و به عنوان مجری استانداردهای مستند عمل می‌نماید (تولید سند از کد ملغی است). این سند در وضعیت **پیش‌نویس (Draft)** قرار دارد و تا زمان تصویب رسمی توسط مالک محصول، به عنوان مرجع طراحی معماری عمل می‌کند.
 
 ---
 
