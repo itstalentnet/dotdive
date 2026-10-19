@@ -9,7 +9,7 @@ count published in any report is reproducible from the repository alone.
 Deterministic output. Exit code: 0 if no broken links, 1 otherwise.
 
 Usage:
-    python3 dotdive/scripts/check_links.py
+    python3 dotdive/docs/lemmo/scripts/check_links.py
 """
 import os
 import re
