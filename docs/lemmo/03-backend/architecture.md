@@ -98,7 +98,7 @@ lemmo-api/                      ← ریشه مونوریپوی بک‌اند (�
 ├── core/                       ← هسته مشترک Go (بوت‌استرپ، لاگینگ، میدل‌ور، Idempotency، Outbox)
 │   ├── bootstrap/              ← راه‌اندازی استاندارد سرور gRPC و HTTP با Graceful Shutdown
 │   ├── config/                 ← بارگذاری سازگار تنظیمات از .env و متغیرهای محیطی
-│   ├── middleware/             ← تزریق Trace ID، ریکاوری از پنیک و MockAuthMiddleware توسعه
+│   ├── middleware/             ← تزریق Trace ID، ریکاوری از پنیک و کانتکست احراز هویت (حذف MockAuth طبق D-35)
 │   ├── outbox/                 ← الگوی Transactional Outbox برای ارسال مطمئن رویدادها
 │   └── idempotency/            ← کلیدهای یکتا جهت جلوگیری از اجرای تکراری
 │

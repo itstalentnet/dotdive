@@ -16,7 +16,7 @@
 # شناسنامه میکروسرویس‌ها و نقشه فازبندی تحویل (`services/`)
 
 > ⚠️ **وضعیت پیاده‌سازی در کد (`api/`):**  
-> وضعیت معماری این سند `Approved` است و بر پایه تصمیمات مصوب [ADR-004](../01-architecture/decisions/adr-004-backend-microservices.md)، [ADR-007](../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md) و [ADR-009](../01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md) تدوین شده است. در راستای متدولوژی **Contract-First & Spine-First**، کلیه ۹ سرویس مسیر حیاتی فاز ۱ با ساختار استاندارد لایه‌ای Clean Architecture، فایل شناسنامه `service.md` و الگوهای مایگریشن در پوشه `services/` اسکافولد شده‌اند. همچنین پیاده‌سازی عملیاتی استاب اینترفیس هسته `QuotaChecker` در `orchestrator-service` و میدل‌ور `MockAuthMiddleware` در پکیج `core/` مستقر گردیده است. تکمیل منطق تجاری داخلی و تست‌های یکپارچگی گام‌به‌گام مطابق نقشه راه ([DOC-BE-005](./roadmap.md)) انجام خواهد شد.
+> وضعیت معماری این سند `Approved` است و بر پایه تصمیمات مصوب [ADR-004](../01-architecture/decisions/adr-004-backend-microservices.md)، [ADR-007](../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md) و [ADR-009](../01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md) تدوین شده است. در راستای متدولوژی **Contract-First & Spine-First**، کلیه ۹ سرویس مسیر حیاتی فاز ۱ با ساختار استاندارد لایه‌ای Clean Architecture، فایل شناسنامه `service.md` و الگوهای مایگریشن در پوشه `services/` اسکافولد شده‌اند. همچنین پیاده‌سازی عملیاتی استاب اینترفیس هسته `QuotaChecker` در `orchestrator-service` و لایه مدیریت کانتکست هویت در پکیج `core/` مستقر گردیده است (میدل‌ور موک طبق D-35 حذف گردید). تکمیل منطق تجاری داخلی و تست‌های یکپارچگی گام‌به‌گام مطابق نقشه راه ([DOC-BE-005](./roadmap.md)) انجام خواهد شد.
 
 این سند کاتالوگ جامع کلیه سرویس‌های فعال و رزروشده در مونوریپوی بک‌اند (`lemmo-api`) را به همراه ساختار داخلی استاندارد و زمان‌بندی پیاده‌سازی فازها تشریح می‌کند.
 
@@ -41,7 +41,7 @@
 | **`login-consent-app`** | رابط واسط میان Kratos و Hydra جهت اخذ تاییدیه ورود و دامنه دسترسی کاربران | آماده / بازاستفاده |
 
 ### مسیر گام‌به‌گام گذار به سیستم احراز هویت واقعی (Kratos Transition Roadmap)
-1. **فاز ۰ (ستون فقرات محلی):** توسعه محلی بک‌اند و فرانت‌اند با میدل‌ور موک (`MockAuthMiddleware`) و داده‌های ساختگی انجام می‌شود تا وابستگی به سرویس‌های هویت مانع پیشرفت نشود.
+1. **فاز ۰ (ستون فقرات محلی):** توسعه محلی بک‌اند و فرانت‌اند با داده‌های ساختگی انجام می‌شود (میدل‌ور `MockAuthMiddleware` طبق تصمیم D-35 حذف گردید).
 2. **فاز ۱ (Milestone Gate 1 & 2):** با راه‌اندازی `project-service` و `orchestrator-service`، فرانت‌اند با تنظیم `NEXT_PUBLIC_API_MODE=live` مستقیماً به نشست‌های Kratos متصل می‌شود؛ کوکی‌های Session کلاینت از طریق متد `/sessions/whoami` در Kratos اعتبارسنجی شده و شناسه کاربری در کانتکست تزریق می‌گردد.
 3. **فاز ۲ و ۳ (Milestone Gate 4 به بعد):** اتصال کلاینت‌های بیرونی و CLI از طریق Ory Hydra (`token-service`) و توکن‌های OAuth2/OIDC پیاده‌سازی می‌گردد.
 
@@ -90,13 +90,8 @@
 - **Contract Generator:** اسکریپت‌های تبدیل در پوشه `contracts/` قرار دارند، نه یک سرویس اجرایی.
 - **Project Clone:** کلون‌های پروژه به عنوان نمای اختصاصی هر عضو در همان `project-service` باقی می‌مانند.
 
-### ۱. مشخصات میدل‌ور موک احراز هویت (`core/middleware/MockAuthMiddleware`)
-برای محیط توسعه محلی و تست‌های یکپارچگی مستقل از Ory Kratos:
-- **هدرهای ورودی پشتیبانی‌شده:**
-  - `X-Mock-User-ID`: شناسه کاربر در کانتکست (در صورت عدم ارسال: مقدار پیش‌فرض `"mock-user-dev"`).
-  - `X-Mock-Tenant-ID`: شناسه فضای کاری جاری (پیش‌فرض: `"mock-tenant-default"`).
-  - `X-Mock-Roles`: نقش‌های کاربر به صورت کاما-جدا (پیش‌فرض: `"workspace:owner,admin"`).
-- **قانون امنیتی غیرفعال‌سازی در پروداکشن:** این میدل‌ور فقط در صورتی اجازه اجرا دارد که متغیر محیطی `LEMMA_ENV=development` یا `APP_ENV=development` باشد. در محیط‌های `production`، بارگذاری یا فراخوانی این میدل‌ور بلافاصله با خطای مهلک (Panic) مانع از بالا آمدن سرویس می‌شود.
+### ۱. میدل‌ور موک احراز هویت (`core/middleware/MockAuthMiddleware` — حذف‌شده طبق D-35)
+این میدل‌ور پیش‌تر برای محیط توسعه محلی تعریف شده بود، اما طبق تصمیم مالک محصول (D-35، مورخ ۲۰۲۶-۱۰-۱۹) و اصل حذف کدهای غیرفعال (D-36) به طور کامل از کدبیس حذف گردید و کانتکست احراز هویت مستقیماً از طریق `auth_context.go` مدیریت می‌شود.
 
 ### ۲. مشخصات اینترفیس سهمیه در ارکستریتور (`orchestrator-service/domain/QuotaChecker`)
 ارکستریتور برای بررسی اعتبار پیش از آغاز اجرای گره‌های سنگین DAG از اینترفیس انتزاعی زیر در لایه Domain خود استفاده می‌کند:

@@ -231,7 +231,7 @@ flowchart LR
 - [x] **0.3 ساختار پکیج‌های مشترک (`core/`):**
   - [x] پیاده‌سازی `core/config`: لودر امن YAML با اعتبارسنجی Fail-Fast و منع فال‌بک سکرت‌ها (DOC-ARCH-009)
   - [x] پیاده‌سازی `core/bootstrap`: سرور استاندارد gRPC و HTTP با Graceful Shutdown
-  - [x] پیاده‌سازی `core/middleware`: تزریق TraceID (OpenTelemetry)، ریکاوری پنیک، و MockAuthMiddleware
+  - [x] پیاده‌سازی `core/middleware`: تزریق TraceID (OpenTelemetry)، ریکاوری پنیک، و کانتکست هویت (حذف MockAuth طبق D-35)
   - [x] پیاده‌سازی `core/outbox`: الگوی Outbox تراکنشی پایگاه داده
   - [x] پیاده‌سازی `core/idempotency`: کلیدهای idempotency در Redis
 - [x] **0.4 و 0.5 ابزارها و پکیج‌های SDK:**
