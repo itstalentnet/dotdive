@@ -16,7 +16,7 @@ import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DOC_ROOT = os.path.normpath(os.path.join(HERE, "..", "docs", "lemmo"))
+DOC_ROOT = os.path.normpath(os.path.join(HERE, ".."))
 
 LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 SKIP_PREFIXES = ("http://", "https://", "mailto:", "#", "tel:", "file://")

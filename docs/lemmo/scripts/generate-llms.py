@@ -8,7 +8,7 @@ import os
 import re
 from pathlib import Path
 
-DOCS_DIR = Path(__file__).resolve().parent.parent / "docs" / "lemmo"
+DOCS_DIR = Path(__file__).resolve().parent.parent
 OUTPUT_FILE = DOCS_DIR / "llms.txt"
 
 CATEGORY_TITLES = {
