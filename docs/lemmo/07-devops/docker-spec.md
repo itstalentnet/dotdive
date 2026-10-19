@@ -149,19 +149,29 @@ ENV APP_BUILD_TIME=$BUILD_TIME
 
 ## ۵. فرامین استاندارد داکر در Makefile ریشه (`api/Makefile`)
 
-برای تضمین اجرای بدون خطای انسانی، تارگت‌های زیر به فایل `api/Makefile` اضافه می‌شوند:
+برای تضمین اجرای بدون خطای انسانی و جلوگیری از اجرای خاموش کدهای قدیمی (حل قطعی نقص `QF-BUILD-REGISTRY-01` طبق TASK_GOV_04)، تارگت‌های زیر در فایل `api/Makefile` پیاده‌سازی شده‌اند:
 
 ```makefile
-# Start local development infrastructure with guaranteed fresh build
+# Guarded local deploy for a single service with build enforcement and provenance audit
+deploy:
+	@if [ -z "$(SERVICE)" ]; then \
+		echo "ERROR: SERVICE is required. Usage: make deploy SERVICE=<service-name>"; \
+		exit 1; \
+	fi
+	./scripts/deploy_guard.sh $(SERVICE)
+
+# Start local development infrastructure with guaranteed build failure guard
 docker-dev:
-	docker compose -f infra/docker-compose.yml -f infra/compose/dev.yml up --build -d
+	docker compose -f infra/compose/dev.yml build
+	docker compose -f infra/compose/dev.yml up -d
 
 # Stop infrastructure and remove orphan containers
 docker-stop:
-	docker compose -f infra/docker-compose.yml -f infra/compose/dev.yml down --remove-orphans
+	docker compose -f infra/compose/dev.yml down --remove-orphans
 
 # Clean dangling images and build cache to resolve cache issues
 docker-clean:
-	docker compose -f infra/docker-compose.yml -f infra/compose/dev.yml down --remove-orphans
+	docker compose -f infra/compose/dev.yml down --remove-orphans
 	docker image prune -f
 ```
+
