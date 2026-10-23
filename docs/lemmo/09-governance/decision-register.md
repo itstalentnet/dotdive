@@ -7,8 +7,8 @@
 | **Status** | `Active` |
 | **Owner** | Senior Architect / Project Management |
 | **Last Updated** | 2026-10-23 |
-| **Summary (EN)** | Authoritative registry tracking architectural decisions D-01..D-53 (including historical D-39/D-42 and new D-48..D-53), conflict resolutions C-1..C-6, and action items P-1..P-7 for Lemmo MVP. P-3 is closed by ADR-025/D-53. Links directly to SSOT documents and specifies publication targets. |
-| **Summary (FA)** | جدول و ماتریس رسمی تصمیمات معماری D-01 تا D-53 (شامل ثبت تاریخی D-39/D-42 و تصمیم‌های جدید D-48 تا D-53)، تعارض‌های C-1 تا C-6 و بندهای پیگیری P-1 تا P-7. P-3 با ADR-025/D-53 بسته شد. مقاصد ثبت و انتشار نیز مشخص شده‌اند. |
+| **Summary (EN)** | Authoritative registry tracking architectural decisions D-01..D-54 (including historical D-39/D-42, D-48..D-53, and D-54), conflict resolutions C-1..C-6, and action items P-1..P-7 for Lemmo MVP. P-3 is closed by ADR-025/D-53. Links directly to SSOT documents and specifies publication targets. |
+| **Summary (FA)** | جدول و ماتریس رسمی تصمیمات معماری D-01 تا D-54 (شامل ثبت تاریخی D-39/D-42، تصمیم‌های D-48 تا D-53 و D-54)، تعارض‌های C-1 تا C-6 و بندهای پیگیری P-1 تا P-7. P-3 با ADR-025/D-53 بسته شد. مقاصد ثبت و انتشار نیز مشخص شده‌اند. |
 | **Tags** | `governance`, `decisions`, `adr`, `mvp`, `matrix`, `ssot`, `conflicts`, `access-promo`, `ai-gateway` |
 
 ---
@@ -80,6 +80,14 @@
 | <a id="d-51"></a>**D-51** | **ساختار پوشه/فایل تعریف ابزار در `tools-service` (T1–T5 ساختار ابزار):** هر ابزار یک پوشه، `tool.yaml` اجباری، `prompts/`، `examples/`، و اتصال مدل فقط با `model_alias`؛ بدون provider/مدل واقعی/کد. | ✅ تأیید مالک (۲۰۲۶-۱۰-۲۳) | دستور مالک در `TASK_ARCH_07` | [`ADR-018`](../01-architecture/decisions/ADR-018-tools-platform-architecture-unified-execution-and-domain-decoupling.md) §۲.۱۱ | ۲۰۲۶-۱۰-۲۳ |
 | <a id="d-52"></a>**D-52** | **سه محل تعریف و اعتبارسنج مشترک CI (L1، V1):** فقط رجیستری درگاه، تعریف ابزار، و نگاشت نام مستعار/مجوز؛ محل چهارم ممنوع. یک اعتبارسنج JSON Schema مشترک در CI و زمان راه‌اندازی روی هر سه اجرا می‌شود و PR با کلید ناشناخته/تکرار/ارجاع شکسته fail می‌شود. | ✅ تأیید مالک (۲۰۲۶-۱۰-۲۳) | دستور مالک در `TASK_ARCH_07` | [`ADR-027`](../01-architecture/decisions/ADR-027-ai-gateway-quality-safety-observability.md) §۲.۱۲ | ۲۰۲۶-۱۰-۲۳ |
 | <a id="d-53"></a>**D-53** | **مالکیت دائمی `access-promo-service` در MVP (P1–P5):** سرویس مستقل و دائمی مالک دعوت بتا/ظرفیت/مصرف یک‌باره/پروموی اعتباری؛ بدون موجودی یا ledger؛ اثر مالی فقط با Claim در `quota-service` (D-03)؛ انطباق از روز اول با ADR-024؛ اصلاح D-42؛ بستن P-3. | ✅ تأیید مالک (۲۰۲۶-۱۰-۲۳) | دستور مالک در `TASK_ARCH_07` | [`ADR-025`](../01-architecture/decisions/ADR-025-access-promo-service-ownership.md) §۲ | ۲۰۲۶-۱۰-۲۳ |
+
+### جدول الحاقی — تصمیم `TASK_ARCH_09` (۲۰۲۶-۱۰-۲۴)
+
+| شناسه | موضوع تصمیم | وضعیت | پیوند به مرجع تصمیم | ثبت‌شده در (Destination SSOT) | تاریخ ثبت |
+| :---: | :--- | :---: | :--- | :--- | :---: |
+| <a id="d-54"></a>**D-54** | **قاعدهٔ تغییر مسئولیت سرویس:** هر تغییر در مسئولیت یک سرویس فقط با ردیف تصمیم در این دفتر و به‌روزرسانی هم‌زمان سند مرجع مسئولیت (`service-responsibility-registry.md`) ممکن است. هیچ سند دیگری مسئولیت سرویس را تعریف نمی‌کند؛ فقط به کارت آن سرویس ارجاع می‌دهد. سرویس جدید فقط با ثبت کارت‌ش در همان سند وجود دارد. | ✅ تأیید مالک (۲۰۲۶-۱۰-۲۴) | دستور مالک در `TASK_ARCH_09` | [`01-architecture/service-responsibility-registry.md`](../01-architecture/service-responsibility-registry.md) §۷ | ۲۰۲۶-۱۰-۲۴ |
+
+---
 
 ---
 
