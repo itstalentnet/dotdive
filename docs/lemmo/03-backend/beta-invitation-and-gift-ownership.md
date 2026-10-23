@@ -6,9 +6,9 @@
 | **Category** | `architecture` |
 | **Status** | `Draft` |
 | **Owner** | Platform Architecture / Backend Lead |
-| **Last Updated** | 2026-10-15 |
-| **Summary (EN)** | Defines the seven-stage beta onboarding path (registration, beta access check, invite code page, activation, workspace/wallet plus one-time gift, studio) and fixes ownership: validation, beta capacity, single-use enforcement and gift issuance belong to the responsible backend service using the Quota Claim engine; the studio client only displays and calls the contract. Also records the current measured gaps. |
-| **Summary (FA)** | مسیر هفت‌مرحله‌ای آنبوردینگ بتا و مالکیت آن را تثبیت می‌کند: اعتبارسنجی، سقف ظرفیت، مصرف یک‌باره و اعطای هدیه متعلق به سرویس مسئول بک‌اند از مسیر موتور Claim در Quota است؛ کلاینت استودیو تنها نمایش می‌دهد و قرارداد را فراخوانی می‌کند. شکاف‌های اندازه‌گیری‌شده نیز ثبت شده است. |
+| **Last Updated** | 2026-10-23 |
+| **Summary (EN)** | Defines the seven-stage beta onboarding path and fixes ownership: invitation, beta capacity, single-use enforcement, and credit-promo rules belong to `access-promo-service` (D-53 / ADR-025); the gift is issued only through the Quota Claim engine (D-03); the studio client only displays and calls the contract. Records measured gaps and the 2026-10-23 closure of P-3. |
+| **Summary (FA)** | مسیر هفت‌مرحله‌ای آنبوردینگ بتا و مالکیت آن را تثبیت می‌کند: دعوت، سقف ظرفیت، مصرف یک‌باره و قواعد پروموی اعتباری متعلق به `access-promo-service` (D-53 / ADR-025) است؛ اعطای هدیه فقط از مسیر موتور Claim در Quota (D-03) انجام می‌شود؛ کلاینت استودیو تنها نمایش می‌دهد و قرارداد را فراخوانی می‌کند. شکاف‌های اندازه‌گیری‌شده و بسته‌شدن P-3 در ۲۰۲۶-۱۰-۲۳ ثبت شده است. |
 | **Tags** | `beta`, `invitation`, `onboarding`, `quota`, `claim`, `gateway`, `p06`, `p08` |
 
 # Beta Invitation, Access Gate, and One-Time Gift Ownership
@@ -29,9 +29,9 @@ document may lag behind an approved decision.
 | # | Stage | Owner | Contract status |
 |---|---|---|---|
 | 1 | Registration / login (passwordless) | `auth-service` (Kratos) | **Working** |
-| 2 | Beta access check for the authenticated user | Responsible backend service | **Missing** |
+| 2 | Beta access check for the authenticated user | `access-promo-service` (D-53 / ADR-025) | **Missing** |
 | 3 | Invite code entry page when access is absent | Studio client (display only) | **Missing** |
-| 4 | Invite validation, capacity ceiling, single-use enforcement, activation | Responsible backend service | **Missing** (test-only) |
+| 4 | Invite validation, capacity ceiling, single-use enforcement, activation | `access-promo-service` (D-53 / ADR-025) | **Missing** (test-only) |
 | 5 | Workspace / Wallet provisioning and one-time gift claim | `workspace-service` + `quota-service` Claim engine | Wallet: **Working**. Gift claim over the network: **Missing** |
 | 6 | Studio entry (draft-only prompt) | Studio client | **Working** |
 | 7 | History, refresh, re-login | Studio client + backend | **Working** |
@@ -43,13 +43,14 @@ document may lag behind an approved decision.
    an access control (ADR-016 §2.9 fail-closed).
 2. **Financial decisions live only in the financial owner.** Invite validation,
    beta capacity, single-use enforcement, and gift issuance are performed
-   server-side. The gift is issued **only** through the existing Claim engine in
-   `quota-service` (`ClaimUserGift`). No new financial logic is added to
-   `auth-service` or to any client.
+   server-side. **Invite/capacity/promo rules are owned by `access-promo-service`
+   (D-53 / ADR-025); the gift is issued only through the existing Claim engine in
+   `quota-service` (`ClaimUserGift`).** No new financial logic is added to
+   `access-promo-service`, `auth-service`, or any client.
 3. **Idempotency is mandatory.** Retrying a redemption must not consume the
    invite twice nor issue the gift twice. The Claim table already enforces this
    with `uq_user_gift_claims_user_code (user_id, gift_code)`; the invite
-   consumption must be equally atomic in the responsible service.
+   consumption must be equally atomic in `access-promo-service`.
    *Verified in STB-01:* the generic grant capability does **not** satisfy this —
    a replay and five concurrent calls each produced an additional bucket. It is
    therefore kept fail-closed rather than authorized.
@@ -89,20 +90,26 @@ reading alone.
 | G-G | **P06 / gateway membership projection** | Provide the production writer for the membership-version projection; manual seeding is a dev-only workaround. |
 | G-H | **P08** (context contract) | Split the context readiness contract so "no workspace" is an onboarding state distinct from financial `degraded`. |
 
-## 6. Open question requiring a decision (blocking G-A..G-D)
+## 6. Resolved ownership decision (2026-10-23) — G-A..G-D unblocked
 
-The baseline lists the beta-access owner as an unresolved input (section 5 of
-`BASELINE_MVP_CONTENT_GENERATION.md`: "Beta access owner must be determined in
-B01; new service name is not predetermined"). Existing IAM surface must be
-reviewed before creating any new service. **This document does not choose the
-owner**; per decision **D-03** and action item **P-3**, the permanent ownership,
-data model, and service boundaries will be resolved in a dedicated upcoming ADR
-before any implementation in Stage 2 begins. Until that ADR is formally approved,
-stages 2-5 cannot be implemented without an architectural decision, and the gap
-must not be closed by client-side behaviour. Reference: [MVP Decision Register (DOC-GOV-004)](../09-governance/decision-register.md#d-03).
+**Decision:** the permanent owner of beta invitation, beta capacity, single-use
+consumption, and credit-promo rules is **`access-promo-service`** (D-53,
+[ADR-025](../01-architecture/decisions/ADR-025-access-promo-service-ownership.md)).
+The financial effect remains exclusively in `quota-service` via the Claim engine
+(D-03). **P-3 is closed**; the previous open question is history.
+
+- The baseline text ("Beta access owner must be determined in B01; new service
+  name is not predetermined") is **superseded** as of 2026-10-23.
+- This decision fixes **ownership and boundaries only**. API, data model, event
+  contract, capacity source, and atomic redeem+claim behaviour are designed in
+  the implementation task **after ADR-025 is approved**; no code may start before
+  that approval.
+- Stages 2–5 must still not be closed by client-side behaviour; the studio only
+  renders the contract and calls the owner service.
+- Reference: [MVP Decision Register (DOC-GOV-004)](../09-governance/decision-register.md#d-03), [D-53](../09-governance/decision-register.md#d-53), and [ADR-025](../01-architecture/decisions/ADR-025-access-promo-service-ownership.md).
 
 ## دامنه جاری MVP — دستور مالک محصول 2026-10-15
 
-توالی تحویل در [رودمپ اصلی](./roadmap.md) نسخه ۵ است: تشخیص‌پذیری → مالکیت دائمی و بک‌اند ورود/دعوت/اعتبار → چت و تولید تصویر با زبان طبیعی و command → آماده‌سازی فرانت بر اساس قرارداد → اتصال سرتاسری → عرضه محدود. هیچ سرویس مسئولیت دامنه دیگر را موقتاً نمی‌پذیرد. Quota مالک فعلی Wallet و اثر مالی است؛ نام Wallet به معنی تصویب سرویس تازه نیست. مالک دائمی قواعد دعوت/Promo باید قبل از پیاده‌سازی آن بخش تعیین شود؛ سرویس کوچک جدید فقط با اثبات خلأ دامنه و ثبت قرارداد/استقرار/مالک داده ایجاد می‌شود. تصمیم‌گیری فعلی محدود به مرحله آغاز و log/trace است؛ مالک دعوت/Promo، نام سرویس جدید و migration احتمالی هنوز تصویب نشده‌اند.
+توالی تحویل در [رودمپ اصلی](./roadmap.md) نسخه ۵ است: تشخیص‌پذیری → مالکیت دائمی و بک‌اند ورود/دعوت/اعتبار → چت و تولید تصویر با زبان طبیعی و command → آماده‌سازی فرانت بر اساس قرارداد → اتصال سرتاسری → عرضه محدود. هیچ سرویس مسئولیت دامنه دیگر را موقتاً نمی‌پذیرد. Quota مالک فعلی Wallet و اثر مالی است؛ نام Wallet به معنی تصویب سرویس تازه نیست. **مالک دائمی قواعد دعوت/ظرفیت/پروموی اعتباری از ۲۰۲۶-۱۰-۲۳ `access-promo-service` است (D-53، [ADR-025](../01-architecture/decisions/ADR-025-access-promo-service-ownership.md)).** سرویس جدید فقط با اثبات خلأ دامنه و ثبت قرارداد/استقرار/مالک داده ایجاد می‌شود. عبارت «مالک دعوت/Promo هنوز تصویب نشده» در نسخه‌های پیشین **سابقه** است و دیگر جاری نیست.
 
 عبارت مالک Auth/Workspace در تسک تاریخی P06 با ابهام ثبت‌شده در سند مالکیت بتا سازگار نیست و اثبات تصویب نهایی مالکیت تلقی نمی‌شود؛ تعیین تکلیف آن ورودی مرحله ۲ است. تا آن زمان مسئولیت موقت اضافه نمی‌شود. متن قبلی این اسناد و گزارش‌ها شاهد تاریخی است، نه مجوز اجرای مالکیت مبهم.

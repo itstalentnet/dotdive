@@ -13,8 +13,8 @@ icon: "file-check"
 | **Category** | `architecture` |
 | **Status** | `Approved` |
 | **Owner** | تیم معماری و پلتفرم بک‌اند / @behroz |
-| **Last Updated** | 2026-10-08 |
-| **Summary (EN)** | Ratifies Stage 15 architectural blueprint following OQ-050 to OQ-055: Mandates Tool-as-Definition schema (tool-definition.schema.json, immutable versions, DB-backed catalog_version, idempotent seeder), Single Unified Execution Path preventing parallel booking logic (Single Execution Path via orchestrator/core with WorkflowOrigin=MENU), moves assets ownership to storage-service (contracts/openapi/assets/v1) and jobs ownership to job-service (contracts/openapi/jobs/v1), enforces end-to-end Idempotency-Key scoping, AIP-193 error mappings, role-based tool naming (text-to-image with fal-ai/flux-dev model_ref), and strict workspace boundary access rules. |
+| **Last Updated** | 2026-10-23 |
+| **Summary (EN)** | Ratifies Stage 15 architectural blueprint following OQ-050 to OQ-055: Mandates Tool-as-Definition schema (tool-definition.schema.json, immutable versions, DB-backed catalog_version, idempotent seeder), Single Unified Execution Path preventing parallel booking logic (Single Execution Path via orchestrator/core with WorkflowOrigin=MENU), moves assets ownership to storage-service (contracts/openapi/assets/v1) and jobs ownership to job-service (contracts/openapi/jobs/v1), enforces end-to-end Idempotency-Key scoping, AIP-193 error mappings, role-based tool naming (text-to-image with a model_ref), strict workspace boundary access rules, and (2026-10-23) the physical tool-definition layout (T1–T5: one folder per tool, mandatory tool.yaml, prompts/, examples/, alias-only model binding). |
 | **Summary (FA)** | تصویب نقشه راه و مشخصات معماری مرحله ۱۵ پیرو تصمیمات OQ-050 تا OQ-055: الزام مدل ابزار=تعریف با JSON Schema، عدم تغییرناپذیری نسخه‌ها، نسخه کاتالوگ در دیتابیس، مسیر اجرای مشترک سرتاسری بدون لاجیک موازی، انتقال دارایی‌ها به storage-service و جاب‌ها به job-service، الزام Idempotency-Key اسکوپ‌شده، نام‌گذاری نقش‌محور ابزارها و جدول خطای AIP-193. |
 | **Tags** | `adr`, `tools-service`, `stage15`, `openapi`, `storage-service`, `job-service`, `execution-path` |
 
@@ -225,6 +225,57 @@ required_capabilities:
 template:
   prompt: "A cinematic portrait of {{subject}}, 8k, detailed skin texture"
 ```
+
+<a id="t1-t5-structure"></a>
+
+### ۲.۱۱. ساختار پوشه و فایل تعریف ابزار در `tools-service` (T1–T5 — مصوب D-51، تسک ARCH_07)
+
+> **هشدار برچسب:** `T1` تا `T5` در این بخش، برچسب‌های محلی تسک `TASK_ARCH_07` هستند و با `T1` تا `T7` بخش §۲.۸ (مصوب D-46) **یکی نیستند**. برای جلوگیری از ابهام، در ارجاع‌ها به‌صورت «T1–T5 ساختار ابزار» نوشته می‌شوند.
+
+این بخش ساختار فیزیکی تعریف ابزار را تثبیت می‌کند. تعریف ابزار **اعلانی** است و هیچ کد اجرایی، کلید provider یا نام مدل واقعی در آن نیست.
+
+| بند | حکم |
+|---|---|
+| **T1** | **هر ابزار = یک پوشه مستقل.** هر ابزار در مسیر `tools-service/tools/<tool-name>/` قرار می‌گیرد. `<tool-name>` پایدار، `kebab-case` و همان `tool_id` است؛ تغییر نام = ابزار جدید با نسخه جدید. |
+| **T2** | **فایل `tool.yaml` اجباری است.** حداقل فیلدها: `tool_id`، `version` (SemVer)، `type` (`prompt-template` یا `workflow`)، نیازها (از واژه‌نامه)، `model_alias`، `input_schema`، `output_type`، **ارجاع به قیمت در rate-card**، و `enabled`. هیچ فیلد provider/مدل واقعی/کلید/قیمت کاربر در آن مجاز نیست. |
+| **T3** | **پرامپت‌ها در پوشه `prompts/`.** هر پرامپت یک فایل نسخه‌دار با نام مشخص است و در `tool.yaml` با مسیر نسبی ارجاع می‌شود. پرامپت بزرگ به‌صورت رشته درون `tool.yaml` نوشته نمی‌شود؛ متغیرهای قالب مستند می‌شوند. |
+| **T4** | **نمونه‌ها در پوشه `examples/`.** هر ابزار حداقل یک نمونه ورودی/خروجی مرجع دارد که **به‌عنوان آزمون** استفاده می‌شود. داده نمونه باید ساختگی و بدون PII باشد. |
+| **T5** | **اتصال مدل فقط با نام مستعار؛ قیمت فقط ارجاع.** ابزار فقط `model_alias` را اعلام می‌کند (طبق R5 در ADR-027 §۲.۱۱) و هیچ‌گاه نام provider یا مدل واقعی را نمی‌داند. **قیمت کاربر در تعریف ابزار نیست؛ فقط ارجاع به rate-card.** تعویض provider/مدل فقط با تغییر رجیستری درگاه انجام می‌شود و تعریف ابزار تغییر نمی‌کند. |
+
+**ساختار نمونه (غیرمرجع):**
+
+```
+tools-service/tools/portrait-generator/
+├── tool.yaml
+├── prompts/
+│   └── v1.md
+└── examples/
+    ├── input-01.json
+    └── expected-01.json
+```
+
+```yaml
+# نمونه غیرمرجع — schema نهایی در تسک اجرایی tools-service تعریف می‌شود
+tool_id: portrait-generator
+version: 1.0.0
+type: prompt-template
+description:
+  en: Generate a cinematic portrait
+  fa: تولید پرتره سینمایی
+model_alias: hq-image
+input_schema:
+  subject: { type: string, required: true }
+output_type: image
+pricing_ref: rate-card/v1#portrait-generator   # فقط ارجاع؛ قیمت اینجا نیست
+prompt_ref: prompts/v1.md
+examples_ref: examples/
+required_capabilities:
+  supports_negative_prompt: true
+  supported_aspect_ratios: ["1:1", "9:16"]
+enabled: true
+```
+
+**ارجاع:** ساختار تعریف، مکمل بند T4 در §۲.۸ است؛ T4 می‌گوید ابزار «تعریف اعلانی» است و این بخش می‌گوید آن تعریف **کجا و با چه ساختاری** نگهداری می‌شود.
 
 ---
 

@@ -6,10 +6,10 @@
 | **Category** | `architecture` |
 | **Status** | `Draft` |
 | **Owner** | Core Architecture & AI Platform Team |
-| **Last Updated** | 2026-10-22 |
-| **Summary (EN)** | Authoritative specification for Lemmo AI Gateway quality, safety, evaluation gates, and telemetry standards following LLMOps patterns: strict intent classification output validation (C1), configurable input size caps (C2), log telemetry contracts (C3), strict prohibition of raw prompt storage/logging (C4), intent quality golden test set & provider switch gate (C7), service-by-model-tier authorization (C8), budget caps & rate limiting per service (C9), local model hosting readiness note (C10), and evaluated/rejected alternatives registry (C11). |
-| **Summary (FA)** | سند رسمی معماری درگاه هوش مصنوعی (AI Gateway) لِمو در حوزه کیفیت، ایمنی، گیت‌های ارزیابی و استانداردهای تله‌متری مطابق الگوهای پلتفرم‌های بالغ LLMOps: اعتبارسنجی قطعی خروجی نیت‌خوانی (C1)، سقف کانفیگ‌پذیر اندازه ورودی مدل‌ها (C2)، قرارداد فیلدهای لاگ پایش فراخوانی (C3)، ممنوعیت مطلق ذخیره و لاگ پرامپت خام (C4)، مجموعه آزمون کیفیت نیت و گیت تعویض پراویدر (C7)، ماتریس مجوز سرویس در دسته‌های مدل (C8)، سقف بودجه و ریت‌لیمیت به‌ازای سرویس (C9)، یادداشت آمادگی میزبانی مدل محلی (C10) و فهرست ابزارهای ارزیابی‌شده و ردشده (C11). |
-| **Tags** | `adr`, `ai-gateway`, `llmops`, `quality`, `safety`, `observability`, `model-router`, `intent-classification` |
+| **Last Updated** | 2026-10-23 |
+| **Summary (EN)** | Authoritative specification for Lemmo AI Gateway quality, safety, evaluation gates, telemetry standards, and declarative provider/model registry: intent output validation (C1), input caps (C2), log contracts (C3), raw-prompt ban (C4), golden set (C7), service-by-model-tier authorization (C8), budget/rate limits (C9), local model readiness (C10), rejected alternatives (C11), exclusive agent access through the `intent-classifier` alias (A3–A4, replacing D-39), registry structure (R1–R6), and the single three-location definition model with a shared CI validator (L1, V1). |
+| **Summary (FA)** | سند رسمی معماری درگاه هوش مصنوعی (AI Gateway) لِمو در حوزه کیفیت، ایمنی، تله‌متری و رجیستری اعلانی provider/مدل: اعتبارسنجی خروجی نیت (C1)، سقف ورودی (C2)، قرارداد لاگ (C3)، ممنوعیت پرامپت خام (C4)، مجموعه طلایی (C7)، مجوز سرویس×دسته مدل (C8)، بودجه/ریت‌لیمیت (C9)، آمادگی مدل محلی (C10)، گزینه‌های ردشده (C11)، دسترسی انحصاری `agent-service` از نام مستعار `intent-classifier` (A3–A4، جایگزین D-39)، ساختار رجیستری (R1–R6) و مدل سه‌محلی تعریف با اعتبارسنج مشترک CI (L1، V1). |
+| **Tags** | `adr`, `ai-gateway`, `llmops`, `quality`, `safety`, `observability`, `model-router`, `intent-classification`, `registry`, `provider`, `alias` |
 
 ---
 
@@ -93,6 +93,105 @@
 - **مالک سرویس:** `ai-gateway`
 - **حکم تصمیم:** در مکانیزم فالبک خودکار بین مدل‌ها، مدل جایگزین انتخابی باید حتماً **تمامی ویژگی‌های فنی الزامی ابزار** (اعلام‌شده در درخواست توسط `tools-service`) را دارا باشد **و** تعرفه و هزینه آن **گران‌تر از مدل اصلی نباشد**؛ در غیر این صورت فالبک لغو و فراخوانی متوقف می‌گردد. همگام با [ADR-018 §۲.۹](./ADR-018-tools-platform-architecture-unified-execution-and-domain-decoupling.md#۲۹-استاندارد-ویژگیهای-مدل-و-نیازمندیهای-ابزار-k1-تا-k9--مصوب-d-47).
 
+<a id="a3-a4"></a>
+
+### ۲.۱۰. مسیر انحصاری دسترسی `agent-service` به مدل و نام مستعار واحد (A3–A4 — پیش از بتا، مصوب D-49)
+
+- **برچسب زمان:** پیش از بتا (Pre-Beta).
+- **مالک تصمیم:** `ai-gateway` (مالک مسیر فراخوانی و رجیستری) و `agent-service` (مصرف‌کننده).
+- **حکم A3 — مسیر انحصاری:** در بتا، `agent-service` **فقط** از طریق `ai-gateway` به مدل زبانی دسترسی دارد. این سرویس:
+  - هیچ کلید provider، `base_url`، نام provider، SDK اختصاصی provider یا مدل واقعی را نمی‌شناسد؛
+  - فقط یک **نام مستعار منطقی** به نام `intent-classifier` را فراخوانی می‌کند؛
+  - انتخاب provider، مدل واقعی، timeout، فالبک و سیاست هزینه را از رجیستری درگاه دریافت می‌کند.
+- **حکم A4 — پیش‌نیاز پیش از بتا:** مسیر فراخوانی متنی سازگار با OpenAI روی `ai-gateway` و نام مستعار `intent-classifier` **پیش‌نیاز بتا** است، نه قابلیت اختیاری یا بعد از بتا. قرارداد درخواست/پاسخ این مسیر در `contracts/platform/ai/` (طبق L1 در §۲.۱۲) تعریف می‌شود؛ طراحی آن خارج از دامنه این ADR است.
+- **جایگزینی D-39:** تصمیم `D-39` (اتصال مستقیم `agent-service` به endpoint سازگار با OpenAI و خواندن کلید از env خود سرویس) **با این بند جایگزین می‌شود** و وضعیت آن در دفتر تصمیم «جایگزین‌شده» است. دلیل جایگزینی: تمرکز کلید و provider در درگاه، حذف نام provider از کد مصرف‌کننده، و جلوگیری از دو مسیر موازی دسترسی به مدل.
+- **وضعیت فعلی کد (شاهد، نه تصمیم):** `api/services/agent-service/internal/adapters/llm/client.go` یک کلاینت مستقیم provider و `api/services/agent-service/internal/config/config.go` کلید/آدرس provider را در خود سرویس نگه می‌دارد. این وضعیت با A3 ناسازگار است و به‌عنوان بدهی/انحراف در `QF-ARCH07-F1..F7` و گزارش پژوهش ثبت شده است؛ رفع آن در دامنه این تسک مستندسازی نیست.
+
+<a id="r1-r6"></a>
+
+### ۲.۱۱. ساختار رجیستری provider و مدل (R1–R6 — پیش از بتا، مصوب D-50)
+
+- **برچسب زمان:** پیش از بتا (Pre-Beta).
+- **مالک:** `ai-gateway`.
+
+| بند | حکم |
+|---|---|
+| **R1** | **یک پوشه به‌ازای هر provider:** `ai-gateway/registry/<provider>/`. هیچ providerی فایل پراکنده در ریشه رجیستری ندارد. |
+| **R2** | **فایل `provider.yaml` در ریشه پوشه provider:** شامل پروتکل (مثلاً `openai-compatible`)، آدرس پایه، **فقط نام secret** (نه مقدار آن)، محدودیت نرخ، timeout و retry، و **منطقه پردازش داده**. |
+| **R3** | **یک فایل به‌ازای هر مدل:** `<provider>/models/<model>.yaml` شامل دسته، ویژگی‌ها (از واژه‌نامه)، محدودیت‌ها، **هزینه provider**، و وضعیت (`active`، `deprecated`، `disabled`). |
+| **R4** | **قرارداد ورودی/خروجی مال دسته است، نه مدل:** قرارداد هر دسته در `contracts/platform/ai/` نگهداری می‌شود. فایل مدل فقط به دسته **اشاره** می‌کند و محدودیت‌ها و تفاوت‌های خودش را می‌گوید («اشاره، نه کپی»). |
+| **R5** | **نام‌های مستعار و زنجیره fallback در یک فایل ریشه:** `registry/aliases.yaml`، **بیرون از پوشه‌های provider**. مصرف‌کننده‌ها فقط نام مستعار را می‌بینند؛ نام provider و مدل واقعی از آن‌ها پنهان است. |
+| **R6** | **پوشه‌ها فقط داده‌اند:** کد adapter به‌ازای هر **پروتکل** در خود سرویس `ai-gateway` است. قاعده: «adapter به‌ازای پروتکل، فایل به‌ازای provider». افزودن provider/مدل جدید تغییر کد مصرف‌کننده نمی‌خواهد. |
+
+<a id="l1-v1"></a>
+
+### ۲.۱۲. سه محل تعریف و اعتبارسنج مشترک CI (L1، V1 — پیش از بتا، مصوب D-52)
+
+- **برچسب زمان:** پیش از بتا (Pre-Beta).
+- **حکم L1 — فقط سه محل تعریف:** تعریف‌های اعلانی پلتفرم منحصراً در سه محل زیر نگهداری می‌شوند و **محل چهارمی ایجاد نمی‌شود**:
+
+| # | محل | مالک | محتوا |
+|---|---|---|---|
+| ۱ | `contracts/platform/ai/` | تیم قرارداد | واژه‌نامه ویژگی‌ها و قرارداد ورودی/خروجی هر دسته |
+| ۲ | `ai-gateway/registry/` | تیم AI Platform | providerها، مدل‌ها، نام‌های مستعار و زنجیره fallback |
+| ۳ | `tools-service/tools/` | تیم Tools | ابزارها و workflowها (ADR-018 §۲.۱۱) |
+
+- **حکم V1 — اعتبارسنج مشترک:** یک اعتبارسنج واحد در CI **هر سه محل را با هم** بررسی می‌کند:
+  1. هر نام مستعار به مدل **موجود و فعال** اشاره می‌کند؛
+  2. هر ویژگی استفاده‌شده در واژه‌نامه **وجود دارد**؛
+  3. هر ابزار **حداقل یک مدل سازگار** دارد؛
+  4. **هیچ فایلی کلید خام ندارد** (فقط نام secret مجاز است).
+- **دامنه V1:** در این تسک فقط **الزام ثبت** می‌شود؛ ساختن اعتبارسنج کار تسک اجرایی است. اعتبارسنج در زمان راه‌اندازی سرویس نیز اجرا می‌شود و خطا باعث fail-fast است.
+- **قاعده:** افزودن فیلد جدید فقط با تغییر schema و هر سه مصرف‌کننده انجام می‌شود؛ تعریف موازی یا «محل موقت» ممنوع است (A1).
+
+### ۲.۱۳. نمونه‌های غیرمرجع رجیستری (Non-normative)
+
+> این نمونه‌ها فقط برای نمایش شکل داده‌اند و **مرجع الزام‌آور نیستند**. schema نهایی در تسک اجرایی درگاه تعریف می‌شود. هیچ نام provider واقعی در نمونه‌ها نیامده است.
+
+```text
+ai-gateway/registry/
+├── primary-text/
+│   ├── provider.yaml
+│   └── models/
+│       └── text-fast-v1.yaml
+└── aliases.yaml
+```
+
+```yaml
+# ai-gateway/registry/primary-text/provider.yaml
+provider_id: primary-text
+protocol: openai-compatible
+base_url: https://provider.example/v1
+secret_env: AI_GATEWAY_PRIMARY_TEXT_KEY   # فقط نام secret
+rate_limit: { rpm: 600 }
+timeout: { ms: 12000 }
+retry: { max_attempts: 2 }
+data_region: eu
+```
+
+```yaml
+# ai-gateway/registry/primary-text/models/text-fast-v1.yaml
+model_id: text-fast-v1
+category: text-fast
+features:
+  text: true
+  vision: false
+  tool_calling: true
+limits:
+  context_tokens: 32000
+  max_output_tokens: 4096
+provider_cost: { unit: usd_per_1k_tokens, input: 0.15, output: 0.60 }
+status: active
+```
+
+```yaml
+# ai-gateway/registry/aliases.yaml
+aliases:
+  intent-classifier:
+    - model_ref: text-fast-v1
+    - model_ref: text-fast-v1-backup
+```
+
 ---
 
 ## ۳. گزینه‌های ارزیابی‌شده و ردشده (C11 — Evaluated & Rejected Alternatives)
@@ -115,4 +214,7 @@
 - [معماری پلتفرم ابزارها، مدل داده ابزار=تعریف و مسیر اجرای مشترک (ADR-018)](./ADR-018-tools-platform-architecture-unified-execution-and-domain-decoupling.md)
 - [قراردادهای پلتفرم و استانداردهای ارتباطی (DOC-BE-003)](../../03-backend/contracts.md)
 - [دفتر تصمیمات معماری پلتفرم](../../09-governance/decision-register.md)
+- [اصل حاکم بر تغییرات معماری (A1–A2)](../index.md) — بدون استثنا و تفکیک بدهی از استثنا.
+- [ADR-025 — مالکیت سرویس Access/Promo](./ADR-025-access-promo-service-ownership.md) — مرز دعوت بتا و Promo با اثر مالی در Quota.
 - ثبت و پیگیری پرسش‌های باز OQ-066 (حفاظت داده/GDPR پراویدرها) و OQ-067 (سیاست محتوای تصویر) در رجیستری موقت پرسش‌های باز (`OPEN_QUESTIONS.md`) با مالکیت «مالک محصول».
+- پرسش‌های باز تفصیلی C1–C8 (رجیستری، پیکربندی، اعتبارسنج، قرارداد و مالکیت هزینه) با شناسه‌های `OQ-073` تا `OQ-080` در همان رجیستری ثبت شده‌اند.
