@@ -6,7 +6,7 @@
 | **Category** | `architecture` |
 | **Status** | `Approved` |
 | **Owner** | Core Architecture Team / @behroz |
-| **Last Updated** | 2026-10-02 |
+| **Last Updated** | 2026-10-24 |
 | **Summary (EN)** | Architectural decision establishing a 3-tier perimeter ingress: Declarative Kong edge gateway, Ory Oathkeeper identity proxy translating Kratos sessions to short-lived JWTs, and a stateless Go context-service for UI-only aggregated context. |
 | **Summary (FA)** | تصمیم مصوب معماری جهت استقرار درگاه سه‌لایه لبه: گیت‌وی کانفیگ‌محور Kong، پروکسی هویتی Ory Oathkeeper جهت تبدیل سشن‌های Kratos به JWT کوتاه‌مدت، و سرویس تجمیع‌کننده کانتکست (context-service) صرفاً جهت نمایش در UI. |
 | **Tags** | `gateway`, `kong`, `oathkeeper`, `jwt`, `bff`, `context`, `security` |
@@ -195,3 +195,7 @@ flowchart TD
 - **محدودیت‌ها و وظایف بعدی:**
   - نیاز به راه‌اندازی و نگهداری کانتینرهای `edge-gateway` و `identity-proxy` در `infra/gateway/`.
   - تنظیم و مستندسازی دقیق فایل پیکربندی دکلراتیو Kong (`kong.yml`) و قوانین دسترسی Oathkeeper (`access-rules.yml`).
+
+## ۴. پاسخ به پرسش باز OQ-073 (تصمیم ۲۰۲۶-۱۰-۲۴)
+
+**قانون لبه شبکه:** تمام درخواست‌ها از طریق Kong و پلاگین Access Enforcer اعتبارسنجی می‌شوند. هیچ‌کدام از سرویس‌های داخلی مجاز به اعتماد کورکورانه به هدرهای خام ارسالی بدون اعتبارسنجی نیستند. این قانون مکمل D-38 (توکن امضاشده داخلی) است و حذف fallback «Fallback B» در `TASK_SEC_04` را الزامی می‌سازد.

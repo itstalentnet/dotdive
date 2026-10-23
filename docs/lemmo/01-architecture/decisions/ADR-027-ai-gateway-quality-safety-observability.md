@@ -6,7 +6,7 @@
 | **Category** | `architecture` |
 | **Status** | `Draft` |
 | **Owner** | Core Architecture & AI Platform Team |
-| **Last Updated** | 2026-10-23 |
+| **Last Updated** | 2026-10-24 |
 | **Summary (EN)** | Authoritative specification for Lemmo AI Gateway quality, safety, evaluation gates, telemetry standards, and declarative provider/model registry: intent output validation (C1), input caps (C2), log contracts (C3), raw-prompt ban (C4), golden set (C7), service-by-model-tier authorization (C8), budget/rate limits (C9), local model readiness (C10), rejected alternatives (C11), exclusive agent access through the `intent-classifier` alias (A3–A4, replacing D-39), registry structure (R1–R6), and the single three-location definition model with a shared CI validator (L1, V1). |
 | **Summary (FA)** | سند رسمی معماری درگاه هوش مصنوعی (AI Gateway) لِمو در حوزه کیفیت، ایمنی، تله‌متری و رجیستری اعلانی provider/مدل: اعتبارسنجی خروجی نیت (C1)، سقف ورودی (C2)، قرارداد لاگ (C3)، ممنوعیت پرامپت خام (C4)، مجموعه طلایی (C7)، مجوز سرویس×دسته مدل (C8)، بودجه/ریت‌لیمیت (C9)، آمادگی مدل محلی (C10)، گزینه‌های ردشده (C11)، دسترسی انحصاری `agent-service` از نام مستعار `intent-classifier` (A3–A4، جایگزین D-39)، ساختار رجیستری (R1–R6) و مدل سه‌محلی تعریف با اعتبارسنج مشترک CI (L1، V1). |
 | **Tags** | `adr`, `ai-gateway`, `llmops`, `quality`, `safety`, `observability`, `model-router`, `intent-classification`, `registry`, `provider`, `alias` |
@@ -217,4 +217,10 @@ aliases:
 - [اصل حاکم بر تغییرات معماری (A1–A2)](../index.md) — بدون استثنا و تفکیک بدهی از استثنا.
 - [ADR-025 — مالکیت سرویس Access/Promo](./ADR-025-access-promo-service-ownership.md) — مرز دعوت بتا و Promo با اثر مالی در Quota.
 - ثبت و پیگیری پرسش‌های باز OQ-066 (حفاظت داده/GDPR پراویدرها) و OQ-067 (سیاست محتوای تصویر) در رجیستری موقت پرسش‌های باز (`OPEN_QUESTIONS.md`) با مالکیت «مالک محصول».
-- پرسش‌های باز تفصیلی C1–C8 (رجیستری، پیکربندی، اعتبارسنج، قرارداد و مالکیت هزینه) با شناسه‌های `OQ-073` تا `OQ-080` در همان رجیستری ثبت شده‌اند.
+- پرسش‌های باز تفصیلی C1–C8 (رجیستری، پیکربندی، اعتبارسنج، قرارداد و مالکیت هزینه) با شناسه‌های `OQ-073` تا `OQ-080` در همان رجیستری ثبت شده‌اند و در ۲۰۲۶-۱۰-۲۴ بسته شدند.
+
+## ۲.۱۴. پاسخ به پرسش‌های باز OQ-075، OQ-077 و OQ-079 (تصمیم ۲۰۲۶-۱۰-۲۴)
+
+- **OQ-075 (C3):** مدیریت خطاهای ارائه‌دهندگان هوش مصنوعی و هدایت هوشمند درخواست به مدل‌های جایگزین **به صورت متمرکز در سطح `ai-gateway`** پیاده‌سازی می‌شود (مکمل §۲.۹ K7).
+- **OQ-077 (C5):** توکن‌های مصرف‌شده توسط مدل‌های پشت‌صحنه برای تشخیص نیت یا مسیریابی جزو **هزینه‌های عملیاتی پلتفرم (Platform COGS)** محسوب شده و از سهمیه کاربر کسر نمی‌گردد.
+- **OQ-079 (C7):** سرویس `ai-gateway` تنها نقطه مجاز برای انتشار رویدادهای مصرف پس از دریافت پاسخ قطعی از ارائه‌دهنده مدل است (مکمل §۲.۳).
