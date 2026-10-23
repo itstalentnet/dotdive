@@ -220,6 +220,11 @@
 * **گارد خودکار کنترل کیفیت و پیشگیری از بازگشت نشت (CI Automated Guard):**
   یک قانون اکید در پیکربندی ESLint یا اسکریپت اعتبارسنجی اضافه می‌شود که هرگونه ایمپورت از مسیرهای حاوی `mock` یا `*mock*` را در تمامی دایرکتوری‌های خارج از `src/sdk/mock/` مسدود کرده و بیلد را با خطای قطعی متوقف کند.
 
+### ۲.۲۴. تفکیک entitlement امنیتی از entitlement تجاری (Security vs Commercial Entitlements — A6)
+پیرو اصل تفکیک مسئولیت‌ها (همگام با [service-responsibility-registry.md](../service-responsibility-registry.md#۳۷-iam-service) §۳.۷ و §۳.۲۲):
+1. **entitlement امنیتی (Security Entitlements):** حقوق دسترسی سیستمی، اختیارات نقشی (RBAC/ReBAC) و دسترسی به منابع که منحصراً در لایه امنیت و توسط `iam-service` (و لایه احراز هویت لبه) اعتبارسنجی می‌شوند.
+2. **entitlement تجاری (Commercial Entitlements):** سهمیه‌های مصرف، پلن‌های کاربری، امکانات بسته تجاری و شارژ که منحصراً توسط `quota-service` مدیریت و محاسبه می‌شوند. هیچ‌یک از این دو دامنه نباید مسئولیت دیگری را بر عهده بگیرد یا با آن خلط شود.
+
 ---
 
 ## ۳. پیوندها و اسناد مرتبط (Traceability)

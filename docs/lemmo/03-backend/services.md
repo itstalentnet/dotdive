@@ -28,17 +28,17 @@
 
 | نام سرویس | نقش و مسئولیت در پلتفرم Lemmo | وضعیت |
 | :--- | :--- | :--- |
-| **`auth-service` (Ory Kratos)** | مدیریت ثبت‌نام، ورود با کد یکبارمصرف (OTP)، مدیریت نشست‌ها (Session) و SSO؛ استقرار کامل کانتینر Kratos، سرور ایمیل توسعه، وب‌هوک Post-Registration و اتصال زنده به `auth/` UI (مصوب ADR-014) | در حال توسعه (فاز ۲ — استیج ۱۱) |
-| **`reference-data-registry`** | رجیستری متمرکز داده‌های مرجع مشترک (ایمیل‌های موقت، نام‌های رزروشده، کشورها)، اسکیما جنریک JSONB، لاگ ممیزی، و رویدادهای بی‌اعتبارسازی در RabbitMQ (مصوب ADR-012) | تکمیل شد (`Completed - Stage 10A`) |
-| **`user-service`** | نمایه و اطلاعات هویتی کاربر (شماره تلفن، نام نمایشی، وضعیت تایید، شناسه عمومی Handle، ترجیحات، ماشین حالت آنبوردینگ، موتور امتیاز ریسک، تعلیق موقت و کش محلی دو سطحی) | تکمیل شد (`Completed - Stage 10B`) |
-| **`edge-gateway` (`infra/gateway`)** | تک‌درگاه لبه ورود ترافیک عمومی کلاینت بر بستر Kong (DB-less)، ایزولاسیون شبکه، ریت‌لیمیتینگ، تصدیق بومی JWT با JWKS، استریم SSE بدون بافر و مسدودسازی آنی کاربران معلق در Redis (مصوب ADR-013) | تکمیل شد (`Completed - Stage 10.5`) |
-| **`identity-proxy` (`infra/identity-proxy`)** | پروکسی تصمیم هویتی بر بستر Ory Oathkeeper، تبدیل نشست کوکی Kratos به JWT کوتاه‌مدت، هیدراتور عضویت‌های ورک‌اسپیس و صدور توکن‌های استاندارد (مصوب ADR-013) | تکمیل شد (`Completed - Stage 10.5`) |
-| **`context-service` (`services/context-service`)** | میکروسرویس Go کانتکست کلاینت (BFF)، پیاده‌سازی اندپوینت `GET /api/v1/me/context`، محاسبه وضعیت مشتق‌شده آنبوردینگ؛ ارتقای تاب‌آوری اتصالات downstream و تصحیح خطای ۵۰۳ ذیل `DEBT-CTX-01` (مصوب ADR-013 و DOC-OPS-INC-002) | تکمیل‌شده / ارتقای تاب‌آوری (`Stage 10.5 & DEBT-CTX-01`) |
-| **`iam-service`** | موتور اعطای دسترسی‌های دانه‌ریز (Entitlement Grants per DOC-BE-008)، ماتریس دسترسی به نودها و پروژه‌ها، سقف منابع و ReBAC (مصوب ADR-014) | **Day-1 سرویس** — RBAC محلی در بتا؛ ارتقا به ReBAC در نسخه‌های آتی (تصمیم Q2) |
-| **`token-service` (Ory Hydra)** | مدیریت توکن‌های امنیتی OAuth2 و OIDC، اعطای کلیدهای API سازمانی جهت اجرای خارجی ورک‌فلوها | اسکلت `service.md` آماده / بازاستفاده |
-| **`notification-service`** | ارسال اعلان‌های چندکاناله سیستمی (In-App Inbox، ایمیل، پیامک) با پلتفرم Novu و شنود ایونت‌های RabbitMQ (مصوب ADR-011) | در صف توسعه (فاز ۳ — استیج ۱۶) |
-| **`storage-service`** | مدیریت فایل‌های ورودی کاربر، خروجی‌های تولیدشده، لینک‌های امضاشده (S3/MinIO) و توزیع CDN | اسکلت `service.md` آماده / بازاستفاده |
-| **`login-consent-app`** | رابط واسط میان Kratos و Hydra جهت اخذ تاییدیه ورود و دامنه دسترسی کاربران | آماده / بازاستفاده |
+| **`auth-service` (Ory Kratos)** | [کارت auth-service](../01-architecture/service-responsibility-registry.md#۳۳-auth-service) — احراز هویت، ثبت‌نام و مدیریت نشست‌ها | در حال توسعه (فاز ۲ — استیج ۱۱) |
+| **`reference-data-registry`** | [کارت reference-data](../01-architecture/service-responsibility-registry.md#۳۲۰-reference-data) — رجیستری داده‌های مرجع عمومی، غیرمالی و کم‌تغییر | تکمیل شد (`Completed - Stage 10A`) |
+| **`user-service`** | [کارت user-service](../01-architecture/service-responsibility-registry.md#۳۴-user-service) — پروفایل و اطلاعات کاربری و وضعیت آنبوردینگ | تکمیل شد (`Completed - Stage 10B`) |
+| **`edge-gateway` (`infra/gateway`)** | [کارت Kong](../01-architecture/service-responsibility-registry.md#۳۱-kong) — درگاه لبه، مسیریابی و کنترل ترافیک کلاینت | تکمیل شد (`Completed - Stage 10.5`) |
+| **`identity-proxy` (`infra/identity-proxy`)** | [کارت Oathkeeper](../01-architecture/service-responsibility-registry.md#۳۲-لایه-احراز-هویت-oathkeeper) — پروکسی تصمیم هویتی و تبدیل سشن به JWT | تکمیل شد (`Completed - Stage 10.5`) |
+| **`context-service` (`services/context-service`)** | [کارت context-service](../01-architecture/service-responsibility-registry.md#۳۸-context-service) — تجمیع کانتکست کلاینت (BFF) | تکمیل‌شده / ارتقای تاب‌آوری (`Stage 10.5 & DEBT-CTX-01`) |
+| **`iam-service`** | [کارت iam-service](../01-architecture/service-responsibility-registry.md#۳۷-iam-service) — موتور دسترسی‌های دانه‌ریز امنیتی | **مستقر نمی‌شود در بتا** (ارزیابی مجدد پس از بتا طبق D-54) |
+| **`token-service` (Ory Hydra)** | [کارت token-service](../01-architecture/service-responsibility-registry.md#۳۲۶-token-service) — مدیریت توکن‌های OAuth2 و کلیدهای API | اسکلت `service.md` آماده / بازاستفاده |
+| **`notification-service`** | [کارت notification-service](../01-architecture/service-responsibility-registry.md#۳۲۵-notification-service) — ارسال اعلان‌های سیستمی چندکاناله | در صف توسعه (فاز ۳ — استیج ۱۶) |
+| **`storage-service`** | [کارت storage-service](../01-architecture/service-responsibility-registry.md#۳۱۴-storage-service) — تنها سرویس دارایی پلتفرم؛ ذخیره فایل‌ها و متادیتای دارایی‌ها | اسکلت `service.md` آماده / بازاستفاده |
+| **`login-consent-app`** | رابط واسط میان Kratos و Hydra جهت اخذ تاییدیه ورود | آماده / بازاستفاده |
 
 ### مسیر گام‌به‌گام گذار به سیستم احراز هویت واقعی (Kratos Transition Roadmap)
 1. **فاز ۰ (ستون فقرات محلی):** توسعه محلی بک‌اند و فرانت‌اند با داده‌های ساختگی انجام می‌شود (میدل‌ور `MockAuthMiddleware` طبق تصمیم D-35 حذف گردید).
@@ -53,17 +53,21 @@
 
 | نام سرویس | مسئولیت و وظیفه اصلی | فاز تحویل | وضعیت پیاده‌سازی در مخزن |
 | :--- | :--- | :---: | :---: |
-| **`project-service`** | نگهداری و مدیریت JSON مرجع پروژه‌ها (نودها، پورت‌های پویا، متادیتا، لایه‌های وکتور Design Mode) | فاز ۱ | پیاده‌سازی لایه‌ای، مایگریشن و gRPC تکمیل شد (`Completed`) |
-| **`workspace-service`** | مدیریت فضاهای کاری چندمستأجری، سازمان‌ها، تیم‌ها، سطوح دسترسی، **دعوت اعضای Workspace (نه دعوت دسترسی بتا)** و ارتباط با کیف‌پول سازمانی (پورت `50060` gRPC / `8089` HTTP) | فاز ۱ | پیاده‌سازی کامل و بستن گیت ۵ (`Completed - Stage 9`) |
-| **`access-promo-service`** (Access/Promo) | مالک دائمی کد/ظرفیت دعوت بتا، اعتبارسنجی و مصرف یک‌باره، و قواعد پروموی اعتباری؛ **بدون** موجودی/ledger — اثر مالی فقط از مسیر Claim در `quota-service` (D-03). مرزها در [`ADR-025`](../01-architecture/decisions/ADR-025-access-promo-service-ownership.md) | MVP (پیش از بتا) | `Planned` — مالکیت قطعی (D-53)؛ پیاده‌سازی پس از تصویب ADR-025 |
-| **`orchestrator-service`** | تفسیر گراف جریان کار (DAG Execution) و هدایت ترتیبی نودها (اینترفیس سهمیه `QuotaChecker` مصوب طبق [ADR-007](../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md)) | فاز ۱ | پیاده‌سازی فعال هسته (`Core Stub Active`) — **فریز در مسیر بتا (تصمیم Q1)** |
-| **`node-registry-service`** | ثبت و اعتبارسنجی اسکیما و قرارداد نودها و پورت‌های پویا ([DOC-MOD-001](../06-modules/canvas-modes.md) و [ADR-007](../01-architecture/decisions/ADR-007-backend-contracts-and-tooling-standards.md)) | فاز ۱ | پیاده‌سازی لایه‌ای، مایگریشن و رجیستری داخلی تکمیل شد (`Completed - Stage 4`) — **فریز در مسیر بتا (تصمیم Q1)** |
-| **`job-service`** | صف‌بندی کارهای ناهمگام ابری با RabbitMQ، اولویت‌بندی، تلاش مجدد (Retry)، استریم وضعیت با SSE | فاز ۱ | پیاده‌سازی لایه‌ای، صف RabbitMQ و ورکر تکمیل شد (`Completed - Stage 6`) |
-| **`storage-service`** | ذخیره‌سازی پایدار در MinIO S3، تولید دسته‌ای Presigned URLs و تمدید امضا در خطای ۴۰۳ | فاز ۱ | پیاده‌سازی لایه‌ای و درایور MinIO تکمیل شد (`Completed - Stage 6`) |
-| **`model-router-service`** | رجیستری ۴ لایه‌ای پراویدرها، آداپتورهای اعلانی REST، فالبک ۳ سطحی و ریت‌لیمیت توکن‌باکت در Redis | فاز ۱ | پیاده‌سازی لایه‌ای، کاتالوگ مدل‌ها و آداپتورها تکمیل شد (`Completed - Stage 7`) |
-| **`image-service`** | ورکر ناهمگام سبک جهت فراخوانی API پراویدرهای ابری (Fal, Replicate)، شنود وب‌هوک و آپلود به S3 (پورت `50057` gRPC / `8082` HTTP) | فاز ۱ | **در حال بازنشستگی (Retiring)** — پیرو تصمیم معمارانه مصوب D-46 و T7 در [ADR-018 §۲.۸](../01-architecture/decisions/ADR-018-tools-platform-architecture-unified-execution-and-domain-decoupling.md#۲۸-تکمیل-معماری-ابزار-و-اجرا-و-بازنشستگی-image-service-t1-تا-t7--مصوب-d-46)؛ پیش از بتا هیچ مسئولیت جدیدی نمی‌پذیرد؛ پس از بتا حذف و وظایف آن به `tools-service` و `ai-gateway` منتقل می‌گردد. |
-| **`quota-service`** | مدیریت سهمیه‌ها، سطل‌های منقضی‌شونده (FEFO)، رزرو دوسفره اعتبار، استقرار مستقل با موتور `financial-ledger` طبق ADR-009 (پورت `50058` gRPC / `8087` HTTP) | فاز ۱ | پیاده‌سازی کامل و بستن گیت ۴ (`Completed - Stage 8`) |
-| **`usage-service`** | **Audit Trail (متریک خام مصرف)** — ثبت متریک خام (تعداد درخواست، توکن، تصویر) از رویدادهای ai-gateway. **نه** دفترکل مالی (تصمیم Q3) | فاز ۱ | پیاده‌سازی کامل و بستن گیت ۴ (`Completed - Stage 8`) |
+| **`project-service`** | [کارت project-service](../01-architecture/service-responsibility-registry.md#۳۱۳-project-service) — نگهداری متادیتا و ساختار گراف پروژه‌ها | فاز ۱ | پیاده‌سازی لایه‌ای، مایگریشن و gRPC تکمیل شد (`Completed`) |
+| **`workspace-service`** | [کارت workspace-service](../01-architecture/service-responsibility-registry.md#۳۵-workspace-service) — فضاهای کاری چندمستأجری، تیم‌ها، عضویت‌ها (تنها نویسنده پروجکشن ردیس) و دعوت تیم | فاز ۱ | پیاده‌سازی کامل و بستن گیت ۵ (`Completed - Stage 9`) |
+| **`access-promo-service`** (Access/Promo) | [کارت Access/Promo](../01-architecture/service-responsibility-registry.md#۳۶-accesspromo) — دعوت پلتفرم (بتا)، ظرفیت و پروموی اعتباری (بدون موجودی/پول) | MVP (پیش از بتا) | `Planned` — مالکیت قطعی (D-53)؛ پیاده‌سازی پس از تصویب ADR-025 |
+| **`orchestrator-service`** | [کارت orchestrator-service](../01-architecture/service-responsibility-registry.md#۳۱۱-orchestrator-service) — تنها موتور اجرای گراف و ابزارها (تفسیر DAG، هدایت ترتیبی، رزرو و تسویه اعتبار) | فاز ۱ | **از فریز خارج، در مسیر بتا (تصمیم T6)** |
+| **`tools-service`** | [کارت tools-service](../01-architecture/service-responsibility-registry.md#۳۱۰-tools-service) — رجیستری و تعریف اعلانی ابزارها بر اساس YAMLهای `tools/<tool-name>/` (بدون اجرا یا رزرو) | فاز ۲ | در صف توسعه (مصوب D-46 و T1-T5) |
+| **`agent-service`** | [کارت agent-service](../01-architecture/service-responsibility-registry.md#۳۹-agent-service) — ارکستراسیون گفتگو و تعامل با کاربر (فراخوانی مدل‌ها و تشخیص نیت فقط از راه ai-gateway) | فاز ۲ | در صف توسعه |
+| **`ai-gateway`** | [کارت ai-gateway](../01-architecture/service-responsibility-registry.md#۳۱۶-ai-gateway) — تنها درگاه دسترسی به مدل‌های AI (کاملاً داخلی، بدون نقش مالی، با ریت‌لیمیت فنی و انتشار رویداد مصرف) | فاز ۱ / ۲ | تکمیل لایه‌ای / بازسازی کاتالوگ مدل‌ها (تکامل از model-router-service) |
+| **`ledger-service`** | [کارت ledger-service](../01-architecture/service-responsibility-registry.md#۳۲۱-ledger-service-tigerbeetle-داخل-آن) — تنها منبع حقیقت وضعیت مالی و دفترکل پلتفرم بر بستر TigerBeetle (حساب‌ها، انتقال‌ها، رزرو pending با مهلت داخلی بدون sweeper) | فاز ۱ | استقرار مستقل `financial-ledger` طبق ADR-009 |
+| **`quota-service`** | [کارت quota-service](../01-architecture/service-responsibility-registry.md#۳۲۲-quota-service) — ارزیابی قوانین تجاری سهمیه و محاسبه مقادیر (موتور قوانین بدون موجودی یا دفترکل) | فاز ۱ | پیاده‌سازی کامل و بستن گیت ۴ (`Completed - Stage 8`) |
+| **`usage-service`** | [کارت usage-service](../01-architecture/service-responsibility-registry.md#۳۱۹-usage-service) — زیرساختی؛ ثبت متریک خام و رویدادهای ممیزی مصرف (Audit Trail)، بدون مسئولیت دفترکل مالی | فاز ۱ | پیاده‌سازی کامل و بستن گیت ۴ (`Completed - Stage 8`) |
+| **`job-service`** | [کارت job-service](../01-architecture/service-responsibility-registry.md#۳۱۲-job-service) — نمای خواندنی وضعیت اجرای کارهای ناهمگام | فاز ۱ | پیاده‌سازی لایه‌ای، صف RabbitMQ و ورکر تکمیل شد (`Completed - Stage 6`) |
+| **`node-service`** (امروز node-registry-service) | [کارت node-service](../01-architecture/service-responsibility-registry.md#۳۲۴-node-service-امروز-node-registry) — چیدمان و توپولوژی بوم گراف | فاز ۱ | پیاده‌سازی لایه‌ای تکمیل شد — **فریز تا فاز بوم (کد فعلی بدهی)** |
+| **`storage-service`** | [کارت storage-service](../01-architecture/service-responsibility-registry.md#۳۱۴-storage-service) — تنها سرویس دارایی پلتفرم؛ ذخیره‌سازی پایدار فایل‌ها در S3/MinIO و نگهداری متادیتای دارایی کاربر (`asset_id`) | فاز ۱ | پیاده‌سازی لایه‌ای و درایور MinIO تکمیل شد (`Completed - Stage 6`) |
+| **`image-service`** | [کارت image-service](../01-architecture/service-responsibility-registry.md#۳۲۳-image-service) — ورکر ناهمگام سبک APIهای Fal/Replicate | فاز ۱ | **در حال بازنشستگی (Retiring)** — بدون مسئولیت جدید، بدون نقش مالی یا اجرایی در هدف (واگذاری اجرا به orchestrator و مدل به ai-gateway) |
+| **`feed-service`** | [کارت feed-service](../01-architecture/service-responsibility-registry.md#۳۱۵-feed-service) — فید عمومی و انتشار خروجی‌ها برای جامعه کاربری | فاز ۲.۵ | در صف توسعه (همگام با گالری) |
 | **`subscription-service`** | پلن‌های ماهانه/سالانه، بسته‌های اعتبار اشتراکی، ارتقا و تنزل بسته‌ها | فاز ۲ | در صف توسعه (`Planned - Phase 2`) |
 | **`billing-service`** | صدور فاکتور، درگاه پرداخت آنلاین ریالی و ارزی و موتور جامع پرومو کد و تخفیف چک‌اوت طبق ADR-011 | فاز ۲ | در صف توسعه (`Planned - Phase 2`) |
 | **`community-service`** | گالری عمومی بوم، فید اجتماعی، سیستم لایک‌ها و بوک‌مارک‌ها و کش محبوب‌ترین‌ها در Redis بر بستر MinIO S3 (مصوب ADR-011) | فاز ۲.۵ | در صف توسعه (`Planned - Phase 2.5`) |
@@ -110,16 +114,17 @@ type QuotaChecker interface {
 - **پیاده‌سازی فاز ۰ و ۱:** یک پیاده‌سازی خنثی (`NoopQuotaChecker`) که بدون مسدودسازی اجازه پیشروی می‌دهد.
 - **پیاده‌سازی نهایی فاز ۱ (Stage 8):** پیاده‌سازی کلاینت gRPC متصل به `quota-service` جهت رزرو اتمیک اعتبار دوفازی پیش از ثبت جاب‌ها در DAG.
 
-### ۳. تفکیک معماری سرویس‌های مالی (`quota-service` و `usage-service`)
-مطابق با [DOC-BE-007](./credit-and-ledger.md) و [ADR-009](../01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md)، عملیات مالی و کردیت به دو سطح مکمل تفکیک شده است:
-1. **سرویس سهمیه و رزرو اتمیک (`quota-service` — پورت gRPC: `50058` / HTTP: `8087`):**
-   - **نقش:** موتور مالی آنلاین (Hot OLTP) متصل به کانتینر مستقل `financial-ledger` (TigerBeetle) با تجرید `FinancialLedgerPort`.
-   - **وظایف:** رزرو اعتبارات (Reserve)، تسویه (Settle)، بازگشت وجه (Refund)، ارزیابی الگوریتم سطل‌های منقضی‌شونده (FEFO) در دیتابیس `lemmo_quota`، و اعمال سیاست توقف قطعی سازمان (`WORKSPACE_WALLET_EMPTY`).
-   - **استقرار مستقل:** تعاریف داکر و کانفیگ‌ها منحصراً در `services/quota-service/deploy/` قرار دارد و با Compose `include:` به استک متصل می‌شود.
-2. **سرویس دفترکل و ثبت مصرف (`usage-service` — پورت gRPC: `50059` / HTTP: `8088`):**
-   - **نقش:** دفترکل تحلیلی و بازرسی تغییرناپذیر ۱۹ فیلدی (Cold Historical & Audit Ledger) در دیتابیس PostgreSQL `lemmo_usage`.
-   - **ورودی رویدادمحور:** مصرف رویدادهای ناهمگام `CreditLedgerEntryPayload` از صف RabbitMQ (`lemmo.events`) جهت Decouple بودن از خط لوله بوم، همراه با RPC مستقیم `CommitLedgerEntry`.
-   - **ردیابی حاشیه سود:** ثبت هزینه ابری در سطح میکرو دلار (`provider_cost_micros`) و گزارش‌گیری مالی.
+### ۳. تفکیک معماری سرویس‌های مالی و ممیزی (`ledger-service`، `quota-service` و `usage-service`)
+مطابق با [سند مرجع مسئولیت سرویس‌ها (DOC-ARCH-013)](../01-architecture/service-responsibility-registry.md#۳۲۱-ledger-service-tigerbeetle-داخل-آن)، [DOC-BE-007](./credit-and-ledger.md) و [ADR-009](../01-architecture/decisions/ADR-009-service-owned-deployment-and-financial-ledger.md)، مرزهای مالی و مصرفی به تفکیک قطعی رسیده‌اند:
+1. **سرویس دفترکل مالی (`ledger-service` — [کارت](../01-architecture/service-responsibility-registry.md#۳۲۱-ledger-service-tigerbeetle-داخل-آن)):**
+   - **نقش:** تنها منبع حقیقت وضعیت مالی، مانده حساب‌ها و انتقالات در پلتفرم بر بستر کانتینر اختصاصی TigerBeetle (`financial-ledger`).
+   - **وظایف:** مدیریت حساب‌ها و ترانسفرها، رزرو دوفازی (Pending Reservation) با انقضای مهلت داخلی در خود دیتابیس (بدون نیاز به ورکر جاروب‌کننده/sweeper خارجی)، و تسویه (Settle) با مبلغ نهایی دریافتی بدون پیش‌فرض صفر.
+2. **سرویس سهمیه و قوانین تجاری (`quota-service` — [کارت](../01-architecture/service-responsibility-registry.md#۳۲۲-quota-service)):**
+   - **نقش:** موتور ارزیابی قوانین تجاری، پکیج‌ها، سهمیه‌ها و ریت‌لیمیت‌های تجاری؛ این سرویس فاقد موجودی یا دفترکل مالی است.
+   - **وظایف:** اعتبارسنجی مجاز بودن عملیات بر اساس قوانین، ارزیابی سیاست سطل‌های زمانی (FEFO) در دیتابیس خود (`lemmo_quota`)، محاسبه مبلغ واقعی رزرو و تسویه، و صدور درخواست به `ledger-service` جهت جابجایی وجه.
+3. **سرویس ثبت و ممیزی مصرف (`usage-service` — [کارت](../01-architecture/service-responsibility-registry.md#۳۱۹-usage-service)):**
+   - **نقش:** سرویس زیرساختی جهت ثبت متمرکز متریک‌های خام مصرف (Audit Trail)، نه دفترکل مالی.
+   - **ورودی رویدادمحور:** مصرف رویدادهای ناهمگام مصرف منتشرشده توسط `ai-gateway` همراه با شناسه نسخه رجیستری مدل‌ها، جهت گزارش‌گیری، مانیتورینگ و لاگ حسابرسی.
 
 ### ۴. معماری سرویس فضاهای کاری و چندمستأجری (`workspace-service` — مصوب ADR-010)
 مطابق با [ADR-010](../01-architecture/decisions/ADR-010-workspace-service-and-phase1-completion.md) و [DOC-BE-008](./entitlements-and-iam.md)، سرویس دهم با مشخصات فنی زیر مستقر می‌گردد:
@@ -208,7 +213,7 @@ flowchart TD
 - **استیج ۱۰.۵ ✅:** استقرار درگاه سه‌لایه `infra/gateway` (Kong 3.6)، `identity-proxy` (Oathkeeper) و BFF کانتکست (`context-service`).
 - **استیج ۱۱ 🎯:** استقرار کامل `auth-service` (Ory Kratos + Mailpit)، اندپوینت ورود یکپارچه بدون رمز (`/api/v1/auth/entry`)، وب‌هوک Kratos به `user-service`، اتصال فرانت‌اند `auth/` و آزمون E2E با Mailpit.
 - **استیج ۱۲ 📋:** ابزار تولید خودکار OpenAPI و آداپتور زنده شبکه در `@/sdk` استودیو (`app/`).
-- **استیج ۱۳ 📋:** موتور مجوزهای دانه‌ریز `iam-service` (ReBAC Engine و ماتریس دسترسی به بوم و پروژه‌ها).
+- **استیج ۱۳ 📋:** موتور مجوزهای دانه‌ریز `iam-service` (مستقر نمی‌شود در بتا طبق تصمیم D-54؛ ارزیابی در فازهای پس از بتا).
 - **پیش از بتا — `access-promo-service` 🎯:** سرویس دائمی دعوت/ظرفیت/پروموی اعتباری (D-53، ADR-025)؛ پیش‌نیاز مسیر طلایی بتا.
 - **🏁 گیت ۶:** اعتبارسنجی کامل ورود کاربر در مرورگر، ریدایرکت به استودیو، اجرای زنده گراف و کسر کردیت.
 

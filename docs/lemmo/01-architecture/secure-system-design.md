@@ -238,6 +238,15 @@ func NewSSRFSafeHTTPClient(timeout time.Duration) *http.Client {
 
 ---
 
+### الگوی ۸: تفکیک entitlement امنیتی از entitlement تجاری (A6)
+
+#### قانون معماری:
+1. **تفکیک مطلق دو مفهوم:** واژه «entitlement» در سیستم هرگز نباید بدون صفت به کار رود.
+2. **entitlement امنیتی (Security Entitlements):** اعتبارسنجی دسترسی سیستمی، اختیارات نقشی (RBAC/ReBAC) و دسترسی به منابع که منحصراً توسط `iam-service` (و لایه احراز هویت لبه) تصمیم‌گیری می‌شود.
+3. **entitlement تجاری (Commercial Entitlements):** سهمیه‌های مصرف، پلن‌های کاربری، امکانات بسته تجاری و محاسبات سهمیه که منحصراً توسط `quota-service` مدیریت و ارزیابی می‌شوند. هیچ سرویس امنیتی حق دستکاری یا ارزیابی سهمیه‌های تجاری را ندارد و بالعکس (همگام با [service-responsibility-registry.md](./service-responsibility-registry.md#۳۷-iam-service) §۳.۷ و §۳.۲۲).
+
+---
+
 ## ۳. چک‌لیست سیستم‌دیزاین پیش از کدنویسی (Pre-Coding Design Checklist)
 
 هر مهندس نرم‌افزار در پلتفرم Lemmo موظف است پیش از نگارش کد یا باز کردن Pull Request برای هر سرویس جدید، این چک‌لیست را بررسی و تکمیل نماید:

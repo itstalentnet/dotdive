@@ -844,7 +844,7 @@
 
 - **ID:** `SB-CND-REF`
 - **Name:** Static Catalog Reference Data Registry Conformance
-- **Requirement:** تبعیت داده‌های استاتیک کاتالوگ از رجیستری مرکزی داده‌های مرجع و کش دو سطحی کلاینت؛ ممنوعیت هاردکد کردن اطلاعات کاتالوگ در سورس‌کد سرویس.
+- **Requirement:** تبعیت داده‌های استاتیک عمومی و مستقل از دامنه از رجیستری مرکزی داده‌های مرجع (reference-data-registry) و کش دو سطحی کلاینت؛ داده‌های کاتالوگ ابزار، مدل‌ها یا قیمت‌ها نباید از reference-data خوانده شوند (طبق ADR-012 §۲.۷ و ADR-018 §۲.۹).
 - **Check:** `static`
 - **Scope:** `service`
 - **Applies To:** `[go-service]`

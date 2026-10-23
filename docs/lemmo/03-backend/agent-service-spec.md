@@ -104,8 +104,8 @@ sequenceDiagram
     participant Kong as Kong Gateway
     participant Agent as agent-service (:8096)
     participant Redis as Redis Buffer
-    participant Router as model-router-service
-    participant Tools as tools-service (:8094)
+    participant AIGateway as ai-gateway (alias: intent-classifier)
+    participant Orchestrator as orchestrator-service
     participant JobSvc as job-service (:8095)
 
     Client->>Kong: POST /api/v1/chat/messages (Idempotency-Key)
@@ -120,12 +120,12 @@ sequenceDiagram
     Agent-->>Client: event: token (text delta chunks)
 
     alt Intent = Tool Invocation
-        Agent->>Router: Function Calling Execution
-        Router-->>Agent: ToolCall (text-to-image, inputs)
+        Agent->>AIGateway: Request Intent Classification (Platform COGS)
+        AIGateway-->>Agent: ToolCall (text-to-image, inputs)
         Agent->>Redis: event: tool_call { tool_id, inputs }
-        Agent->>Tools: gRPC ExecuteTool(input_kind=command, user_ctx)
-        Tools->>JobSvc: Create Job
-        Tools-->>Agent: 202 Accepted { jobId }
+        Agent->>Orchestrator: ExecuteTool (input_kind=command, user_ctx)
+        Orchestrator->>JobSvc: Create Job
+        Orchestrator-->>Agent: 202 Accepted { jobId }
         Agent->>Redis: event: job_dispatched { jobId, tool_id }
         Agent->>Agent: Insert message_jobs record
         Client->>JobSvc: sdk.jobs.subscribe(jobId) (Parallel Direct Connection)
@@ -212,7 +212,7 @@ services:
 
 [راهنمای JSON](https://api-docs.deepseek.com/guides/json_mode/) احتمال پاسخ خالی و خطر قطع JSON با max_tokens کم را ذکر می‌کند؛ هر دو باید تست شوند. پرامپت ثابت امکان استفاده از cache را بهبود می‌دهد ولی cache hit تضمین‌شده نیست. سقف concurrency اعلامی Provider نیز تضمین latency یا پایداری نیست و سقف محلی نباید صرفاً برابر حداکثر Provider قرار گیرد.
 
-قیمت‌ها و ظرفیت‌ها در سورس هاردکد نشوند؛ هنگام تدوین تسک نرخ روز با تاریخ منبع ثبت شود. برای بودجه‌بندی، cache miss و هزینه Retry لحاظ شوند. هزینه تشخیص نیت جزو سقف تجمعی ۲ دلاری آزمون پولی این دور است، نه بودجه اضافه بر تولید تصویر. درخواست تعاملی برای انتظار off-peak معطل نشود.
+قیمت‌ها و ظرفیت‌ها در سورس هاردکد نشوند؛ هنگام تدوین تسک نرخ روز با تاریخ منبع ثبت شود. برای بودجه‌بندی، cache miss و هزینه Retry لحاظ شوند. هزینه مدل‌های پشت‌صحنه (نظیر تشخیص نیت) جزو هزینه‌های سربار پلتفرم (Platform COGS) و در چارچوب سقف بودجه پلتفرم است و هرگز از سهمیه یا کردیت کاربر کسر نمی‌گردد. درخواست رزرو و تسویه اعتبار صرفاً برای فراخوانی پولی مستقیم ابزارها صادر می‌شود. درخواست تعاملی برای انتظار off-peak معطل نشود.
 
 ### کلید و آماده‌سازی تسک
 

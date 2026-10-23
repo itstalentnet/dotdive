@@ -32,7 +32,7 @@ document may lag behind an approved decision.
 | 2 | Beta access check for the authenticated user | `access-promo-service` (D-53 / ADR-025) | **Missing** |
 | 3 | Invite code entry page when access is absent | Studio client (display only) | **Missing** |
 | 4 | Invite validation, capacity ceiling, single-use enforcement, activation | `access-promo-service` (D-53 / ADR-025) | **Missing** (test-only) |
-| 5 | Workspace / Wallet provisioning and one-time gift claim | `workspace-service` + `quota-service` Claim engine | Wallet: **Working**. Gift claim over the network: **Missing** |
+| 5 | Workspace / Wallet provisioning and one-time gift claim | `workspace-service` + `quota-service` Claim engine + `ledger-service` | Wallet: **Working**. Gift claim over the network: **Missing** |
 | 6 | Studio entry (draft-only prompt) | Studio client | **Working** |
 | 7 | History, refresh, re-login | Studio client + backend | **Working** |
 
@@ -44,9 +44,10 @@ document may lag behind an approved decision.
 2. **Financial decisions live only in the financial owner.** Invite validation,
    beta capacity, single-use enforcement, and gift issuance are performed
    server-side. **Invite/capacity/promo rules are owned by `access-promo-service`
-   (D-53 / ADR-025); the gift is issued only through the existing Claim engine in
-   `quota-service` (`ClaimUserGift`).** No new financial logic is added to
-   `access-promo-service`, `auth-service`, or any client.
+   (D-53 / ADR-025); the gift claim path follows the Service Responsibility Registry
+   (DOC-ARCH-013 §5.5): `access-promo-service` (eligibility, capacity) →
+   `quota-service` (gift amount) → `ledger-service` (TigerBeetle transfer).**
+   No new financial logic is added to `access-promo-service`, `auth-service`, or any client.
 3. **Idempotency is mandatory.** Retrying a redemption must not consume the
    invite twice nor issue the gift twice. The Claim table already enforces this
    with `uq_user_gift_claims_user_code (user_id, gift_code)`; the invite

@@ -25,9 +25,9 @@ icon: "cpu"
 این سند پیرو مصوبات رسمی **[ADR-018](../01-architecture/decisions/ADR-018-tools-platform-architecture-unified-execution-and-domain-decoupling.md)**، پاسخ‌های مصوب سوالات معماری OQ-050 تا OQ-055 و تصمیمات کلان قبلی (ADR-016، ADR-017، DOC-BE-007) تدوین شده و به عنوان **منبع واحد حقیقت (SSOT)** برای پیاده‌سازی مهندسی مرحله ۱۵ عمل می‌کند.
 
 ### اهداف اصلی مرحله ۱۵:
-1. **استقرار سرویس ابزارها (`tools-service`):** راه‌اندازی مایکروسرویس Go با الگوی Clean Architecture و DualServer بر پورت‌های HTTP `8094` و gRPC `50065`.
-2. **مدل ابزار = تعریف داده‌محور:** بارگذاری ابزارها از فایل‌های نسخه‌دار (`tool-definition.schema.json`)، Seed تغییرناپذیر در دیتابیس `lemmo_tools` با Advisory Lock و کش‌گذاری نسخه‌دار در Redis.
-3. **مسیر اجرای یکپارچه و مشترک (Single Execution Path):** اجرای ابزار پایه (`text-to-image` با مدل `fal-ai/flux-dev`) از مسیر مشترک پلتفرم با اعتبارسنجی ورودی‌ها، رزرو اعتبار در `quota-service`، درج در `job-service` و صف RabbitMQ بدون ایجاد لاجیک موازی.
+1. **استقرار سرویس ابزارها (`tools-service`):** راه‌اندازی مایکروسرویس Go با الگوی Clean Architecture و DualServer بر پورت‌های HTTP `8094` و gRPC `50065` منحصراً جهت رجیستری و کاتالوگ تعاریف ابزارها ([کارت tools-service](../01-architecture/service-responsibility-registry.md#۳۱۰-tools-service)).
+2. **مدل ابزار = تعریف داده‌محور (T1-T5):** بارگذاری ابزارها از فایل‌های اعلانی در ساختار پوشه‌ای `tools/<tool-name>/` به صورت تغییرناپذیر در دیتابیس `lemmo_tools` با Advisory Lock و کش‌گذاری نسخه‌دار در Redis.
+3. **تفکیک قطعی اجرا از تعریف ابزار (مصوب D-46 و T5):** `tools-service` هیچ‌گونه نقشی در اجرا، رزرو یا تسویه سهمیه، یا انتشار جاب ندارد. کلیه فراخوانی‌ها و اجرای ابزارها منحصراً توسط `orchestrator-service` هدایت می‌شود.
 4. **تفکیک قطعی دامنه‌ها:** انتقال اندپوینت‌های دارایی (`/api/v1/assets`) به `storage-service` و اندپوینت‌های جاب (`/api/v1/jobs`) به `job-service`.
 5. **جایگزینی کامل ماک:** حذف ۱۰۰٪ کانتینر ماک `lemmo-mock-tools` در داکر کامپوز و اتصال گیت‌وی Kong به سرویس‌های واقعی.
 
@@ -37,8 +37,8 @@ icon: "cpu"
 
 ### ۲.۱. توپولوژی و پورت‌ها
 - **نام کانتینر:** `lemmo-svc-tools`
-- **پورت HTTP:** `8094` (پاسخ‌گویی به کاتالوگ و اجرای ابزار)
-- **پورت gRPC:** `50065` (ارتباطات داخلی بین‌سرویسی)
+- **پورت HTTP:** `8094` (پاسخ‌گویی به استعلام کاتالوگ و متادیتای ابزارها؛ اندپوینت‌های اجرا به orchestrator-service منتقل شده‌اند)
+- **پورت gRPC:** `50065` (ارتباطات داخلی بین‌سرویسی جهت ارائه تعاریف ابزار به orchestrator-service و سایر کلاینت‌ها)
 - **پایگاه داده اختصاصی:** PostgreSQL `lemmo_tools`
 - **کش:** Redis کش‌اَساید با پیشوند کلید `lemmo:tools:catalog:{catalog_version}`
 
@@ -95,40 +95,42 @@ CREATE INDEX IF NOT EXISTS idx_tools_status ON tool_state(status);
 
 ---
 
-## ۳. پایپ‌لاین اجرای مشترک ابزارها (Execution Pipeline)
+## ۳. پایپ‌لاین اجرای ابزارها (تفکیک به orchestrator-service طبق مصوبه D-46 و T5)
+
+> ⚠️ **وضعیت معماری: جایگزین‌شده (Superseded)**  
+> پیرو تصمیم معمارانه **D-46** و بندهای **T1 تا T5** در [ADR-018 §۲.۸](../01-architecture/decisions/ADR-018-tools-platform-architecture-unified-execution-and-domain-decoupling.md#۲۸-تکمیل-معماری-ابزار-و-اجرا-و-بازنشستگی-image-service-t1-تا-t7--مصوب-d-46) و [سند مرجع مسئولیت سرویس‌ها (DOC-ARCH-013)](../01-architecture/service-responsibility-registry.md#۳۱۰-tools-service)، **`tools-service` هیچ نقشی در اجرای ابزارها، رزرو سهمیه، یا انتشار جاب ندارد.** اجرا منحصراً بر عهده **`orchestrator-service`** است. `tools-service` صرفاً رجیستری و فراهم‌کننده تعاریف اعلانی ابزارهاست.
+
+### ۳.۱. پایپ‌لاین جاری معماری (Orchestrator Execution Pipeline)
+1. کلاینت استودیو درخواست اجرای ابزار یا گردش‌کار را به `orchestrator-service` ارسال می‌کند.
+2. `orchestrator-service` تعریف ابزار را از `tools-service` (فقط‌خواندنی) واکشی و اعتبارسنجی می‌کند.
+3. `orchestrator-service` عملیات بررسی و رزرو اعتبار را از طریق `quota-service` هدایت می‌کند.
+4. `orchestrator-service` وظایف را به ورکرها ارسال کرده یا مستقیماً از طریق `ai-gateway` اجرا می‌نماید.
+5. تسویه نهایی اعتبار بر اساس هزینه واقعی توسط `orchestrator-service` انجام می‌شود.
+
+### ۳.۲. دیاگرام تاریخی مرحله ۱۵ (سابقه — منسوخ‌شده)
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Client as Studio Client (app/)
     participant Kong as Kong Gateway
-    participant Tools as tools-service
+    participant Tools as tools-service (سابقه)
     participant Quota as quota-service
     participant JobSvc as job-service
     participant Rabbit as RabbitMQ
     participant Worker as image-service
     participant Storage as storage-service
-    participant Usage as usage-service (Ledger)
+    participant Usage as usage-service (متریک خام)
 
+    Note over Tools: این پایپ‌لاین تاریخی با مصوبه D-46 T5 جایگزین گردید و اجرا به orchestrator-service واگذار شد.
     Client->>Kong: POST /api/v1/tools/text-to-image/execute (Idempotency-Key)
-    Note over Kong: Auth JWT + X-Workspace-ID + Policy check
     Kong->>Tools: Proxy to 8094
     Tools->>Tools: Validate Inputs & Workspace Scope
-    Tools->>Tools: Deduplicate via Idempotency-Key (if replayed -> return 202)
     Tools->>Quota: CheckAndReserveQuota(tool_id, credits, idempotency_key)
     Quota-->>Tools: ReservationID confirmed
     Tools->>JobSvc: EnqueueJob(WorkflowOrigin=MENU, reservation_id, outbox)
     JobSvc-->>Tools: JobID created
     Tools-->>Client: 202 Accepted { "jobId": "..." }
-    
-    JobSvc->>Rabbit: Publish lemmo.jobs.main (Transactional Outbox)
-    Rabbit->>Worker: Consume Image Task
-    Worker->>Worker: Call Model Router / Cloud Provider
-    Worker->>Storage: Store Result in S3 (lemmo-artifacts)
-    Storage-->>Worker: ObjectKey registered (asset_id)
-    Worker->>JobSvc: CompleteJob(status=SUCCEEDED, asset_id)
-    Worker->>Quota: SettleQuota(ReservationID, actual_credits)
-    Quota->>Usage: Record Final Ledger Entry
 ```
 
 ### قواعد تضمین سازگاری و امنیت پایپ‌لاین:
@@ -208,11 +210,9 @@ sequenceDiagram
 
 پیرو تصمیمات تکمیلی معماری مصوب **[ADR-018 §۲.۸ و §۲.۹](../01-architecture/decisions/ADR-018-tools-platform-architecture-unified-execution-and-domain-decoupling.md#۲۸-تکمیل-معماری-ابزار-و-اجرا-و-بازنشستگی-image-service-t1-تا-t7--مصوب-d-46)**:
 
-1. **تفکیک مسئولیت‌های اجرا در `tools-service` (T2 و T5 — بعد از بتا):**
-   - خواندن تعاریف ابزار (`prompt-template` یا `workflow`).
-   - رزرو کل هزینه تخمینی گردش‌کار در `quota-service` پیش از آغاز اولین مرحله و تسویه نهایی بر اساس هزینه واقعی.
-   - اجرای گام‌به‌گام و ثبت وضعیت پایدار هر مرحله در دیتابیس `lemmo_tools` جهت بازیابی پس از Crash بدون هزینه تکراری.
-   - تحویل خروجی نهایی به سرویس متولی دارایی و انتشار تغییرات وضعیت در `job-service`.
+1. **تفکیک مسئولیت‌های اجرا و تعریف (مصوب D-46 T5 و سند مرجع):**
+   - مسئولیت اجرا و رزرو سهمیه از `tools-service` سلب شده و منحصراً بر عهده **`orchestrator-service`** قرار دارد. `tools-service` فقط رجیستری و تعریف اعلانی ابزارهاست ([کارت tools-service](../01-architecture/service-responsibility-registry.md#۳۱۰-tools-service)).
+   - *(سابقه منسوخ T5)*: خواندن تعاریف، رزرو هزینه و اجرای گام‌به‌گام توسط tools-service جایگزین گردید و تمام وظایف اجرایی به orchestrator منتقل شد.
 2. **استقلال تعاریف از ران‌تایم موتور گردش‌کار (T6 — هنگام نیاز):** ساختار تعاریف گردش‌کار به گونه‌ای طراحی می‌شود که ارتقا به موتورهای ارکستراسیون پیشرفته (مانند Temporal) بدون تغییر فایل‌های تعریف ابزار و صرفاً با بازنویسی اجراکننده میسر باشد. فعال‌سازی این قابلیت وابسته به پاسخ‌های مالک محصول به پرسش‌های `OQ-068` تا `OQ-070` است.
 3. **نیازمندی‌های ابزار و تطبیق با واژه‌نامه (K1، K5 و K6 — بعد از بتا):**
    - نیازهای هر ابزار در فیلد `required_capabilities` همان ابزار قید می‌شود و با واژه‌نامه رسمی `contracts/platform/ai/` سنجیده می‌شود.
