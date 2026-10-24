@@ -25,12 +25,12 @@
 
 | مشاهده در سورس | شاهد | نتیجه برای برنامه |
 | --- | --- | --- |
-| JSON logger در core وجود دارد | `api/core/bootstrap/server.go:36` و `:150` | هسته موجود توسعه یابد؛ پشته تازه یا logger موازی نسازیم |
-| interceptor ورودی gRPC و خواندن traceparent وجود دارد، اما fallback شناسه UUID است و x-trace-id اولویت دارد | `api/core/middleware/trace.go:76-98` | وجود این فایل اثبات trace سرتاسری نیست؛ سازگاری شناسه‌ها و انتقال خروجی باید بررسی شود |
+| JSON logger در core سابقه اولیه بود، اما طبق D-26 تا D-30 لاگر به ماژول تولیدی هر سرویس منتقل شد | `api/core/bootstrap/server.go:36` (سابقه) و `api/contracts/platform/observability/log-event.schema.json` | لاگر استاندارد JSON بر اساس قرارداد در ماژول تولیدی هر سرویس پیاده‌سازی شد (TASK_OBS_01) |
+| interceptor ورودی gRPC سابقاً در core بود (با fallback شناسه UUID)، اما طبق D-28 به ماژول تولیدی هر سرویس با W3C traceparent منتقل شد | `api/core/middleware/trace.go:76-98` (سابقه و بدهی تاریخی) | شناسه W3C (هگز ۳۲ رقمی غیرصفر) در ماژول تولیدی و Kong پیاده‌سازی و در چهار سرویس مسیر بتا جایگزین شد |
 | outbox عمومی TraceID دارد؛ مدل outbox فعلی Job و headerهای publisher شناسه trace صریح ندارند | `api/core/outbox/outbox.go:45`؛ `api/services/job-service/internal/domain/outbox.go:33,67`؛ `api/services/job-service/internal/adapters/rabbitmq/publisher.go:360` | مرز async یک نقطه مشخص برای تکمیل است؛ صرف اضافه‌کردن logger کافی نیست |
 | Quota و Agent هر دو readyz را به handler پاسخ ثابت UP وصل کرده‌اند | `api/services/quota-service/internal/adapters/http/handler.go:34-35,141-144`؛ `api/services/agent-service/internal/adapters/http/handler.go:35-49` | پاسخ ۲۰۰ کنونی فقط سلامت handler است؛ آمادگی DB، صف یا لجر را ثابت نمی‌کند |
 | healthcheck لجر فقط echo اجرا می‌کند | `api/services/quota-service/deploy/compose.yaml:24-25` | Docker healthy شاهد پاسخ‌گویی لجر نیست |
-| make doctor/trace وجود ندارد؛ lint/test در نبود بعضی ابزارها skip می‌کنند | `api/Makefile:8-16,29-36,59-65` | فرمان عملیاتی مستقل با خروجی غیرصفر برای بررسی ناموفق/ناقص لازم است |
+| make trace پیاده‌سازی شد؛ make doctor در برنامه است | `api/Makefile:67-73`؛ `api/scripts/trace.sh` | فرمان عملیاتی make trace TRACE_ID=<id> اضافه شد؛ doctor در STB-09 پیاده‌سازی می‌شود |
 | dev-verify از شناسه‌های ثابت و gRPC مستقیم استفاده می‌کند و در خطای دسترسی Gateway ادامه می‌دهد؛ عملیات نوشتنی نیز دارد | `api/scripts/dev_verify.go:17-24,44-66,75-104` | این فرمان نه doctor فقط‌خواندنی است و نه شاهد journey از Gateway؛ فعلاً به عنوان اثبات سلامت معرفی نشود |
 | route عمومی grant از handler حذف و RPC آن نیز از server حذف شده است | `api/services/quota-service/internal/adapters/http/handler.go:38-44`؛ `api/services/quota-service/internal/adapters/grpc/server.go:23` | توصیه حذف را از صفر تکرار نکنیم؛ STB-02 باید نسخه مستقر و نبود اثر مالی درخواست ردشده را بررسی کند |
 | Compose سرویس Quota هنوز host port تعریف می‌کند | `api/services/quota-service/deploy/compose.yaml:16-17,37-39` | وضعیت غیر-dev با پیکربندی واقعی انتشار بررسی شود؛ از سورس dev نمی‌توان exposure تولید را نتیجه گرفت |
@@ -41,7 +41,7 @@
 
 ## ۳. حداقل مشترک لاگ، شناسه و خطا
 
-پیاده‌سازی پیشنهادی در core و adapterهای فعلی؛ rollout نخست فقط سرویس‌هایی که واقعاً در مسیر منتخب ورود→دسترسی→اعتبار→تولید تصویر→ذخیره→تاریخچه فراخوانی می‌شوند. فهرست نهایی از مسیر اجرایی استخراج شود، نه از فهرست همه سرویس‌های repo.
+پیاده‌سازی بر اساس مصوبات D-26 تا D-30 در ماژول تولیدی هر سرویس (`internal/observability/`) به‌صورت درون‌بسته‌ای (D-28) و مطابق قرارداد نسخه‌دار `contracts/platform/observability/log-event.schema.json` (D-29) انجام شده است. Core دیگر میان‌افزار اجرایی لاگ و رهگیری ندارد. Rollout نخست در ۴ سرویس مسیر بتا (`agent-service`، `quota-service`، `storage-service`، `model-router-service`) پیاده‌سازی شده است.
 
 - JSON در stdout با زمان UTC، level، service، نسخه/instance، operation، outcome، duration و شناسه درخواست/trace. رویداد آغاز، پایان و شکست مرزهای سرویس کافی است؛ لاگ همه توابع لازم نیست.
 - `trace_id` برای اتصال زنجیره؛ `request_id` برای درخواست ورودی؛ `job_id`، `event_id`، `attempt_id` و شناسه عملیات مالی برای عملیات پایدار مربوط. این شناسه‌ها جایگزین کلید idempotency نمی‌شوند. retry یک event هویت همان event را حفظ کند.

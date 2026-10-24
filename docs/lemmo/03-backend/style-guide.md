@@ -328,31 +328,60 @@ All Go services in `api/` must strictly implement the security invariants define
 
 ---
 
+## 8.1. لاگ و رهگیری توزیع‌شده (Logging & Distributed Tracing — D-26 تا D-30)
+
+معماری رهگیری و ثبت وقایع در پلتفرم لمو مطابق مصوبات معماری **D-26 تا D-30** (و وظیفه `TASK_OBS_01`) پیاده‌سازی شده است:
+
+1. **جداسازی کامل از Core (D-28):** کتابخانه `core` فقط ناظر و ارائه‌دهنده پروتکل‌های مرزی است و هیچ میان‌افزار اجرایی (runtime middleware) برای لاگ، trace یا recovery صادر نمی‌کند. هر میکروسرویس ماژول رهگیری اختصاصی خود را در مسیر `internal/observability/` نگهداری می‌کند که توسط ابزار رسمی `lemmo-cli observability <service-name>` اسکلت‌بندی و تولید می‌شود (دارای سرآیند D-18).
+2. **قرارداد رویداد لاگ (`log-event.schema.json` — D-29):** تمام لاگ‌های خروجی سرویس‌ها باید روی `stdout` با ساختار یکنواخت JSON مطابق قرارداد نسخه‌دار `contracts/platform/observability/log-event.schema.json` ثبت شوند:
+   - **فیلدهای الزامی:** `ts` (فرمت RFC3339 در مبنای UTC)، `level`، `service`، `version`، `msg`، `trace_id` (هگز ۳۲ کاراکتری W3C)، `span_id` (هگز ۱۶ کاراکتری)، `request_id`.
+   - **فیلدهای اختیاری هوش مصنوعی (ADR-027 §۲.۳):** `model`, `provider`, `tokens_in`, `tokens_out`, `cost`, `latency_ms`, `caller_service`.
+   - **فیلدهای اکیداً ممنوع:** ثبت محتوای پرامپت خام (`prompt`, `raw_prompt`)، توکن‌های دسترسی (`token`, `api_key`)، اطلاعات احراز هویت (`authorization`)، کلیدهای محرمانه (`secret`, `password`) در لاگ مطلقاً ممنوع است و توسط هندلر قراردادی فیلتر و حذف می‌شود.
+3. **انتشار W3C Trace Context (D-27 / D-30):** انتقال زنجیره رهگیری در مرزهای شبکه بر اساس استاندارد رسمی W3C `traceparent` و با استفاده از SDK رسمی OpenTelemetry (`go.opentelemetry.io/otel/propagation` و `trace`) انجام می‌گیرد:
+   - گیت‌وی ورودی (Kong) و میان‌افزارهای HTTP/gRPC سرویس‌ها در صورت نبود `traceparent`، شناسه معتبر ۳۲ رقمی هگز تصادفی غیرصفر تولید کرده و آن را در هدرهای پاسخ بازتاب می‌دهند.
+   - شناسه‌های ساختگی غیر W3C (نظیر پیشوندهای `tr-...` یا UUID نامعتبر) در سرتاسر مسیر اجرایی ممنوع هستند.
+4. **بک‌اند رهگیری در MVP (D-27):** بک‌اند رهگیری در فاز کنونی مبتنی بر JSON روی `stdout` و فرمان جست‌وجوی تایم‌لاین `make trace TRACE_ID=<id>` در ریشه `api/` است. اتصال به Collector یا Exporter بیرونی در فاز کنونی خاموش بوده و برای پس از MVP (بسته REL-01) زمان‌بندی شده است.
+
+---
+
 ## 9. Secure Service Blueprint & Pre-Implementation Patterns (الگوهای طلایی راه‌اندازی سرویس امن)
 
 To completely eliminate security regressions during the development of new microservices (such as `iam-service`, `billing-service`, `notification-service`), developers must adhere strictly to these 5 standard implementation blueprints. **No custom or ad-hoc security logic is permitted.**
 
 ### Blueprint 9.1: Mandatory gRPC Server Bootstrap
-Every new gRPC service in `api/services/<name>/cmd/` must wire authentication and health check interceptors. Unauthenticated traffic must never reach business logic:
+Every new gRPC service in `api/services/<name>/cmd/` must wire observability, recovery, authentication and health check interceptors. Unauthenticated traffic must never reach business logic:
 
 ```go
-// Standard gRPC Server Bootstrap Pattern (AIP-193 & Zero-Trust)
+// Standard gRPC Server Bootstrap Pattern (AIP-193, Zero-Trust & Observability D-26..D-30)
+observability.InitLogger(observability.Config{
+    Service: "<ServiceName>",
+    Version: GitCommit,
+    Level:   cfg.LogLevel,
+})
+
 s := grpcServer.NewServer(
-    grpcServer.UnaryInterceptor(middleware.UnaryServerAuthInterceptor()),
-    grpcServer.StreamInterceptor(middleware.StreamServerAuthInterceptor()),
+    grpcServer.ChainUnaryInterceptor(
+        observability.UnaryServerInterceptor(),
+        observability.UnaryRecoveryInterceptor(),
+        middleware.UnaryServerAuthInterceptor(),
+    ),
+    grpcServer.ChainStreamInterceptor(
+        middleware.StreamServerAuthInterceptor(),
+    ),
 )
 lemmov1.Register<ServiceName>Server(s, handler)
 reflection.Register(s) // Automatically exempted in middleware.isExemptMethod
 ```
 
 ### Blueprint 9.2: Outgoing gRPC Client Identity Propagation
-When a microservice calls another internal gRPC service, it **must never send a naked context**. The authenticated caller's identity must be explicitly propagated to downstream RPCs:
+When a microservice calls another internal gRPC service, it **must never send a naked context**. The authenticated caller's identity and W3C trace context must be explicitly propagated to downstream RPCs:
 
 ```go
 // In api/services/<name>/internal/adapters/clients/<target>_client.go
 func (c *TargetGRPCClient) ExecuteOperation(ctx context.Context, req *lemmov1.Request) (*lemmov1.Response, error) {
-    // MANDATORY: Propagate caller AuthContext into outgoing gRPC metadata
+    // MANDATORY: Propagate caller AuthContext and W3C TraceContext (D-27 / TASK_OBS_01)
     outCtx := middleware.PropagateAuthMetadata(ctx)
+    outCtx = observability.InjectGRPCMetadata(outCtx)
     
     resp, err := c.client.ExecuteOperation(outCtx, req)
     if err != nil {
