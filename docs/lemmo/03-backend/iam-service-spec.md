@@ -16,7 +16,7 @@
 # معماری میکروسرویس IAM و کنترل دسترسی‌های دانه‌ریز (`iam-service`) — استیج ۱۳
 
 > **هدف و جایگاه معماری (Mission & Architecture Role):**  
-> سرویس `iam-service` به عنوان مرجع واحد و رسمی تصمیم‌گیری دسترسی (PDP - Policy Decision Point) در پلتفرم Lemmo عمل می‌کند. این سرویس مسئولیت ارزیابی بلادرنگ مجوزهای دسترسی به بوم‌ها، پروژه‌ها، ورک‌اسپیس‌ها و ابزارها (Fine-Grained ReBAC/ACL) و همچنین مدیریت چرخه حیات اعطای امتیازات و سهمیه‌ها (Entitlement Grants per [DOC-BE-008](./entitlements-and-iam.md)) را بر عهده دارد.
+> سرویس `iam-service` به عنوان مرجع تصمیم‌گیری دسترسی امنیتی (PDP - Policy Decision Point) در پلتفرم Lemmo برای فازهای پس از بتا تعریف شده است (D-54 / [DOC-ARCH-013](../01-architecture/service-responsibility-registry.md#۳۷-iam-service)). این سرویس مسئولیت ارزیابی بلادرنگ مجوزهای دسترسی امنیتی به بوم‌ها، پروژه‌ها و ورک‌اسپیس‌ها (Fine-Grained ReBAC/ACL) را بر عهده دارد. محاسبات تجاری، اعتبارات مالی و سهمیه‌های مصرفی منحصراً متعلق به `quota-service` و `ledger-service` است و در حیطه IAM قرار ندارد. این سرویس در بتای محدود مستقر نیست.
 
 ---
 
@@ -120,10 +120,10 @@ service IAMService {
   // حذف دسترسی مستقیم کاربر از روی شیء
   rpc RevokeResourceAccess(RevokeResourceAccessRequest) returns (RevokeResourceAccessResponse);
 
-  // استعلام سهمیه‌ها و اعطای امتیازات فعال کاربر/ورک‌اسپیس (Entitlement Grants per DOC-BE-008)
+  // استعلام مجوزها و امتیازات امنیتی کاربر/ورک‌اسپیس (گرنت‌های سهمیه و اعتبار مالی متعلق به quota-service است)
   rpc ListActiveGrants(ListActiveGrantsRequest) returns (ListActiveGrantsResponse);
 
-  // صدور اعطای امتیاز جدید (توسط ادمین یا سیستم صدور پلن)
+  // صدور اعطای امتیاز یا نقش امنیتی جدید
   rpc IssueEntitlementGrant(IssueEntitlementGrantRequest) returns (IssueEntitlementGrantResponse);
 }
 

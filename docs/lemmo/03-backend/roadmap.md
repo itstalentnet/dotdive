@@ -176,7 +176,7 @@ Release candidate مشخص، checkهای لازم، بررسی مستقل، آد
 | ۶ | `model-router-service` | رجیستری ۴ لایه‌ای پراویدرها، مسیریابی هوشمند، فالبک ۳ سطحی، Token Bucket در Redis و circuit breaker | ✅ پیاده‌شده و تست‌شده (Stage 7) |
 | ۷ | `image-service` | ورکر ناهمگام سبک ابری جهت فراخوانی APIهای Fal/Replicate/OpenAI، پولینگ/وبهوک و آپلود به S3 | ✅ پیاده‌شده و تست‌شده (Stage 7) |
 | ۸ | `quota-service` | مدیریت سهمیه‌ها و اعتبارسنجی حق اجرا (Entitlement)، رزرو دوسفره اعتبار و مسدودسازی کیف‌پول خالی | ✅ پیاده‌شده و تست‌شده (Stage 8) |
-| ۹ | `usage-service` | سیستم دفترکل تغییرناپذیر (Credit Ledger) با مدل Bucket، ردیابی هزینه‌های دلاری پراویدر و محاسبه حاشیه سود | ✅ پیاده‌شده و تست‌شده (Stage 8) |
+| ۹ | `usage-service` | ثبت ردپای حسابرسی خام زیرساختی (Raw Metric Audit Trail) و هزینه‌های دلاری پراویدر (بدهی مدل لجر به `ledger-service` منتقل می‌شود) | ✅ پیاده‌شده و تست‌شده (Stage 8) |
 | ۱۰ | `workspace-service` | مدیریت ورک‌اسپیس‌ها، تننت‌ها، نقش‌های کاربری پروژه و تنظیم سیاست‌های پرداخت‌کننده (Payer Policy) | ✅ پیاده‌شده و تست‌شده (Stage 9 — پایان فاز ۱) |
 
 ---
@@ -458,7 +458,7 @@ flowchart TD
   - تفکیک ماژولار قراردادهای OpenAPI به `tools/v1`, `assets/v1`, `jobs/v1` و هدایت موفق ترافیک به مایکروسرویس‌های متولی در Kong Gateway.
   - ارتقای `storage-service` (HTTP `8084`) و `job-service` (HTTP `8095`) به DualServer با صدور Presigned URL امن و استریم بلادرنگ SSE.
   - استقرار مایکروسرویس پاک `tools-service` (HTTP `8094` + gRPC `50065`) در Go با دیتابیس `lemmo_tools` و Seeder تغییرناپذیر کاتالوگ با Advisory Lock و کش نسخه‌دار ردیس.
-  - اتصال موفق پایپ‌لاین اجرای مشترک (Single Unified Execution Path) برای ابزار پایه `text-to-image` با مدل `fal-ai/flux-dev`: اعتبارسنجی ورودی‌ها، رد URLهای خام خارجی، رزرو اعتبار دوفازی در `quota-service`، درج در `job-service`، انتشار به RabbitMQ، پردازش در ورکر `image-service`، ذخیره فایل در S3 و تسویه کردیت در Ledger.
+  - اتصال موفق پایپ‌لاین اجرای مشترک (Single Unified Execution Path) برای ابزار پایه `text-to-image` با مدل `fal-ai/flux-dev`: اعتبارسنجی ورودی‌ها با کاتالوگ `tools-service`، رد URLهای خام خارجی، رزرو اعتبار دوفازی در `quota-service`/`ledger-service`، درج در `job-service`، انتشار به RabbitMQ، پردازش در ورکر `image-service`، ذخیره فایل در S3 و تسویه کردیت در Ledger (هماهنگی اجرا و ماشین حالت در معماری هدف طبق D-31/D-40 با `orchestrator-service` است).
   - حذف ۱۰۰٪ کانتینر ماک `lemmo-mock-tools` از Compose و پاس شدن کامل تست‌های واحد و ۸ آزمون یکپارچگی زنده سرتاسری (`tools_live_test.go`).
 
 ---
@@ -509,7 +509,7 @@ flowchart TD
       2. *انضباط تسویه مالی با تک‌نقطه نرخ‌گذاری:* حذف مقدار هاردکد ۸ و `uuid.NewString()` تصادفی در ورکر؛ ورکر صرفاً `reservation_id` و `delivered_count` را ارسال می‌کند تا `quota-service` بر مبنای نرخ‌نامه رسمی تسویه کند؛ کلید ایدمپوتنس قطعی: `settle:{job_id}`.
       3. *آزادسازی سهمیه در شکست پراویدر ابری:* فراخوانی متد `ReleaseQuota` با کلید قطعی `release:{job_id}` در شکست/لغو قطعی مطابق سیاست مالی؛ Timeout و نتیجه نامشخص Provider ابتدا تعیین تکلیف شوند تا Retry باعث تولید پولی مضاعف نشود.
       4. *ایدمپوتنسی ورکر و منع شارژ دوبل:* افزودن قید `UNIQUE(job_id)` در دیتابیس `image_tasks` همراه claim اتمیک، بازیابی PROCESSING رهاشده و شناسه درخواست Provider؛ قید یکتایی به‌تنهایی کافی نیست. سقف Retry از کانفیگ خوانده شود.
-      5. *جاب پس‌زمینه پاک‌سازی رزروها (Reaper) در `quota-service`:* تطبیق وضعیت Ledger و `credit_reservations` در Postgres و بازگردانی دقیقاً یک‌بار باکت‌های FEFO با کنترل رقابت settle/release؛ زمان انقضا و دوره اجرا کانفیگ هستند و ۳۰۰ ثانیه صرفاً مقدار گزارش‌شده محیط قبلی است.
+      5. *انقضای بومی رزروها بدون ریپر در `quota-service` (طبق DOC-ARCH-013):* سرویس `quota-service` فاقد جاب ریپر/سوییپر پس‌زمینه است؛ آزادسازی هولدهای منقضی‌شده به صورت بومی و قطعی توسط تایم‌اوت نیتیو TigerBeetle در `ledger-service` مدیریت می‌شود.
       6. *ثبت دارایی در `storage-service`:* ثبت متادیتای خروجی تصویر در جدول `assets` کاربر جهت بازگرداندن `asset_id` پایدار به استودیو.
     - **بسته اولویت P1 (تاب‌آوری، بازیابی خطا و تجربه کاربری):**
       - تفکیک قطعی خطای سهمیه از ورود به استودیو (Degraded Mode در `context-service`).
@@ -546,7 +546,7 @@ flowchart TD
 ### ۸. ثبت بدهی‌های فنی رسمی پلتفرم (Technical Debt Registry)
 | شناسه | عنوان بدهی فنی | سرویس‌ها / فایل‌ها | وضعیت فعلی | معیار خروج و حل قطعی (Exit Criteria) |
 |---|---|---|---|---|
-| `DEBT-CANVAS-01` | شبیه‌سازی ماک اجرای نودهای بوم در فرانت و ارکستریتور | `app/src/modules/canvas/components/CanvasWorkspaceEditor.tsx`<br>`api/services/orchestrator-service/internal/app/service.go` | در فرانت‌اند با `setTimeout(..., 1800)` تصاویر تصادفی تولید می‌شود و در `orchestrator-service` متد `executeStage` جاب واقعی ایجاد نمی‌کند. | مهاجرت کامل به مسیر اجرای مشترک `tools-service` با رزرو در سطح ران (`run_id` و `parent_reservation_id`) در مرحله 17B. |
+| `DEBT-CANVAS-01` | شبیه‌سازی ماک اجرای نودهای بوم در فرانت و ارکستریتور | `app/src/modules/canvas/components/CanvasWorkspaceEditor.tsx`<br>`api/services/orchestrator-service/internal/app/service.go` | در فرانت‌اند با `setTimeout(..., 1800)` تصاویر تصادفی تولید می‌شود و در `orchestrator-service` متد `executeStage` جاب واقعی ایجاد نمی‌کند. | مهاجرت کامل به مسیر اجرای هماهنگ `orchestrator-service` (با تعاریف `tools-service`) با رزرو در سطح ران (`run_id` و `parent_reservation_id`) در مرحله 17B. |
 | `DEBT-CTX-01` | خرابی پایدار context-service پس از شکست اتصال اولیه و نگاشت کاذب ۴۰۴ به جای ۵۰۳ | `api/services/context-service/internal/adapters/clients/*_client.go`<br>`api/services/context-service/cmd/server/main.go`<br>`api/services/context-service/internal/adapters/grpc/handler.go` | کلاینت در صورت تاخیر وابستگی `nil` مانده و خطای کاذب ۴۰۴ صادر می‌کند؛ با ری‌استارت دستی کانتینر موقتاً برطرف شد (INC-2026-10-13-CONTEXT-01). | استقرار اتصال غیرمسدودکننده با تلاش مجدد خودکار، بازگرداندن ۵۰۳ در زمان اختلال، بازیابی خودکار پس از وصل سرویس بدون ری‌استارت، و تست‌های رگرسیون CI (طبق DOC-OPS-INC-002). |
 | `DEBT-IMG-01` | آسیب‌پذیری مصرف صف و انضباط مالی در ورکر تصویر | `api/services/image-service/cmd/main.go`<br>`api/services/image-service/internal/app/service.go`<br>`api/services/image-service/migrations/` | مصرف‌کننده رابیت در صورت تاخیر بروکر متوقف می‌ماند، تسویه روی عدد ۸ هاردکد است، در خطای پراویدر سهمیه آزاد نمی‌شود و جدول فاقد قید یکتایی `job_id` است. | پیاده‌سازی کامل بسته P0 شامل Reconnect صف، تسویه داینامیک، کلید قطعی `settle`/`release`، و قید یکتایی (طبق `TASK_MVP_CONTENT_GEN_P0_HARDENING.md`). |
 | `DEBT-ONBOARD-01` | وابستگی کیف‌پول و هدیه کاربر تازه به داده‌های Seed و غیاب چرخه اهدای زنده | `api/services/workspace-service/internal/app/workspace_service.go`<br>`api/services/quota-service/internal/app/service.go`<br>`api/scripts/dev_seed.go` | کاربر تازه در ثبت‌نام واقعی کیف‌پول با مانده صفر دریافت می‌کند و هیچ هدیه‌ای اعطا نمی‌شود؛ ۱۰۰۰ کردیت صرفاً در اسکریپت `dev_seed.go` هاردکد است. | پیاده‌سازی چرخه اعطای هدیه کانفیگ‌شده در بتای محدود به هویت واجد شرایط، بدون وابستگی به Seed (بسته B06 در [`.task/active/BASELINE_MVP_CONTENT_GENERATION.md`](../../../../.task/active/BASELINE_MVP_CONTENT_GENERATION.md)). |
