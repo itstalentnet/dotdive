@@ -14,8 +14,8 @@ icon: "file-check"
 | **Status** | `Approved` |
 | **Owner** | تیم معماری و پلتفرم بک‌اند / @behroz |
 | **Last Updated** | 2026-10-23 |
-| **Summary (EN)** | Ratifies Stage 15 architectural blueprint following OQ-050 to OQ-055: Mandates Tool-as-Definition schema (tool-definition.schema.json, immutable versions, DB-backed catalog_version, idempotent seeder), Single Unified Execution Path preventing parallel booking logic (Single Execution Path via orchestrator/core with WorkflowOrigin=MENU), moves assets ownership to storage-service (contracts/openapi/assets/v1) and jobs ownership to job-service (contracts/openapi/jobs/v1), enforces end-to-end Idempotency-Key scoping, AIP-193 error mappings, role-based tool naming (text-to-image with a model_ref), strict workspace boundary access rules, and (2026-10-23) the physical tool-definition layout (T1–T5: one folder per tool, mandatory tool.yaml, prompts/, examples/, alias-only model binding). |
-| **Summary (FA)** | تصویب نقشه راه و مشخصات معماری مرحله ۱۵ پیرو تصمیمات OQ-050 تا OQ-055: الزام مدل ابزار=تعریف با JSON Schema، عدم تغییرناپذیری نسخه‌ها، نسخه کاتالوگ در دیتابیس، مسیر اجرای مشترک سرتاسری بدون لاجیک موازی، انتقال دارایی‌ها به storage-service و جاب‌ها به job-service، الزام Idempotency-Key اسکوپ‌شده، نام‌گذاری نقش‌محور ابزارها و جدول خطای AIP-193. |
+| **Summary (EN)** | Ratifies Stage 15 architectural blueprint following ratified Stage 15 architectural decisions (D-46, D-55 to D-59): Mandates Tool-as-Definition schema (tool-definition.schema.json, immutable versions, DB-backed catalog_version, idempotent seeder), Single Unified Execution Path preventing parallel booking logic (Single Execution Path via orchestrator/core with WorkflowOrigin=MENU), moves assets ownership to storage-service (contracts/openapi/assets/v1) and jobs ownership to job-service (contracts/openapi/jobs/v1), enforces end-to-end Idempotency-Key scoping, AIP-193 error mappings, role-based tool naming (text-to-image with a model_ref), strict workspace boundary access rules, and (2026-10-23) the physical tool-definition layout (T1–T5: one folder per tool, mandatory tool.yaml, prompts/, examples/, alias-only model binding). |
+| **Summary (FA)** | تصویب نقشه راه و مشخصات معماری مرحله ۱۵ پیرو تصمیمات مصوب مرحله ۱۵ (D-46 و D-55 تا D-59): الزام مدل ابزار=تعریف با JSON Schema، عدم تغییرناپذیری نسخه‌ها، نسخه کاتالوگ در دیتابیس، مسیر اجرای مشترک سرتاسری بدون لاجیک موازی، انتقال دارایی‌ها به storage-service و جاب‌ها به job-service، الزام Idempotency-Key اسکوپ‌شده، نام‌گذاری نقش‌محور ابزارها و جدول خطای AIP-193. |
 | **Tags** | `adr`, `tools-service`, `stage15`, `openapi`, `storage-service`, `job-service`, `execution-path` |
 
 ---
@@ -27,13 +27,13 @@ icon: "file-check"
 2. **دوگانگی و نشت منبع حقیقت در دارایی‌ها و جاب‌ها:** قرارداد فعلی `tools/v1/openapi.yaml` به صورت نامتجانس روت‌های دارایی‌ها (`/assets`) و جاب‌ها (`/jobs`) را ذیل ابزارها تجمیع کرده بود. این در حالی است که دارایی‌ها متعلق به کل پلتفرم (`storage-service`) و جاب‌ها متعلق به موتور پردازش پس‌زمینه (`job-service`) هستند.
 3. **واقع‌بینی در چشم‌انداز «ابزار = داده/پلاگین»:** طبق ارزیابی تخصصی، افزودن ابزارهای تک‌مرحله‌ای (`generic_rest`) می‌تواند بدون کد انجام شود اما نیازمند زیرساخت داده‌محور استاندارد و پایدار است.
 
-این ADR پیرو پاسخ‌های مصوب به سوالات **OQ-050 تا OQ-055**، استانداردهای فنی مرحله ۱۵ و فازهای آتی را به عنوان **قانون قطعی معماری** تصویب می‌کند.
+این ADR پیرو تصمیمات مصوب معماری مرحله ۱۵، استانداردهای فنی مرحله ۱۵ و فازهای آتی را به عنوان **قانون قطعی معماری** تصویب می‌کند.
 
 ---
 
 ## ۲. تصمیمات مصوب (Decisions)
 
-### ۲.۱. مدل داده «ابزار = تعریف نسخه‌دار» (Tool Definition Schema) — مصوب OQ-050
+### ۲.۱. مدل داده «ابزار = تعریف نسخه‌دار» (Tool Definition Schema) — مصوب ADR-018
 1. **قالب استاندارد واحد:** هر ابزار منحصراً در قالب یک فایل YAML/JSON منطبق بر JSON Schema رسمی (`tool-definition.schema.json`) در ریپو نگهداری می‌شود.
 2. **تغییرناپذیری نسخه‌ها (Immutability):** جفت `(tool_id, version)` تغییرناپذیر است. در صورت تغییر محتوا بدون افزایش نسخه، Seeder در استارت‌آپ به صورت fail-fast متوقف می‌شود.
 3. **تفکیک تعریف از وضعیت عملیاتی:** جدول تعاریف ابزار (`tool_definitions`) از وضعیت عملیاتی (`tool_state` شامل `active`, `disabled`, `retired`) تفکیک می‌شود تا فعال/غیرفعال کردن ابزار (Kill Switch) بدون نیاز به نسخه جدید و deploy ممکن باشد.
@@ -43,7 +43,7 @@ icon: "file-check"
 
 ---
 
-### ۲.۲. مسیر اجرای مشترک و یکپارچه (Single Unified Execution Path) — مصوب OQ-051
+### ۲.۲. مسیر اجرای مشترک و یکپارچه (Single Unified Execution Path) — مصوب ADR-018
 1. **ممنوعیت قطعی لاجیک موازی:** پیاده‌سازی مستقل رزرو اعتبار، درج جاب در دیتابیس و مدیریت صف در `tools-service` **مطلقا ممنوع** است.
 2. **مسیر اجرای مشترک:** تمام اجراها (از بوم، منو، چت یا API) از یک موتور واحد عبور می‌کنند:
    - `tools-service` ورودی‌های فرم را اعتبارسنجی می‌کند (بررسی constraints، رد قاطع URLهای خام خارجی).
@@ -62,7 +62,7 @@ icon: "file-check"
 
 ---
 
-### ۲.۳. انتقال انحصاری مالکیت دارایی‌ها به `storage-service` — مصوب OQ-052
+### ۲.۳. انتقال انحصاری مالکیت دارایی‌ها به `storage-service` — مصوب ADR-018 و D-59
 1. **مالکیت متمرکز:** اندپوینت‌های `/api/v1/assets` و `/api/v1/assets/{id}` منحصراً توسط `storage-service` بر بستر پایگاه داده `lemmo_storage` و جدول `stored_assets` سرویس‌دهی می‌شوند. ساخت جدول موازی دارایی در `tools-service` ممنوع است.
 2. **تفکیک قرارداد:** قرارداد OpenAPI دارایی‌ها به `contracts/openapi/assets/v1/openapi.yaml` منتقل شده و از قرارداد ابزارها حذف می‌گردد.
 3. **آدرس عمومی و امضای Presigned URL:** `storage-service` موظف است Presigned URLها را بر پایه آدرس عمومی کانفیگ‌پذیر (دروازه عمومی یا ساب‌دامین دارایی‌ها) امضا کند تا برای مرورگر کلاینت قابل دسترس باشد. هاست مذکور در سیاست `img-src` در CSP لحاظ می‌گردد.
@@ -71,7 +71,7 @@ icon: "file-check"
 
 ---
 
-### ۲.۴. متولی انحصاری چرخه حیات و رویدادهای جاب (`job-service`) — مصوب OQ-053
+### ۲.۴. متولی انحصاری چرخه حیات و رویدادهای جاب (`job-service`) — مصوب ADR-018
 1. **تمرکز دامنه‌ای:** روت‌های REST جاب‌ها (`GET /api/v1/jobs` و `GET /api/v1/jobs/{id}`) و روت استریم رویدادهای زنده (`GET /api/v1/jobs/{id}/events`) منحصراً توسط `job-service` سرویس‌دهی می‌شوند.
 2. **حذف روت موقت context-service:** هندلر موقت SSE در `context-service` به طور کامل حذف شده و ترافیک در Kong مستقیماً به `lemmo-svc-job` هدایت می‌شود.
 3. **مجوز دسترسی به جاب:**
@@ -84,7 +84,7 @@ icon: "file-check"
 
 ---
 
-### ۲.۵. حاکمیت امنیت، هویت و الزام Idempotency-Key — مصوب OQ-054
+### ۲.۵. حاکمیت امنیت، هویت و الزام Idempotency-Key — مصوب ADR-018
 1. **کاتالوگ عمومی و یکپارچه:** پاسخ `GET /api/v1/tools` برای همه کاربران (مهمان و احراز هویت‌شده) یکسان و کش‌پذیر با ETag است و هیچ داده شخصی در آن نشت نمی‌کند. ریت‌لیمیت per-IP اعمال می‌گردد.
 2. **الزام سخت‌گیرانه در اجرا:** اجرای ابزار منحصراً نیازمند توکن معتبر و هدر ورک‌اسپیس است (`workspace-policy: required`). اجرای مهمان به هر شکل ممنوع است.
 3. **شناسه یکتایی تکرار (`Idempotency-Key`):**
@@ -109,7 +109,7 @@ icon: "file-check"
 
 ---
 
-### ۲.۶. تفکیک ماژولار قراردادهای OpenAPI — مصوب OQ-055
+### ۲.۶. تفکیک ماژولار قراردادهای OpenAPI — مصوب ADR-018
 1. **یک مسیر، یک قرارداد، یک مالک:**
    - `contracts/openapi/tools/v1/openapi.yaml`: فقط کاتالوگ و اجرای ابزارها (`tools-service`).
    - `contracts/openapi/assets/v1/openapi.yaml`: مدیریت دارایی‌ها (`storage-service`).
@@ -153,8 +153,11 @@ icon: "file-check"
    - **رزرو هزینه کل workflow پیش از شروع:** کل هزینه تخمینی گردش‌کار را پیش از آغاز اجرا رزرو کرده و در پایان بر اساس مصرف واقعی تسویه نماید.
    - **اجرای مرحله‌به‌مرحله و ذخیره وضعیت:** وضعیت هر مرحله را به صورت پایدار در دیتابیس ثبت کند تا در صورت بروز Crash یا قطعی، ادامه اجرا از همان مرحله ذخیره‌شده ازسرگرفته شود و هزینه مالی تکراری به کاربر تحمیل نگردد.
    - تحویل خروجی نهایی به سرویس مالک دارایی و به‌روزرسانی مداوم وضعیت در `job-service`.
-6. **موتور گردش‌کار و استقلال از ران‌تایم (T6 — هنگام نیاز):** در فاز نخست، اجرای گردش‌کارها توسط اجراکننده ساده با مدیریت وضعیت در دیتابیس `lemmo_tools` انجام می‌شود. قالب تعریف اعلانی ابزار باید **کاملاً مستقل از موتور اجرا** طراحی گردد، به‌گونهه‌ای که در صورت نیاز به ارتقا و جایگزینی با موتورهای پایدار ارکستراسیون (نظیر Temporal)، صرفاً لایه اجراکننده بازنویسی شود و ساختار تعاریف ابزارها دست‌نخورده باقی بماند.
-   > 📌 *توجه:* زمان فعال‌سازی و پیاده‌سازی این قابلیت تابع پاسخ‌های مالک محصول به پرسش‌های باز `OQ-068` (دایره سازندگان گردش‌کار)، `OQ-069` (خطی یا شاخه‌دار بودن) و `OQ-070` (مراحل تعاملی با انسان) در `OPEN_QUESTIONS.md` خواهد بود.
+6. **موتور گردش‌کار و استقلال از ران‌تایم (T6 — مصوب D-55 تا D-58):** در فاز نخست، اجرای گردش‌کارها توسط اجراکننده ساده با مدیریت وضعیت در `orchestrator-service` انجام می‌شود. قالب تعریف اعلانی ابزار باید **کاملاً مستقل از موتور اجرا** طراحی گردد، به‌گونهه‌ای که در صورت نیاز به ارتقا و جایگزینی با موتورهای پایدار ارکستراسیون (نظیر Temporal)، صرفاً لایه اجراکننده بازنویسی شود و ساختار تعاریف ابزارها دست‌نخورده باقی بماند:
+   - **دایره سازندگان گردش‌کار (مصوب D-55):** دایره سازندگان گردش‌کارها در فاز بتا منحصراً به صورت سیستمی و از طریق فایل‌های مخزن گیت (Git repo) تعریف می‌شود. ابزار گردش‌کارساز کاربر (User Workflow Builder) به فازهای پس از بتا موکول است.
+   - **توپولوژی خطی گردش‌کار (مصوب D-56):** ساختار گردش‌کارها در فاز بتا منحصراً خطی و ترتیبی (Sequential Pipeline) است. استفاده از موتورهای ارکستراسیون پیشرفته (نظیر Temporal) و پشتیبانی از گراف‌های محاسباتی ناهمگام یا شاخه‌دار (DAG) به فازهای آتی تعویق می‌گردد.
+   - **عدم توقف تعاملی بین‌راهی (مصوب D-57):** گردش‌کارها در فاز بتا بدون توقف تعاملی کاربر (Human-in-the-Loop) اجرا می‌شوند؛ هر مرحله به صورت خودکار و پیوسته پس از تکمیل مرحله قبل آغاز شده و نیاز به تعامل یا تایید بین‌راهی کاربر ندارد.
+   - **مدیریت ابزارها با GitOps (مصوب D-58):** مدیریت و افزودن ابزارهای جدید منحصراً از طریق فایل در ریپازیتوری کد (الگوی GitOps) صورت می‌پذیرد و هیچ‌گونه پنل ادمین یا بک‌آفیس تحت وب برای افزودن داینامیک ابزارها در فاز بتا وجود نخواهد داشت.
 7. **قاعده بازنشستگی و گذار `image-service` (T7 — پیش از بتا و بعد از بتا):**
    - **پیش از بتا (قاعده گذار):** هیچ‌گونه بازسازی ساختاری انجام نمی‌شود و مسیرهای جاری پایدارسازی می‌گردند. اما هیچ تسکی مجاز نیست مسئولیت جدیدی به `image-service` محول کند که بعداً نیاز به انتقال داشته باشد.
    - **بعد از بتا (حذف قطعی):** مدیریت اجرا به `orchestrator-service` و ارتباط مستقیم با مدل‌ها به `ai-gateway` منتقل شده و کانتینر `image-service` رسماً حذف و بازنشسته می‌گردد. وضعیت سرویس در سند `services.md` به صورت «در حال بازنشستگی» ثبت می‌شود.
@@ -300,6 +303,6 @@ enabled: true
 
 ---
 
-## ۲.۱۲. پاسخ به پرسش باز OQ-078 (تصمیم ۲۰۲۶-۱۰-۲۴)
+## ۲.۱۲. تفکیک انحصاری وضعیت اجرا (مصوب D-46)
 
 مالکیت وضعیت اجرایی (Write State) مطلق **orchestrator-service** است و **job-service** صرفاً نمای خواندنی (Read Model) برای گزارش‌دهی به فرانت‌اند است. هیچ سرویس دیگری وضعیت اجرا را نمی‌نویسد. ارجاع: `service-responsibility-registry.md` §۳.۱۱ و §۳.۱۲.

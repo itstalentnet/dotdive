@@ -123,7 +123,7 @@ flowchart LR
 4. **وضعیت محلی کامپوننت (Local State):** هوک‌های `useState` و `useReducer` برای مدیریت انیمیشن‌ها، حالت پاپ‌آپ‌ها و فوکوس عناصر.
 
 ### ۳.۲. تفکیک سیاست کش در خروج و تعویض فضای کاری (Session & Workspace Invalidation Protocol)
-طبق مصوبات صریح [ADR-016](../01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md) (بند ۲.۱۸) و [DOC-FE-002](./workspace-decisions.md) (مصوبه OQ-037):
+طبق مصوبات صریح [ADR-016](../01-architecture/decisions/ADR-016-request-context-governance-and-workspace-policy.md) (بند ۲.۱۸) و [DOC-FE-002](./workspace-decisions.md) :
 
 1. **پروتکل خروج و تعویض حساب کاربری (Sign-out / User Account Switch):**
    - **لغو درخواست‌های فعال:** اجرای قطعی `await queryClient.cancelQueries()`.
@@ -153,7 +153,7 @@ flowchart LR
 - جهت پایه برنامه `<html dir="rtl">` است.
 - استفاده از خواص فیزیکی `left`، `right`، `margin-left`، `margin-right`، `padding-left` و `padding-right` اکیداً ممنوع است.
 - منحصراً از معادل‌های منطقی استفاده می‌شود: `margin-inline-start`, `margin-inline-end`, `padding-inline-*`, `inset-inline-*`.
-- **استثنای رسمی سیستم مختصات آزاد بوم (مصوب ۲۰۲۶-۱۰-۲۴ — حل OQ-061):** در ماژول‌های گرافیکی دوبعدی و بوم استودیو (Canvas)، مختصات دکارتی (`x, y`) ذاتاً مستقل از جهت نوشتار (RTL/LTR) هستند. بنابراین، موقعیت‌یابی المان‌های بوم صراحتاً از قواعد CSS Logical Properties مستثنی بوده و با مختصات مطلق (`left`, `top`) بر مبنای مبدأ بوم یا موقعیت‌یابی برداری `transform: translate(x, y)` هدایت می‌شوند. بدین ترتیب پرسش باز `OQ-061` بسته شد.
+- **سیستم مختصات آزاد بوم در CSS:** این موضوع هنوز تصمیم مصوب ندارد.
 
 ### ۴.۴. آیکون‌ها
 - منحصراً از پکیج `synthline/react` استفاده می‌شود.

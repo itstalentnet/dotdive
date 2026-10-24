@@ -1,6 +1,6 @@
 ---
 title: "ADR-020: معماری میکروسرویس چت ایجنت استودیو (agent-service)، تفکیک استریم رویدادها و چرخه حیات پیام‌ها"
-description: "تصویب معماری سرویس چت ایجنت، مدل داده lemmo_agent، پروتکل تفکیک‌شده استریم پیام‌ها و کارت‌های جاب، زیرساخت شبیه‌ساز ماک مدل‌های زبانی و حذف ماک چت پیرو OQ-056 تا OQ-060"
+description: "تصویب معماری سرویس چت ایجنت، مدل داده lemmo_agent، پروتکل تفکیک‌شده استریم پیام‌ها و کارت‌های جاب، زیرساخت شبیه‌ساز ماک مدل‌های زبانی و حذف ماک چت پیرو تصمیمات مرحله 16B"
 order: 21
 icon: "bot"
 ---
@@ -14,8 +14,8 @@ icon: "bot"
 | **Status** | `Approved` |
 | **Owner** | تیم معماری و پلتفرم بک‌اند / @behroz |
 | **Last Updated** | 2026-10-09 |
-| **Summary (EN)** | Ratifies Stage 16B architectural blueprint following OQ-056 to OQ-060: Establishes agent-service (DualServer HTTP 8096 + gRPC 50066, lemmo_agent DB), workspace/user-isolated immutable threads (404 on access mismatch, private to author), decoupled message lifecycle (POST /messages returning 202 Accepted, GET /messages/{id}/events per-message SSE stream with Last-Event-ID and THREAD_BUSY protection), typed parts schema with message_jobs mapping, client-driven job status observation via sdk.jobs.subscribe, deterministic containerized LLM emulator (lemmo-mock-llm) in dev/test with fail-fast in production, dual Kong routing, and decommission of lemmo-mock-chat. |
-| **Summary (FA)** | تصویب مشخصات معماری مرحله 16B پیرو تصمیمات OQ-056 تا OQ-060: استقرار agent-service (دوال‌سرور پورت HTTP 8096 و gRPC 50066، دیتابیس lemmo_agent)، رشته‌های تغییرناپذیر اسکوپ‌شده به کاربر و ورک‌اسپیس (خطای ۴۰۴ در عدم تطابق، حریم خصوصی مطلق پرامپت‌ها)، چرخه حیات تفکیک‌شده پیام (ارسال با ۲۰۲ و استریم مجزای هر پیام با رویدادهای تایپ‌دار، Last-Event-ID و خطای THREAD_BUSY)، ساختار parts تایپ‌دار با جدول message_jobs، اتصال مستقیم کلاینت به استریم جاب‌ها، شبیه‌ساز قطعی LLM در dev/test (کانتینر lemmo-mock-llm) با منع قطعی در پروداکشن، تفکیک دو روت چت در Kong و حذف کامل lemmo-mock-chat. |
+| **Summary (EN)** | Ratifies Stage 16B architectural blueprint following Stage 16B decisions: Establishes agent-service (DualServer HTTP 8096 + gRPC 50066, lemmo_agent DB), workspace/user-isolated immutable threads (404 on access mismatch, private to author), decoupled message lifecycle (POST /messages returning 202 Accepted, GET /messages/{id}/events per-message SSE stream with Last-Event-ID and THREAD_BUSY protection), typed parts schema with message_jobs mapping, client-driven job status observation via sdk.jobs.subscribe, deterministic containerized LLM emulator (lemmo-mock-llm) in dev/test with fail-fast in production, dual Kong routing, and decommission of lemmo-mock-chat. |
+| **Summary (FA)** | تصویب مشخصات معماری مرحله 16B پیرو تصمیمات مرحله 16B: استقرار agent-service (دوال‌سرور پورت HTTP 8096 و gRPC 50066، دیتابیس lemmo_agent)، رشته‌های تغییرناپذیر اسکوپ‌شده به کاربر و ورک‌اسپیس (خطای ۴۰۴ در عدم تطابق، حریم خصوصی مطلق پرامپت‌ها)، چرخه حیات تفکیک‌شده پیام (ارسال با ۲۰۲ و استریم مجزای هر پیام با رویدادهای تایپ‌دار، Last-Event-ID و خطای THREAD_BUSY)، ساختار parts تایپ‌دار با جدول message_jobs، اتصال مستقیم کلاینت به استریم جاب‌ها، شبیه‌ساز قطعی LLM در dev/test (کانتینر lemmo-mock-llm) با منع قطعی در پروداکشن، تفکیک دو روت چت در Kong و حذف کامل lemmo-mock-chat. |
 | **Tags** | `adr`, `adr-020`, `agent-service`, `stage16b`, `sse`, `model-router`, `chat`, `kong` |
 
 ---
@@ -28,13 +28,13 @@ icon: "bot"
 3. **خطر شکستن فرانت‌اند و هدررفت منابع در رویدادهای جاب:** پروکسی کردن پیشرفت جاب‌ها درون استریم چت موجب ایجاد منبع حقیقت دوم و قطعی استریم در تولیدهای طولانی می‌شد.
 4. **خطر شبیه‌سازهای قانون‌محور در کد پروداکشن:** ایجاد Fallback بی‌صدا به Parserهای محلی در کد سرویس ریسک کسر هزینه واقعی با پاسخ جعلی در پروداکشن را ایجاد می‌کرد.
 
-این ADR پیرو پاسخ‌های مصوب به سوالات **OQ-056 تا OQ-060**، استانداردهای فنی مرحله 16B را تصویب می‌کند.
+این ADR پیرو تصمیمات مصوب مرحله 16B، استانداردهای فنی مرحله 16B را تصویب می‌کند.
 
 ---
 
 ## ۲. تصمیمات مصوب (Decisions)
 
-### ۲.۱. مدل داده، مرز مالکیت و چرخه حیات پیام در `lemmo_agent` (مصوب OQ-056)
+### ۲.۱. مدل داده، مرز مالکیت و چرخه حیات پیام در `lemmo_agent` (مصوب ADR-020 §۲.۱)
 1. **اسکوپ و حریم خصوصی مطلق رشته‌ها (Thread Isolation):**
    - هر Thread منحصراً به جفت `(workspace_id, user_id)` تعلق دارد و پس از ایجاد **تغییرناپذیر** است.
    - هیچ شخصی به جز خود کاربر سازنده (حتی Owner یا Admin ورک‌اسپیس) مجاز به مشاهده Threadها و پرامپت‌های او نیست.
@@ -57,7 +57,7 @@ icon: "bot"
 
 ---
 
-### ۲.۲. تفکیک ارسال از استریم (SSE Protocol & Endpoints) (مصوب OQ-057)
+### ۲.۲. تفکیک ارسال از استریم (SSE Protocol & Endpoints) (مصوب ADR-020 §۲.۲)
 1. **تفکیک اندپوینت‌ها:**
    - ارسال پیام: `POST /api/v1/chat/messages` با وضعیت **`202 Accepted`** شامل `thread_id`، `user_message_id` و `assistant_message_id`.
    - استریم پیام: **`GET /api/v1/chat/threads/{threadId}/messages/{messageId}/events`** اختصاصی برای هر پیام.
@@ -78,7 +78,7 @@ icon: "bot"
 
 ---
 
-### ۲.۳. پایپ‌لاین تشخیص نیت و شبیه‌ساز ماک مدل زبانی (مصوب OQ-058)
+### ۲.۳. پایپ‌لاین تشخیص نیت و شبیه‌ساز ماک مدل زبانی (مصوب ADR-020 §۲.۳)
 1. **ممنوعیت منطق جعلی در کد سرویس:**
    - `agent-service` فقط یک مسیر اجرایی دارد: اتصال به `model-router-service` با Function Calling. هیچ Parser قانون‌محور یا Mock پنهان در کد سرویس وجود ندارد.
 2. **سرویس شبیه‌ساز مستقل در محیط Dev/Test (`lemmo-mock-llm`):**
@@ -90,7 +90,7 @@ icon: "bot"
 
 ---
 
-### ۲.۴. نمایش کارت جاب در فرانت‌اند استودیو (مصوب OQ-059)
+### ۲.۴. نمایش کارت جاب در فرانت‌اند استودیو (مصوب ADR-020 §۲.۴)
 1. **اتصال مستقیم کلاینت به استریم جاب:**
    - ایجنت صرفاً شناسه `job_id` را در پیام درج می‌کند. کامپوننت چت فرانت‌اند (`AgentChatMessage.tsx`) با تابع استاندارد `sdk.jobs.subscribe(jobId)` به استریم زنده وضعیت در `job-service` متصل می‌شود.
 2. **هوک مشترک `useJobStatus`:**
@@ -101,7 +101,7 @@ icon: "bot"
 
 ---
 
-### ۲.۵. توپولوژی پورت‌ها، روت‌های Kong و ترتیب جایگزینی ماک (مصوب OQ-060)
+### ۲.۵. توپولوژی پورت‌ها، روت‌های Kong و ترتیب جایگزینی ماک (مصوب ADR-020 §۲.۵)
 1. **تخصیص رسمی پورت‌ها و کانتینر:**
    - نام کانتینر: `lemmo-svc-agent`
    - پورت HTTP اختصاصی: **`8096`**

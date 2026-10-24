@@ -114,3 +114,14 @@ The financial effect remains exclusively in `quota-service` via the Claim engine
 توالی تحویل در [رودمپ اصلی](./roadmap.md) نسخه ۵ است: تشخیص‌پذیری → مالکیت دائمی و بک‌اند ورود/دعوت/اعتبار → چت و تولید تصویر با زبان طبیعی و command → آماده‌سازی فرانت بر اساس قرارداد → اتصال سرتاسری → عرضه محدود. هیچ سرویس مسئولیت دامنه دیگر را موقتاً نمی‌پذیرد. Quota مالک فعلی Wallet و اثر مالی است؛ نام Wallet به معنی تصویب سرویس تازه نیست. **مالک دائمی قواعد دعوت/ظرفیت/پروموی اعتباری از ۲۰۲۶-۱۰-۲۳ `access-promo-service` است (D-53، [ADR-025](../01-architecture/decisions/ADR-025-access-promo-service-ownership.md)).** سرویس جدید فقط با اثبات خلأ دامنه و ثبت قرارداد/استقرار/مالک داده ایجاد می‌شود. عبارت «مالک دعوت/Promo هنوز تصویب نشده» در نسخه‌های پیشین **سابقه** است و دیگر جاری نیست.
 
 عبارت مالک Auth/Workspace در تسک تاریخی P06 با ابهام ثبت‌شده در سند مالکیت بتا سازگار نیست و اثبات تصویب نهایی مالکیت تلقی نمی‌شود؛ تعیین تکلیف آن ورودی مرحله ۲ است. تا آن زمان مسئولیت موقت اضافه نمی‌شود. متن قبلی این اسناد و گزارش‌ها شاهد تاریخی است، نه مجوز اجرای مالکیت مبهم.
+
+## 7. Ratified Architecture Decisions (D-68 to D-73) — Access & Promo System
+
+Following the ratification of ADR-025 and architectural decisions [D-68 to D-73](../09-governance/decision-register.md):
+
+1. **Client & Internal API Contracts (D-68):** External client surface routes through Kong: `POST /api/v1/promos/claim` (with mandatory `Idempotency-Key` header) and `GET /api/v1/promos/validate/{code}`. Internal service communications use gRPC with idempotency keys; consumption events are published via RabbitMQ.
+2. **Data Model & Lifecycle (D-69):** Invite codes are stored in `invite_codes` with secure SHA-256 code hashes, status lifecycle, usage caps, and expiration timestamps. User redemptions are recorded in `invite_code_redemptions` with a unique index preventing multi-use.
+3. **Beta Capacity Ceiling (D-70):** Beta user capacity limits are driven by version-controlled `config/default.yaml` with environment override capability via `BETA_MAX_CAPACITY`.
+4. **Atomic Redemption & Claim Coordination (D-71):** Atomic coordination between invite redemption and credit claim uses the Transactional Outbox pattern, with deterministic idempotency keys (`Idempotency-Key = user_id + code_hash`) ensuring safe replay and retry behavior.
+5. **Workspace vs Beta Invite Domain Decoupling (D-72):** Strict domain boundary is maintained: workspace membership invites belong exclusively to `workspace-service`, while beta platform access invites belong exclusively to `access-promo-service`.
+6. **Admin & Operational Tooling (D-73):** Phase 1 admin operations and code generation are managed through `lemmo-cli` subcommands and database management scripts; web-based admin dashboards are deferred to post-beta.

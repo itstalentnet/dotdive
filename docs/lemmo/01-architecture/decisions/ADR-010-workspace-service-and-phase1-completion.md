@@ -24,13 +24,13 @@
 
 ## ۲. تصمیمات مصوب معماری (Decisions)
 
-### ۲.۱. تخصیص پورت‌ها و هویت شبکه (OQ-015)
+### ۲.۱. تخصیص پورت‌ها و هویت شبکه (مصوب ADR-010)
 - **پورت gRPC:** `50060`
 - **پورت HTTP Gateway:** `8089`
 - **نام کانتینر رسمی:** `lemmo-svc-workspace`
 - **استقرار:** تابع الگوی مصوب ADR-009 در `services/workspace-service/deploy/compose.yaml` که از طریق `include:` در فایل ریشه `infra/compose/dev.yml` فراخوانی می‌شود.
 
-### ۲.۲. پایگاه داده و اسکیمای `lemmo_workspace` (OQ-016)
+### ۲.۲. پایگاه داده و اسکیمای `lemmo_workspace` (مصوب ADR-010)
 سرویس مالک انحصاری دیتابیس `lemmo_workspace` است. مایگریشن اولیه `000001_init_workspace_schema.up.sql` شامل ۴ جدول تفکیک‌شده به شرح زیر است:
 1. **جدول `workspaces`:**
    - `workspace_id UUID PRIMARY KEY DEFAULT gen_random_uuid()`
@@ -69,14 +69,14 @@
    - `default_resolution VARCHAR NOT NULL DEFAULT '1024x1024'`
    - `created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`, `updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`
 
-### ۲.۳. قراردادهای مرجع Protobuf (OQ-017)
+### ۲.۳. قراردادهای مرجع Protobuf (مصوب ADR-010)
 فایل `contracts/lemmo/v1/workspace.proto` شامل متدهای استاندارد زیر تدوین می‌شود:
 - **مدیریت فضاهای کاری:** `CreateWorkspace`, `GetWorkspace`, `UpdateWorkspace`, `DeleteWorkspace`, `ListUserWorkspaces`
 - **مدیریت اعضا و دعوت‌نامه‌ها:** `InviteMember`, `AcceptInvitation`, `RejectInvitation`, `RemoveMember`, `UpdateMemberRole`, `ListWorkspaceMembers`
 - **حاکمیت سیاست و تنظیمات:** `GetWorkspaceSettings`, `UpdateWorkspaceSettings`, `UpdateWorkspacePayerPolicy`
 - اینام‌های رسمی: `WorkspaceType`, `WorkspaceRole`, `InvitationStatus`, `PayerPolicy`, `OnWalletEmptyAction`.
 
-### ۲.۴. الگوی تجرید مدیریت دسترسی IAM / Keto (OQ-018)
+### ۲.۴. الگوی تجرید مدیریت دسترسی IAM / Keto (مصوب ADR-010)
 مشابه الگوی موفق `FinancialLedgerPort` در استیج ۸، دسترسی‌ها و کنترل نقش‌ها از طریق یک اینترفیس انتزاعی در لایه پورت‌ها پیاده‌سازی می‌شود:
 ```go
 type PermissionManager interface {
@@ -88,7 +88,7 @@ type PermissionManager interface {
 - **آداپتور محلی (`LocalMembershipAdapter`):** پیاده‌سازی پیش‌فرض که مستقیماً جداول `workspace_memberships` را در دیتابیس بررسی کرده و از هدر `X-Mock-Roles` در محیط محلی پشتیبانی می‌کند.
 - **آداپتور Keto (`KetoPermissionAdapter`):** پیاده‌سازی بر پایه کلاینت gRPC/REST به Ory Keto که با تنظیم متغیر `KETO_ENDPOINT` فعال می‌شود.
 
-### ۲.۵. تعامل با `quota-service` و الگوی وضعیت Provisioning (OQ-019)
+### ۲.۵. تعامل با `quota-service` و الگوی وضعیت Provisioning (مصوب ADR-010)
 برای ساخت کیف‌پول سازمانی بدون ایجاد وابستگی شکننده همگام دوفازی:
 1. فضای کاری ابتدا با وضعیت `status = 'provisioning'` در دیتابیس ثبت می‌شود.
 2. سرویس تلاش می‌کند از طریق فراخوانی همگام gRPC به `quota-service` کیف‌پول سازمان (`OwnerTypeWorkspace`) را بسازد.
@@ -97,16 +97,16 @@ type PermissionManager interface {
 5. **قاعده حاکمیتی:** تا زمانی که وضعیت سازمان `provisioning` است، هیچ‌گونه اجرای گراف یا تراکنش اعتباری در آن مجاز نیست.
 6. تغییرات سیاست پرداخت (`UpdateWorkspacePayerPolicy`) نیز علاوه بر به‌روزرسانی محلی، رویداد `workspace.payer_policy_updated` را به صف پیام ارسال می‌کند.
 
-### ۲.۶. تمایز فضای شخصی و سازمانی (OQ-020)
+### ۲.۶. تمایز فضای شخصی و سازمانی (مصوب ADR-010)
 - **فضای شخصی (`PERSONAL`):** در زمان عضویت اولیه کاربر ساخته می‌شود، غیرقابل حذف است، امکان دعوت عضو جدید ندارد، سیاست پرداخت آن ثابت (`member_pays`) و `on_wallet_empty` آن همواره `block` است.
 - **فضای سازمانی (`TEAM`):** توسط کاربر ایجاد می‌شود، دارای اعضای متعدد با نقش‌های مشخص است، سیاست پرداخت و اکشن کیف‌پول خالی (`block` یا `member_fallback`) در آن توسط مالک/ادمین قابل تغییر است.
 
-### ۲.۷. امنیت دعوت‌نامه‌ها و انقضای کانفیگ‌پذیر (OQ-021)
+### ۲.۷. امنیت دعوت‌نامه‌ها و انقضای کانفیگ‌پذیر (مصوب ADR-010)
 - تولید توکن تصادفی با امنیت بالا (`crypto/rand`).
 - ذخیره‌سازی صرفاً به صورت هش امن SHA-256 در فیلد `token_hash`.
 - **منع هاردکد مدت انقضا (DOC-ARCH-009):** مدت اعتبار توکن دعوت‌نامه نباید به صورت `const` در کد نوشته شود؛ این مقدار از کلید پیکربندی `invitation_expiry_duration` در `default.yaml` (با پیش‌فرض `168h` معادل ۷ روز) و متغیر محیطی `INVITATION_EXPIRY_DURATION` خوانده می‌شود.
 
-### ۲.۸. آزمون جامع سرتاسری و معیار پذیرش Milestone Gate 5 (OQ-022)
+### ۲.۸. آزمون جامع سرتاسری و معیار پذیرش Milestone Gate 5 (مصوب ADR-010)
 بسته شدن رسمی فاز اول بک‌اند مستلزم قبولی تست سرتاسری `tests/e2e/phase1_gate5_test.go` در ۹ مرحله متوالی و پیوسته است:
 1. ساخت فضای سازمانی (`TEAM`) با سیاست `workspace_pays` در `workspace-service`.
 2. ارسال دعوت‌نامه برای عضو جدید با نقش `editor` و پذیرش دعوت‌نامه با توکن معتبر.
