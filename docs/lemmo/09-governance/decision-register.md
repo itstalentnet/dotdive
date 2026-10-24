@@ -133,6 +133,7 @@
 data: <JSON>
 
 `) است. | `تأییدشده` | [OQ-062](../../../../OPEN_QUESTIONS.md#oq-062) | [`03-backend/contracts.md`](../03-backend/contracts.md#۹-استاندارد-شمای-رویدادهای-استریم-چت-sse-و-فرمت-فریمها-مصوب-d-82) §۹ و [`02-frontend/agent-chat-state-and-sse-lifecycle.md`](../02-frontend/agent-chat-state-and-sse-lifecycle.md) | ۲۰۲۶-۱۰-۲۴ |
+| <a id="d-85"></a>**D-85** | **عدم اعتماد لبه به شناسهٔ رهگیری کلاینت:** Kong برای هر درخواست ورودی همیشه `traceparent` و `X-Request-ID` تازه می‌سازد. `traceparent`، `tracestate` و `X-Request-ID` ورودی کلاینت هرگز به بالادست نمی‌روند و مبنای trace id نمی‌شوند. مقدار ورودی کلاینت فقط در لاگ لبه و در فیلدهای جدای `client_trace_id` و `client_request_id` ثبت می‌شود. سرویس‌های داخلی `traceparent` فراخوان داخلی را ادامه می‌دهند. | `تأییدشده` | دستور مالک در اصلاحیهٔ ۱ OBS_01 | [`service-responsibility-registry.md`](../01-architecture/service-responsibility-registry.md#۳۱-kong) §۳.۱، [`style-guide.md`](../03-backend/style-guide.md#81-لاگ-و-رهگیری-توزیع‌شده-logging--distributed-tracing--d-26-تا-d-30) و [`platform-reliability-observability.md`](../07-devops/platform-reliability-observability.md) | ۲۰۲۶-۱۰-۲۴ |
 
 ---
 

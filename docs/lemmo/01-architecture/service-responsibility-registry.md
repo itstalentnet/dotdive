@@ -97,13 +97,13 @@ flowchart LR
 | دامنه | لبه |
 | وضعیت | فعال در بتا |
 | مسئولیت در یک جمله | مسیریابی بر اساس URL، CORS، محدودیت نرخ |
-| مسئولیت‌ها | مسیرها: `/v1/chat` → agent-service؛ `/v1/workflows` → orchestrator-service؛ خواندن وضعیت اجرا → job-service؛ `/api/v1/promos/claim` و `/api/v1/promos/validate/{code}` → access-promo-service (D-68) |
-| نمی‌کند / نمی‌داند | تصمیم هویت؛ اعتماد به هدر `X-User-ID`؛ چک عضویت workspace (در هدف)؛ هیچ مسیر بیرونی به ai-gateway |
+| مسئولیت‌ها | مسیرها: `/v1/chat` → agent-service؛ `/v1/workflows` → orchestrator-service؛ خواندن وضعیت اجرا → job-service؛ `/api/v1/promos/claim` و `/api/v1/promos/validate/{code}` → access-promo-service (D-68)؛ ساخت شناسهٔ رهگیری تازه در لبه برای هر درخواست و تزریق به بالادست (D-85) |
+| نمی‌کند / نمی‌داند | تصمیم هویت؛ اعتماد به هدر `X-User-ID`؛ چک عضویت workspace (در هدف)؛ هیچ مسیر بیرونی به ai-gateway؛ عدم اعتماد به traceparent، tracestate و X-Request-ID ورودی کلاینت (D-85) |
 | دادهٔ متعلق | ندارد |
 | قراردادها | مسیرهای HTTP (Kong declarative config) |
 | فراخوانی می‌کند / فراخوانده می‌شود از | فراخوانده می‌شود از کلاینت؛ فراخوانی می‌کند سرویس‌های بالادست |
 | لمس پول | ندارد |
-| تصمیم‌های مرجع | ADR-013، D-38، D-68، تصمیم مسیرها |
+| تصمیم‌های مرجع | ADR-013، D-38، D-68، D-85، تصمیم مسیرها |
 | بدهی شناخته‌شده | QF-ARCH08-02 (header spoofing) |
 
 ### ۳.۲. لایهٔ احراز هویت (Oathkeeper)
@@ -578,7 +578,7 @@ flowchart LR
 
 | مسئولیت | مالک یگانه |
 |---|---|
-| مسیریابی URL / CORS / rate limit لبه | Kong |
+| مسیریابی URL / CORS / rate limit لبه / تولید شناسهٔ رهگیری تازه لبه (D-85) | Kong |
 | تصمیم هویت (cookie/token → internal token) | لایهٔ احراز هویت |
 | ورود/OTP/نشست | auth-service |
 | پروفایل/handle/ریسک/تعلیق | user-service |

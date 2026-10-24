@@ -25,7 +25,7 @@
 
 | قابلیت | وضعیت بر اساس سورس | شاهد | شکاف و مرحله |
 | --- | --- | --- | --- |
-| Distributed tracing / logging | پیاده‌سازی مسیر بتا (TASK_OBS_01 / D-26..D-30) | `api/services/{agent,quota,storage,model-router}-service/internal/observability/`؛ `api/contracts/platform/observability/log-event.schema.json` (سابقه و بدهی تاریخی: `api/core/middleware/trace.go:76`) | انتشار W3C traceparent در Kong و ۴ سرویس بتا برقرار شد؛ لاگ استاندارد JSON روی stdout + فرمان `make trace TRACE_ID=<id>` فعال است. استک مرکزی Collector/Exporter در REL-01 پس از MVP |
+| Distributed tracing / logging | پیاده‌سازی مسیر بتا (TASK_OBS_01 / D-26..D-30 / D-85) | `api/services/{agent,quota,storage,model-router}-service/internal/observability/`؛ `api/contracts/platform/observability/log-event.schema.json` (سابقه و بدهی تاریخی: `api/core/middleware/trace.go:76`) | انتشار W3C traceparent در Kong و ۴ سرویس بتا برقرار شد؛ عدم اعتماد لبه به traceparent/X-Request-ID کلاینت و ساخت شناسه تازه در Kong (D-85)؛ لاگ استاندارد JSON روی stdout + فرمان `make trace TRACE_ID=<id>` فعال است. استک مرکزی Collector/Exporter در REL-01 پس از MVP |
 | Collector / metrics / logs / dashboards | استک استقرار در Composeهای بررسی‌شده مشاهده نشد | جست‌وجوی Collector/OTel، Prometheus، Grafana، Loki، Tempo، Jaeger در Composeها | وجود import کتابخانه OTel معادل Collector نیست؛ استک مرکزی در REL-01 پس از MVP |
 | Job recovery / reconciliation | جزئی و دامنه‌ای | `api/services/job-service/internal/app/service.go:358` (outbox)؛ `api/services/quota-service/internal/app/service.go:423,1351,1456`؛ `api/services/image-service/internal/app/service.go:592` | بازنشر outbox، بازیابی Claim/رزرو و upload موجود؛ sweeper جامع برای RUNNING رهاشده و تضمین پایان همه Jobها اثبات نشده؛ REL-02 |
 | Idempotency / deduplication | پایه موجود | `api/core/idempotency/keys.go:41` و `redis.go`؛ `api/services/image-service/internal/app/service.go:100` | lookup کار موجود و کلید scoped وجود دارد؛ رقابت هم‌زمان و رفتار Provider پس از timeout باید مستقل بررسی شود. STB-03/04 و REL-02؛ trace جای کلید idempotency نیست |
@@ -118,7 +118,7 @@ OpenTelemetry Collector گزینه جمع‌آوری؛ Tempo یا Jaeger گزی�
 
 ۱. Observability قابلیت مشترک و خارج از مسیر تجاری است؛ سرویس واسط اجباری میان Gateway و سرویس‌ها ایجاد نمی‌شود. قطع collector نباید عملیات محصول را متوقف کند؛ export ناهمگام و منابع آن محدود باشند.
 
-۲. trace/context در HTTP، gRPC، SSE، outbox و broker منتقل شود؛ شناسه پایدار Job/event/attempt برای بازیابی حفظ شود. trace جای idempotency یا هویت امنیتی نیست. لاگ JSON پالایش‌شده، reason/domain و کد پیگیری تا UI حفظ شوند.
+۲. trace/context در HTTP، gRPC، SSE، outbox و broker منتقل شود؛ شناسه پایدار Job/event/attempt برای بازیابی حفظ شود. trace جای idempotency یا هویت امنیتی نیست. لبه (Kong) هرگز به شناسه‌های رهگیری ورودی کلاینت اعتماد نمی‌کند؛ برای هر درخواست یک `traceparent` و `X-Request-ID` تازه می‌سازد و مقادیر کلاینت صرفاً در فیلدهای `client_trace_id` و `client_request_id` لاگ لبه ثبت می‌شوند (مصوب D-85). لاگ JSON پالایش‌شده، reason/domain و کد پیگیری تا UI حفظ شوند.
 
 ۳. liveness، readiness وابستگی ضروری و journey واقعی سه ادعای مستقل‌اند. پاسخ ثابت UP، وجود کانتینر و موفقیت تست in-process به‌تنهایی سلامت محصول را ثابت نمی‌کنند. فرمان عملیاتی باید شکست و بررسی ناقص را غیرموفق گزارش کند.
 
