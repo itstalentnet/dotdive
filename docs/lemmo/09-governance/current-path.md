@@ -149,4 +149,4 @@ flowchart LR
 - **ماتریس رسمی تصمیمات:** [MVP Decision Register (DOC-GOV-004)](./decision-register.md)
 - **مالکیت دعوت بتا و هدیه:** [Beta Invitation & Gift Ownership (DOC-BE-014)](../03-backend/beta-invitation-and-gift-ownership.md)
 - **قواعد حاکمیتی تسک‌ها:** [Task & Review Rules (DOC-GOV-005)](./task-template-and-review-rules.md)
-- **نمایه یافته‌های بک‌لاگ:** [Findings Registry (F-1 to F-9)](../../../../.task/backlog/FINDINGS_F1_TO_F9_REGISTRY.md)
+- **نمایه یافته‌های بک‌لاگ:** [Findings Registry (F-1 to F-9)](../../../../.task/archive/obsolete-2026-10-24/FINDINGS_F1_TO_F9_REGISTRY.md) (منتقل‌شده به [QUALITY_FINDINGS_LOG.md](../../../../.task/governance/QUALITY_FINDINGS_LOG.md))
