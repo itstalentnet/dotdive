@@ -350,39 +350,61 @@ All Go services in `api/` must strictly implement the security invariants define
 
 To completely eliminate security regressions during the development of new microservices (such as `iam-service`, `billing-service`, `notification-service`), developers must adhere strictly to these 5 standard implementation blueprints. **No custom or ad-hoc security logic is permitted.**
 
-### Blueprint 9.1: Mandatory gRPC Server Bootstrap
-Every new gRPC service in `api/services/<name>/cmd/` must wire observability, recovery, authentication and health check interceptors. Unauthenticated traffic must never reach business logic:
+### Blueprint 9.1: Mandatory gRPC Server Bootstrap (Core-Free & D-84 Local RPC Policy Interceptor)
+Every new gRPC service scaffolded via `lemmo-cli service <name>` must wire observability, recovery, and local auth policy interceptors without runtime core library dependencies (D-28, D-84). Unauthenticated traffic must never reach business logic:
 
 ```go
-// Standard gRPC Server Bootstrap Pattern (AIP-193, Zero-Trust & Observability D-26..D-30)
+// Standard gRPC Server Bootstrap Pattern (D-28, D-84, TASK_ARCH_14)
+cfg, err := config.LoadConfig("config/default.yaml")
+if err != nil || cfg.Validate() != nil {
+    os.Exit(1)
+}
+
 observability.InitLogger(observability.Config{
-    Service: "<ServiceName>",
-    Version: GitCommit,
-    Level:   cfg.LogLevel,
+    Service: cfg.Service.Name,
+    Version: cfg.Service.Version,
+    Level:   cfg.Observability.LogLevel,
 })
 
-s := grpcServer.NewServer(
-    grpcServer.ChainUnaryInterceptor(
+authInterceptor, err := auth.NewAuthInterceptor(cfg)
+if err != nil {
+    os.Exit(1)
+}
+
+opts := []grpc.ServerOption{
+    grpc.ChainUnaryInterceptor(
         observability.UnaryServerInterceptor(),
         observability.UnaryRecoveryInterceptor(),
-        middleware.UnaryServerAuthInterceptor(),
+        authInterceptor.UnaryServerInterceptor(),
     ),
-    grpcServer.ChainStreamInterceptor(
-        middleware.StreamServerAuthInterceptor(),
+    grpc.ChainStreamInterceptor(
+        authInterceptor.StreamServerInterceptor(),
     ),
-)
-lemmov1.Register<ServiceName>Server(s, handler)
-reflection.Register(s) // Automatically exempted in middleware.isExemptMethod
-```
+}
 
-### Blueprint 9.2: Outgoing gRPC Client Identity Propagation
-When a microservice calls another internal gRPC service, it **must never send a naked context**. The authenticated caller's identity and W3C trace context must be explicitly propagated to downstream RPCs:
+srv, err := server.NewServer(cfg, opts...)
+if err != nil {
+    os.Exit(1)
+}
+
+srv.Serve(func(s *grpc.Server) {
+    // Register domain handlers (grpc.health.v1 is automatically registered and exempted)
+})
+```
+- **Policy Enforcement (D-84):** Each method policy is configured in `config/default.yaml` (`rpc_policies`):
+  - `user`: Requires valid `x-user-id` set by Edge Gateway (otherwise `codes.Unauthenticated`).
+  - `service`: Requires valid `x-caller-service` matching configured `allowed_callers` (otherwise `codes.PermissionDenied`).
+  - Unconfigured methods: Fail-closed (`codes.PermissionDenied`).
+  - Health check: `grpc.health.v1.Health/*` is exempted in code. Reflection is not registered.
+
+### Blueprint 9.2: Outgoing gRPC Client Identity Propagation (D-83)
+When a microservice calls another internal gRPC service, it **must never send a naked context**. The authenticated caller's identity (`x-caller-service`, D-83) and W3C trace context (`traceparent`, D-27 / D-85) must be explicitly propagated to downstream RPCs:
 
 ```go
 // In api/services/<name>/internal/adapters/clients/<target>_client.go
 func (c *TargetGRPCClient) ExecuteOperation(ctx context.Context, req *lemmov1.Request) (*lemmov1.Response, error) {
-    // MANDATORY: Propagate caller AuthContext and W3C TraceContext (D-27 / TASK_OBS_01)
-    outCtx := middleware.PropagateAuthMetadata(ctx)
+    // MANDATORY: Propagate internal caller identity (D-83) and W3C TraceContext (D-27 / TASK_OBS_01)
+    outCtx := metadata.AppendToOutgoingContext(ctx, "x-caller-service", c.serviceName)
     outCtx = observability.InjectGRPCMetadata(outCtx)
     
     resp, err := c.client.ExecuteOperation(outCtx, req)
@@ -392,6 +414,7 @@ func (c *TargetGRPCClient) ExecuteOperation(ctx context.Context, req *lemmov1.Re
     return resp, nil
 }
 ```
+- **Approved Debt (DEBT-AUTH-01):** `x-caller-service` is an approved interim mechanism within the isolated internal network. Kong Edge Gateway clears any external `x-caller-service` incoming headers. It will be replaced post-MVP by signed internal tokens (D-38).
 
 ### Blueprint 9.3: Anti-IDOR Resource Authorization (Zero-Trust Actor Check)
 Every HTTP/REST endpoint and gRPC method operating on a user-owned or workspace-owned resource must verify ownership using the authenticated `Principal` from context:
