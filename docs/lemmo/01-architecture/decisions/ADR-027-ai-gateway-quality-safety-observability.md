@@ -6,7 +6,7 @@
 | **Category** | `architecture` |
 | **Status** | `Approved` |
 | **Owner** | Core Architecture & AI Platform Team |
-P26-10-24|
+| **Last Updated** | 2026-10-24 |
 | **Summary (EN)** | Authoritative specification for Lemmo AI Gateway quality, safety, evaluation gates, telemetry standards, and declarative provider/model registry: intent output validation (C1), input caps (C2), log contracts (C3), raw-prompt ban (C4), golden set (C7), service-by-model-tier authorization (C8), budget/rate limits (C9), local model readiness (C10), rejected alternatives (C11), exclusive agent access through the `intent-classifier` alias (A3–A4, replacing D-39), registry structure (R1–R6), and the single three-location definition model with a shared CI validator (L1, V1). |
 | **Summary (FA)** | سند رسمی معماری درگاه هوش مصنوعی (AI Gateway) لِمو در حوزه کیفیت، ایمنی، تله‌متری و رجیستری اعلانی provider/مدل: اعتبارسنجی خروجی نیت (C1)، سقف ورودی (C2)، قرارداد لاگ (C3)، ممنوعیت پرامپت خام (C4)، مجموعه طلایی (C7)، مجوز سرویس×دسته مدل (C8)، بودجه/ریت‌لیمیت (C9)، آمادگی مدل محلی (C10)، گزینه‌های ردشده (C11)، دسترسی انحصاری `agent-service` از نام مستعار `intent-classifier` (A3–A4، جایگزین D-39)، ساختار رجیستری (R1–R6) و مدل سه‌محلی تعریف با اعتبارسنج مشترک CI (L1، V1). |
 | **Tags** | `adr`, `ai-gateway`, `llmops`, `quality`, `safety`, `observability`, `model-router`, `intent-classification`, `registry`, `provider`, `alias` |
@@ -15,7 +15,7 @@ P26-10-24|
 
 # ADR-027: کیفیت، ایمنی و پایش فراخوانی‌های هوش مصنوعی در درگاه هوش مصنوعی
 
-> ⚠️ **وضعیت سند: پیش‌نویس حاکمیتی (`Draft`)**  
+> ✅ **وضعیت سند: مصوب حاکمیتی (`Approved`)**  
 > این سند استانداردهای کیفیت، ایمنی، گیت‌های ارزیابی و پایش فراخوانی‌های هوش مصنوعی را در بستر معماری AI Gateway و Model Router پلتفرم لِمو پیرو الزامات حاکمیتی مصوب مالک محصول (ثبت‌شده در تسک `TASK_ARCH_05`) تبیین می‌کند. این سند همراه با اسناد فنی پیوسته در [معماری مسیریابی مدل‌ها و پایپ‌لاین تولید مدیا (DOC-BE-006)](../../03-backend/media-and-model-pipeline.md) و [قراردادهای پلتفرم (DOC-BE-003)](../../03-backend/contracts.md) به عنوان منبع واحد حقیقت (SSOT) عمل می‌کند.
 
 ---

@@ -103,8 +103,8 @@ The financial effect remains exclusively in `quota-service` via the Claim engine
   name is not predetermined") is **superseded** as of 2026-10-23.
 - This decision fixes **ownership and boundaries only**. API, data model, event
   contract, capacity source, and atomic redeem+claim behaviour are designed in
-  the implementation task **after ADR-025 is approved**; no code may start before
-  that approval.
+  the implementation task **now that ADR-025 is approved**; no code may start before
+  that implementation task.
 - Stages 2–5 must still not be closed by client-side behaviour; the studio only
   renders the contract and calls the owner service.
 - Reference: [MVP Decision Register (DOC-GOV-004)](../09-governance/decision-register.md#d-03), [D-53](../09-governance/decision-register.md#d-53), and [ADR-025](../01-architecture/decisions/ADR-025-access-promo-service-ownership.md).

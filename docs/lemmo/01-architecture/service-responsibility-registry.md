@@ -6,7 +6,7 @@
 | **Category** | `architecture` |
 | **Status** | `Approved` |
 | **Owner** | Senior Architect / Project Management |
-P26-10-24|
+| **Last Updated** | 2026-10-24 |
 | **Summary (EN)** | Single authoritative registry of every Lemmo service and platform component: one owner per responsibility and per data, explicit "does not" lists, inverse responsibility index, six canonical paths, glossary, and change rule. Defines target state, not current code; gaps are referenced only via QF/Ratchet IDs. |
 | **Summary (FA)** | سند مرجع یگانه برای مسئولیت همهٔ سرویس‌ها و اجزای پلتفرم لمو: یک مالک برای هر مسئولیت و هر داده، فهرست صریح «نمی‌کند»، شاخص معکوس، شش مسیر متعارف، واژه‌نامه و قاعدهٔ تغییر. وضعیت هدف را تعریف می‌کند، نه کد فعلی؛ فاصله‌ها فقط با شناسهٔ QF/Ratchet ارجاع می‌شوند. |
 | **Tags** | `architecture`, `services`, `responsibility`, `ssot`, `registry`, `ownership` |

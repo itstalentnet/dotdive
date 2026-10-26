@@ -6,7 +6,7 @@
 | **Category** | `architecture` |
 | **Status** | `Approved` |
 | **Owner** | Core Architecture / Product Owner |
-P26-10-24|
+| **Last Updated** | 2026-10-24 |
 | **Summary (EN)** | Establishes a permanent, independent `access-promo-service` in the MVP. It owns beta invitation codes, beta capacity, invite validation/redemption, and credit-promo rules; it never owns balances or the ledger. All financial effects are applied by `quota-service` through the existing Claim engine (D-03). The service must conform to the ADR-024 service blueprint from day one (A1). API, data model, and event contracts are explicitly out of scope for this ADR and are designed in the implementation task after approval. |
 | **Summary (FA)** | ایجاد سرویس مستقل و دائمی `access-promo-service` در MVP را تثبیت می‌کند. این سرویس مالک کد/ظرفیت دعوت بتا، اعتبارسنجی و مصرف یک‌باره، و قواعد پروموی اعتباری است؛ اما هیچ‌گاه مالک موجودی یا دفتر کل نیست. تمام اثرهای مالی توسط `quota-service` و از مسیر موتور Claim موجود (D-03) اعمال می‌شود. سرویس از روز اول منطبق بر استاندارد ADR-024 است (A1). قرارداد API، مدل داده و رویدادها صراحتاً خارج از دامنه این ADR هستند و پس از تصویب، در تسک پیاده‌سازی طراحی می‌شوند. |
 | **Tags** | `adr`, `access`, `promo`, `invitation`, `beta`, `quota`, `claim`, `ownership`, `mvp` |
@@ -15,7 +15,7 @@ P26-10-24|
 
 # ADR-025: مالکیت دائمی دعوت بتا، ظرفیت و پروموی اعتباری
 
-> ⚠️ **وضعیت: پیش‌نویس (`Draft`)** — این سند تصمیم مالکیت را ثبت می‌کند و **پس از تصویب مالک محصول** مبنای پیاده‌سازی است. تا قبل از تصویب، هیچ کدی برای این سرویس نوشته نمی‌شود.
+> ✅ **وضعیت: مصوب (`Approved`)** — این سند تصمیم مالکیت را ثبت می‌کند و مبنای پیاده‌سازی است. تصویب مالک محصول در D-53 (۲۰۲۶-۱۰-۲۳) ثبت شده و ارتقای وضعیت سند در TASK_ARCH_13 انجام شده است.
 
 ---
 
