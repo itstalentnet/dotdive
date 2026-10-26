@@ -150,35 +150,121 @@ ENV APP_BUILD_TIME=$BUILD_TIME
 
 ## ۵. فرامین استاندارد داکر در Makefile ریشه (`api/Makefile`)
 
-برای تضمین اجرای بدون خطای انسانی و جلوگیری از اجرای خاموش کدهای قدیمی (حل قطعی نقص `QF-BUILD-REGISTRY-01` طبق TASK_GOV_04)، تارگت‌های زیر در فایل `api/Makefile` پیاده‌سازی شده‌اند:
+برای تضمین اجرای بدون خطای انسانی، جلوگیری از اجرای خاموش کدهای قدیمی (حل قطعی نقص `QF-BUILD-REGISTRY-01` طبق TASK_GOV_04 و بازگشایی TASK_GOV_04R) و مدیریت چرخه عمر پایدار محیط توسعه، تارگت‌های زیر در فایل `api/Makefile` پیاده‌سازی شده‌اند:
 
 ```makefile
-# Guarded local deploy for a single service with build enforcement and provenance audit
+# استقرار محافظت‌شدهٔ یک میکروسرویس منفرد با ممیزی کامل اصالت بیلد و آزمون پروب
 deploy:
-	@if [ -z "$(SERVICE)" ]; then \
-		echo "ERROR: SERVICE is required. Usage: make deploy SERVICE=<service-name>"; \
-		exit 1; \
-	fi
-	./scripts/deploy_guard.sh $(SERVICE)
+	./scripts/deploy_guard.sh $(SERVICE) $(COMPOSE_FILE)
 
-# Start local development infrastructure with guaranteed build failure guard
+# بیلد و بالا آوردن محیط توسعه با گارد خودکار ناهم‌خوانی ایمیج کهنه (D1 تا D3)
 docker-dev:
-	docker compose -f infra/compose/dev.yml build
-	docker compose -f infra/compose/dev.yml up -d
+	./scripts/docker_dev_guard.sh $(COMPOSE_FILE) $(PROFILE)
 
-# Stop infrastructure and remove orphan containers
+# سنجش خودکار منابع ماشین توسعه (رم و دیسک) در برابر بودجهٔ تعیین‌شده (V3-1)
+dev-budget:
+	./scripts/dev_budget.sh
+
+# بالا آوردن کامل محیط بتا از صفر با یک فرمان (بیلد، اعمال مایگریشن‌ها، سید و راستی‌آزمایی سلامت) (V3-4)
+beta-up:
+	./scripts/beta_up.sh
+
+# بازنشانی کامل داده‌های محیط محلی با پاک‌سازی والیوم‌های پروژه و اجرای مجدد beta-up (V3-6)
+dev-reset:
+	./scripts/dev_reset.sh
+
+# پاک‌سازی دوره‌ای و محلی ایمیج‌های آویزان و اعمال سیاست نگه‌داری ۳ نسخه آخر هر سرویس (D-17 / V3-3)
+docker-prune:
+	./scripts/docker_prune.sh
+
+# متوقف کردن کانتینرها و حذف کانتینرهای یتیم
 docker-stop:
-	docker compose -f infra/compose/dev.yml down --remove-orphans
+	docker compose -f $(or $(COMPOSE_FILE),infra/compose/dev.yml) down --remove-orphans
 
-# Clean dangling images and build cache to resolve cache issues
+# متوقف کردن سرویس‌ها و پاک‌سازی محافظت‌شده
 docker-clean:
-	docker compose -f infra/compose/dev.yml down --remove-orphans
-	docker image prune -f
+	docker compose -f $(or $(COMPOSE_FILE),infra/compose/dev.yml) down --remove-orphans
+	./scripts/docker_prune.sh
 ```
+
+---
 
 ## ۶. انطباق با محیط‌های واقعی و مهار حافظه (مصوب D-75)
 
 پیرو تصمیم مصوب [D-75](../09-governance/decision-register.md#d-75):
 1. **منع شبیه‌سازهای ماک در ران‌تایم:** استفاده از کانتینرهای شبیه‌ساز ماک LLM (نظیر `lemmo-mock-llm`) در تمام محیط‌ها (شامل لوکال) ممنوع بوده و ارتباط صرفاً با پرووایدرهای واقعی ابری برقرار می‌شود.
-2. **سقف حافظه در `dev.yml`:** جهت مهار مصرف منابع و جلوگیری از OOM، کانتینرهای زیرساختی در `infra/compose/dev.yml` ملزم به رعایت سقف مشخص حافظه هستند.
+2. **سقف حافظه در `dev.yml` و سرویس‌ها:** جهت مهار مصرف منابع و جلوگیری از OOM، کلیه کانتینرهای زیرساختی در `infra/compose/dev.yml` و فایل‌های `services/*/deploy/compose.yaml` ملزم به رعایت سقف مشخص حافظه (`mem_limit`) هستند که مقادیر آن از طریق متغیرهای محیطی با پیش‌فرض‌های امن در `.env.example` دریافت می‌شود.
 3. **بیلد موردی ایمیج‌ها:** بیلد موردی ایمیج سرویس‌های مسیر بتا با همان سورس کد بلامانع است.
+
+---
+
+## ۷. بودجهٔ منابع ماشین توسعه (Development Machine Budget — V3-1)
+
+برای جلوگیری از قفل شدن ماشین توسعه‌دهنده بر اثر کمبود حافظه یا پر شدن دیسک ریشه، تخصیص منابع بر مبنای بودجه‌بندی سخت‌گیرانهٔ زیر سنجیده و مهار می‌شود:
+
+### ۷.۱. سهم منابع و سقف‌های مصوب
+
+| شاخص منبع | مشخصات ماشین فیزیکی میزبان | سهم تخصیص‌یافته به داکر | حداقل لازم / سقف مجاز برای پروفایل `beta` | وضعیت ارزیابی |
+|---|---|---|---|---|
+| **تعداد هسته پردازنده (CPU)** | ۱۶ هسته فیزیکی | ۶ هسته مجازی | حداقل ۴ هسته | منطبق |
+| **حافظه موقت (RAM)** | ۱۵ GiB | ۵٫۷۸ GiB (~۵۹۲۲ MiB) | سقف ۸۰٪ رم داکر (~۴۷۳۷ MiB)؛ نیاز بتا: ~۳۵۵۲ MiB (~۶۰٪) | منطبق (PASS) |
+| **فضای آزاد دیسک ریشه** | ۲۴۷ GB SSD (۱۱۰ GB آزاد) | مسیر `/var/lib/docker` | حداقل ۲۰ GB فضای خالی برای بیلد و لایه‌ها | منطبق (PASS) |
+
+### ۷.۲. گیت خودکار سنجش بودجه (`make dev-budget`)
+دستور `make dev-budget` (اسکریپت `api/scripts/dev_budget.sh`) پیش از هرگونه بالا آوردن استک، جمع مقادیر `mem_limit` کانتینرهای فعال در پروفایل `beta` را با رم گزارش‌شده در `docker info` و همچنین فضای آزاد دیسک را با آستانهٔ حداقل مقایسه می‌کند. در صورت فراتر رفتن مصرف از سقف ۸۰٪ یا کمبود دیسک، عملیات فوراً با خطا متوقف می‌شود.
+
+---
+
+## ۸. محل داده‌های داکر و سیاست ذخیره‌سازی (Docker Data Placement — V3-2)
+
+### ۸.۱. جدول دسته‌بندی و محل استقرار داده‌ها
+
+| نوع داده | محل ذخیره‌سازی روی دیسک میزبان | حجم فعلی (`docker system df -v`) | نوع درایو | شرح و چرخه عمر |
+|---|---|---|---|---|
+| **ایمیج‌ها و لایه‌ها** | `/var/lib/docker/overlay2` | متغیر (چند گیگابایت) | SSD ریشه | لایه‌های سیستم‌عامل و باینری‌های کامپایل‌شده |
+| **کش بیلد (BuildKit)** | `/var/lib/docker/buildkit` | پاک‌سازی شونده با `docker-prune` | SSD ریشه | لایه‌های موقت جهت تسریع کامپایل Go |
+| **والیوم PostgreSQL** | والیوم نام‌دار `postgres-data` | متغیر بر اساس سطرها | SSD ریشه | پایگاه‌های داده سرویس‌ها (`lemmo_*`) |
+| **والیوم Redis** | والیوم نام‌دار `redis-data` | چند مگابایت | SSD ریشه | کش وضعیت، ایندکس‌ها و سشن‌ها |
+| **والیوم MinIO S3** | والیوم نام‌دار `minio-data` | متغیر (آرتیفکت‌ها و اسناد) | SSD ریشه | باکت‌های ذخیره‌سازی اشیاء و دارایی‌ها |
+| **والیوم RabbitMQ** | والیوم نام‌دار `rabbitmq-data` | چند مگابایت | SSD ریشه | صف‌های پیام و رویدادهای خارج‌جعبه (Outbox) |
+| **والیوم دفترکل مالی** | والیوم نام‌دار `lemmo-financial-ledger-data` | متغیر (گرید کش ۶۴ مگابایتی) | SSD ریشه | دیتابیس تراکنشی TigerBeetle |
+
+### ۸.۲. تحلیل و مقایسه درایو پرسرعت (SSD) در برابر هارد اکسترنال (HDD)
+- **درایو SSD ریشه (`/` با ۱۱۰ GB آزاد):**  
+  پایگاه‌های داده تراکنشی نظیر PostgreSQL و خصوصاً TigerBeetle نیازمند زمان تأخیر بسیار پایین (Low Latency IOPS) و عملیات نوشتن متوالی/همزمان با `fsync` هستند. استقرار این داده‌ها روی درایو SSD ریشه باعث دستیابی به زمان بیلد زیر ۳ دقیقه و زمان بوت دیتابیس‌ها زیر ۳ ثانیه می‌شود. با توجه به وجود ۱۱۰ گیگابایت فضای خالی، دیسک SSD ریشه محل بهینه و توصیه اول برای استقرار داده‌های توسعه است.
+- **درایو HDD اکسترنال (`/media/behroz/Expansion` با ۱٫۴ TB آزاد):**  
+  درایو مکانیکی خارجی از طریق رابط USB به سیستم متصل است و نرخ IOPS بسیار پایین‌تری نسبت به NVMe/SATA SSD ارائه می‌دهد. استقرار دیتابیس‌های تراکنشی روی آن می‌تواند سرعت استارت و تست‌های همزمانی را به شدت کند سازد؛ با این حال، به دلیل ظرفیت بسیار بالای آن (۱٫۴ ترابایت)، در صورتی که دیسک ریشه با کمبود فضا مواجه شود، یک گزینهٔ امن برای جابه‌جایی مخزن Docker Data Root به شمار می‌آید.
+
+> **ممنوعیت مسیرهای مطلق میزبان:**  
+> مطابق مصوبات معماری، ارجاع به مسیرهای مطلق ماشین توسعه‌دهنده (نظیر `/home/behroz` یا `/media/behroz`) در فایل‌های Compose و اسکریپت‌های مشترک اکیداً ممنوع بوده و تمام والیوم‌ها باید صرفاً به‌صورت والیوم‌های نام‌دار پروژه تعریف شوند.
+
+### ۸.۳. راهنمای گام‌به‌گام انتقال Docker Data Root به دیسک خارجی (برای مالک سیستم)
+در صورت نیاز مالک سیستم به انتقال پوشه داده‌های داکر از SSD به هارد خارجی `/media/behroz/Expansion`، مراحل زیر باید به صورت دستی اجرا شوند (عامل هوش مصنوعی مجاز به دستکاری خودکار فایل کانفیگ دیمن سیستم نیست):
+
+1. **متوقف‌سازی سرویس داکر:**
+   ```bash
+   sudo systemctl stop docker docker.socket
+   ```
+2. **ایجاد پوشه هدف روی هارد اکسترنال:**
+   ```bash
+   sudo mkdir -p /media/behroz/Expansion/docker-data
+   ```
+3. **انتقال کامل فایل‌ها و لایه‌ها با حفظ مجوزها و پرمیشن‌های لینوکس:**
+   ```bash
+   sudo rsync -aP /var/lib/docker/ /media/behroz/Expansion/docker-data/
+   ```
+4. **تنظیم مسیر ریشه جدید در `/etc/docker/daemon.json`:**
+   ```json
+   {
+     "data-root": "/media/behroz/Expansion/docker-data"
+   }
+   ```
+5. **راه‌اندازی مجدد سرویس داکر:**
+   ```bash
+   sudo systemctl start docker
+   ```
+6. **بررسی صحت مسیر:**
+   ```bash
+   docker info -f '{{.DockerRootDir}}'
+   # خروجی مورد انتظار: /media/behroz/Expansion/docker-data
+   ```
