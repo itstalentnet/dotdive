@@ -4,19 +4,19 @@
 | **Title (FA)** | ADR-023: استاندارد انتشار و چنج‌لاگ هر سرویس، تگ‌گذاری و انضباط ایمیج، و شناسنامه فایل‌های خودتولید |
 | **ID** | DOC-ARCH-023 |
 | **Category** | `architecture` |
-| **Status** | `Draft` |
+| **Status** | `Approved (مصوب D-16..D-18 و D-90)` |
 | **Owner** | Core Architecture & Platform Team |
-| **Last Updated** | 2026-10-17 |
-| **Summary (EN)** | Draft architectural decision extending ADR-008 to all services and frontends with independent SemVer/changelogs, proposing monorepo changelog aggregation tools for owner review, establishing generated file provenance headers (D-18), linking Docker image tagging to service versions (D-17), and recommending a zero-diff freshness gate. |
-| **Summary (FA)** | پیش‌نویس تصمیم معماری جهت گسترش دامنه ADR-008 به تمام سرویس‌ها و فرانت با SemVer و چنج‌لاگ مستقل، ارائه گزینه‌های تجمیع چنج‌لاگ ریشه جهت تایید مالک، تدوین استاندارد هدر شناسنامه فایل‌های خودتولید (D-18)، پیوند تگ ایمیج به نسخه سرویس (D-17) و پیشنهاد گیت zero-diff در CI. |
-| **Tags** | `adr`, `governance`, `release`, `versioning`, `semver`, `changelog`, `docker`, `hygiene`, `provenance`, `codegen` |
+| **Last Updated** | 2026-10-27 |
+| **Summary (EN)** | Approved architectural decision extending ADR-008 to all services and frontends with independent SemVer/changelogs (D-16), establishing monorepo changelog aggregation tools (git-cliff), establishing generated file provenance headers and freshness gates (D-18), and linking Docker image tagging to service versions (D-17) per Decision D-90. |
+| **Summary (FA)** | تصمیم مصوب معماری جهت گسترش دامنه ADR-008 به تمام سرویس‌ها و فرانت با SemVer و چنج‌لاگ مستقل (D-16)، به‌کارگیری ابزار git-cliff برای تجمیع چنج‌لاگ‌ها، استاندارد هدر شناسنامه فایل‌های خودتولید و گیت zero-diff (D-18)، و پیوند تگ ایمیج داکر به نسخه سرویس (D-17) پیرو مصوبه D-90. |
+| **Tags** | `adr`, `governance`, `release`, `versioning`, `semver`, `changelog`, `docker`, `hygiene`, `provenance`, `codegen`, `approved` |
 
 ---
 
 # ADR-023: استاندارد انتشار و چنج‌لاگ هر سرویس، تگ‌گذاری و انضباط ایمیج، و شناسنامه فایل‌های خودتولید
 
-> ⚠️ **وضعیت سند: پیش‌نویس حاکمیتی (`Draft`)**  
-> این سند پیش‌نویس تصمیمات معماری پیرامون تصمیم‌های حاکمیتی D-16، D-17، D-18 و یافته حاکمیتی P-7 است. این سند تا زمان بازبینی کامل و تأیید صریح مالک محصول (Product Owner) در وضعیت `Draft` باقی می‌ماند و نباید به عنوان تصمیم نهایی و تصویب‌شده (`Approved` / `Accepted`) تلقی گردد.
+> **وضعیت سند: تصویب‌شده (Approved — مصوب D-90، ۲۰۲۶-۱۰-۲۷)**  
+> این سند استانداردهای معماری انتشار، نسخه‌بندی و بهداشت داکر را بر پایه تصمیم‌های مصوب مالک محصول (D-16، D-17، D-18) و اقدام حاکمیتی P-7 به عنوان تصمیم قطعی (`Approved`) تثبیت نموده است. پیاده‌سازی کامل ابزارها و گیت‌ها در تسک‌های `VER_01` و `CONF_01` انجام می‌پذیرد.
 
 ---
 

@@ -332,8 +332,8 @@ All Go services in `api/` must strictly implement the security invariants define
 
 معماری رهگیری و ثبت وقایع در پلتفرم لمو مطابق مصوبات معماری **D-26 تا D-30** و **D-85** (و وظیفه `TASK_OBS_01`) پیاده‌سازی شده است:
 
-1. **جداسازی کامل از Core (D-28):** کتابخانه `core` فقط ناظر و ارائه‌دهنده پروتکل‌های مرزی است و هیچ میان‌افزار اجرایی (runtime middleware) برای لاگ، trace یا recovery صادر نمی‌کند. هر میکروسرویس ماژول رهگیری اختصاصی خود را در مسیر `internal/observability/` نگهداری می‌کند که توسط ابزار رسمی `lemmo-cli observability <service-name>` اسکلت‌بندی و تولید می‌شود (دارای سرآیند D-18).
-2. **قرارداد رویداد لاگ (`log-event.schema.json` — D-29):** تمام لاگ‌های خروجی سرویس‌ها باید روی `stdout` با ساختار یکنواخت JSON مطابق قرارداد نسخه‌دار `contracts/platform/observability/log-event.schema.json` ثبت شوند:
+1. **جداسازی کامل از Core (D-26):** کتابخانه `core` فقط ناظر و ارائه‌دهنده پروتکل‌های مرزی است و هیچ میان‌افزار اجرایی (runtime middleware) برای لاگ، trace یا recovery صادر نمی‌کند. هر میکروسرویس ماژول رهگیری اختصاصی خود را در مسیر `internal/observability/` نگهداری می‌کند که توسط ابزار رسمی `lemmo-cli observability <service-name>` اسکلت‌بندی و تولید می‌شود (دارای سرآیند D-18).
+2. **قرارداد رویداد لاگ (`log-event.schema.json` — D-30):** تمام لاگ‌های خروجی سرویس‌ها باید روی `stdout` با ساختار یکنواخت JSON مطابق قرارداد نسخه‌دار `contracts/platform/observability/log-event.schema.json` ثبت شوند:
    - **فیلدهای الزامی:** `ts` (فرمت RFC3339 در مبنای UTC)، `level`، `service`، `version`، `msg`، `trace_id` (هگز ۳۲ کاراکتری W3C)، `span_id` (هگز ۱۶ کاراکتری)، `request_id`.
    - **فیلدهای اختیاری هوش مصنوعی (ADR-027 §۲.۳):** `model`, `provider`, `tokens_in`, `tokens_out`, `cost`, `latency_ms`, `caller_service`.
    - **فیلدهای اختیاری رهگیری لبه (D-85):** `client_trace_id`, `client_request_id` (برای ثبت مقادیر ردیاب نامعتمد ارسالی کلاینت در لبه).
@@ -342,7 +342,7 @@ All Go services in `api/` must strictly implement the security invariants define
    - **اصل عدم اعتماد لبه (D-85):** گیت‌وی ورودی (Kong) برای هر درخواست ورودی کلاینت، بدون استثنا یک جفت شناسهٔ رهگیری تازه مطابق W3C (`traceparent` شامل ۳۲ رقم هگز تصادفی برای trace id و ۱۶ رقم هگز برای span id، به‌همراه `X-Request-ID` تازه) تولید می‌کند. مقادیر `traceparent`، `tracestate` یا `X-Request-ID` ارسالی از سوی کلاینت‌های بیرونی هرگز به میکروسرویس‌های داخلی تزریق نمی‌شوند و مبنای رهگیری قرار نمی‌گیرند؛ این مقادیر صرفاً در لایهٔ لاگ لبه و در فیلدهای اختصاصی `client_trace_id` و `client_request_id` ثبت می‌گردند.
    - **انتقال درون‌سیستمی:** میکروسرویس‌های داخلی در فراخوانی‌های شبکه‌ای بین‌سرویسی (gRPC/HTTP)، کانتکست رهگیری `traceparent` را از فرستندهٔ داخلی دریافت و به پایین‌دست منتقل می‌کنند.
    - شناسه‌های ساختگی غیر W3C (نظیر پیشوندهای `tr-...` یا UUID نامعتبر) در سرتاسر مسیر اجرایی ممنوع هستند.
-4. **بک‌اند رهگیری در MVP (D-27):** بک‌اند رهگیری در فاز کنونی مبتنی بر JSON روی `stdout` و فرمان جست‌وجوی تایم‌لاین `make trace TRACE_ID=<id>` در ریشه `api/` است. اتصال به Collector یا Exporter بیرونی در فاز کنونی خاموش بوده و برای پس از MVP (بسته REL-01) زمان‌بندی شده است.
+4. **بک‌اند رهگیری در MVP (D-30):** بک‌اند رهگیری در فاز کنونی مبتنی بر JSON روی `stdout` و فرمان جست‌وجوی تایم‌لاین `make trace TRACE_ID=<id>` در ریشه `api/` است. اتصال به Collector یا Exporter بیرونی در فاز کنونی خاموش بوده و برای پس از MVP (بسته REL-01) زمان‌بندی شده است.
 
 ---
 

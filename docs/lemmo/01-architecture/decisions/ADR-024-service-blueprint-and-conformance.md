@@ -4,16 +4,19 @@
 | **Title (FA)** | الگوی استاندارد میکروسرویس، اسکلت مرجع، مانیفست سرویس و موتور اعتبارسنجی انطباق مبتنی بر `lemmo-cli` |
 | **ID** | ADR-024 |
 | **Category** | `architecture` |
-| **Status** | `Draft` |
+| **Status** | `Approved (با تفکیک بخش‌های معوق — مصوب D-90)` |
 | **Owner** | Platform Architecture & Tech Lead |
-| **Last Updated** | 2026-10-18 |
-| **Summary (EN)** | Authoritative specification for Lemmo microservice blueprint, 50 canonical conformance rules codified in machine-readable api/conformance/rules.yaml, service manifest schema, contracts and OpenAPI governance, static AST verification via lemmo-cli, and live runtime probes aggregated into make doctor. |
-| **Summary (FA)** | سند رسمی الگوی استاندارد میکروسرویس‌های لیمو، کاتالوگ ۵۰ گانه قواعد انطباق ماشین‌خوان در api/conformance/rules.yaml، مانیفست سرویس، حاکمیت قراردادها و OpenAPI، اعتبارسنجی ایستا با lemmo-cli و آزمون‌های زنده متصل به make doctor. |
-| **Tags** | `adr`, `blueprint`, `conformance`, `lemmo-cli`, `manifest`, `contracts`, `openapi`, `make-doctor`, `zero-diff` |
+| **Last Updated** | 2026-10-27 |
+| **Summary (EN)** | Approved specification for Lemmo microservice blueprint, 50 canonical conformance rules in ADR-024-rules-catalog.md, and conformance engine per Decision D-90. Scaffolding blueprint and Ratchet baseline are Approved; service manifest enforcement is Deferred to post-beta. |
+| **Summary (FA)** | سند مصوب الگوی استاندارد میکروسرویس‌های لیمو، کاتالوگ ۵۰ گانه قواعد انطباق و موتور اعتبارسنجی پیرو مصوبه D-90. اسکلت مرجع اسکافولد و قواعد دسته اول موتور انطباق Approved شدند؛ الزامات مانیفست سرویس به پس از بتای بسته معوق (Deferred) گردید. |
+| **Tags** | `adr`, `blueprint`, `conformance`, `lemmo-cli`, `manifest`, `contracts`, `openapi`, `make-doctor`, `zero-diff`, `approved`, `deferred` |
 
 ---
 
 # ADR-024: الگوی استاندارد میکروسرویس، اسکلت مرجع، مانیفست سرویس و اعتبارسنج انطباق
+
+> **وضعیت سند: تصویب‌شده (Approved با بخش‌های معوق — مصوب D-90، ۲۰۲۶-۱۰-۲۷)**  
+> پیرو تصمیم مصوب **D-90**، بخش‌های مربوط به الگوی اسکلت مرجع میکروسرویس‌ها، قواعد اعتبارسنجی کاتالوگ و گیت انطباق Ratchet در وضعیت **Approved** تثبیت شده و الزامات مانیفست ماشین‌خوان سرویس به فاز پس از بتای بسته **Deferred** گردید.
 
 > 📖 **منبع یگانه حقیقت قواعد (SSOT — مصوب D-21 اصلاح‌شده و D-25):**  
 > کاتالوگ جامع و رسمی کلیه ۵۰ قاعده انطباق معماری در سند انسان‌خوان و رسمی [`ADR-024-rules-catalog.md`](./ADR-024-rules-catalog.md) مستقر است. این سند مرجع حقیقت کلیه قواعد، شروط اعمال، مکانیزم‌های ارزیابی و ارجاعات سندی است. نسخه‌های ماشینی و ابزاری در مخزن بک‌اند (`api/conformance/rules.yaml`) خروجی‌های تولیدی و تحت هدر شناسنامه D-18 این سند می‌باشند که توسط اسکریپت `dotdive/docs/lemmo/scripts/adr024/export_catalog.py` صادر می‌شوند. معماری ماژولار ابزار مجری (`lemmo-cli`) در سند [`ADR-026`](./ADR-026-modular-lemmo-cli-architecture.md) تبیین شده است.

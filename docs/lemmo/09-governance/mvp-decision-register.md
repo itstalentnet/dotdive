@@ -1,3 +1,22 @@
+| فیلد / Field | مقدار / Value |
+| :--- | :--- |
+| **Title (EN)** | MVP Decisions & Execution Path (Historical / Deprecated) |
+| **Title (FA)** | سند تصمیم‌ها و مسیر اجرایی اولیه MVP (تاریخی / منسوخ) |
+| **ID** | DOC-GOV-004-LEGACY |
+| **Category** | `governance` |
+| **Status** | `Deprecated` |
+| **Owner** | تیم مدیریت پروژه و معماری / @behroz |
+| **Last Updated** | 2026-10-27 |
+| **Summary (EN)** | Deprecated early MVP decision draft, superseded by the canonical Decision Register (DOC-GOV-004) and Architecture Debt Register (DOC-GOV-006). |
+| **Summary (FA)** | پیش‌نویس اولیه تصمیمات MVP که منسوخ شده و با دفتر رسمی تصمیمات پلتفرم (DOC-GOV-004) و دفتر بدهی‌های معماری (DOC-GOV-006) جایگزین گردیده است. |
+| **Tags** | `governance`, `decisions`, `mvp`, `deprecated` |
+
+---
+
+> [!WARNING]
+> **وضعیت سند: منسوخ‌شده / Deprecated (مصوب D-36 و D-91)**  
+> این سند یک پیش‌نویس اولیه تاریخی بوده و منسوخ شده است. تنها منبع رسمی و معتبر حقیقت برای تصمیمات مصوب پلتفرم، [دفتر تصمیمات معماری (decision-register.md)](./decision-register.md) (`DOC-GOV-004`) است.
+
 # سند تصمیم‌ها و مسیر اجرایی لیمو (مرجع تسک‌ها)
 
 تهیه‌شده توسط مدیر پروژه · ۲۰۲۶-۱۰-۱۶ · وضعیت: پیش‌نویس برای تأیید مالک محصول

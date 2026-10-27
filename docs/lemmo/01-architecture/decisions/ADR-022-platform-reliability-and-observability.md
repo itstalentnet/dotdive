@@ -4,18 +4,33 @@
 | **Title (FA)** | قابلیت اطمینان، مشاهده‌پذیری و مرز تحویل MVP |
 | **ID** | ADR-022 |
 | **Category** | `architecture` |
-| **Status** | `Draft` |
+| **Status** | `Approved (با تفکیک بخش‌های معوق — مصوب D-90)` |
 | **Owner** | Platform Architecture / Product Owner |
-| **Last Updated** | 2026-10-15 |
-| **Summary (EN)** | Proposed decision for out-of-band observability, domain-owned recovery, honest readiness and phased reliability delivery without a mandatory central business proxy. Records existing MVP scope direction; detailed architecture awaits approval. |
-| **Summary (FA)** | ثبت جهت‌گیری جاری MVP و پیشنهاد قرارداد معماری مشاهده‌پذیری مستقل، بازیابی در دامنه مالک و سلامت قابل اثبات؛ جزئیات معماری در انتظار تصویب است. |
-| **Tags** | `adr`, `reliability`, `observability`, `mvp`, `recovery` |
+| **Last Updated** | 2026-10-27 |
+| **Summary (EN)** | Approved decision for out-of-band observability, domain-owned recovery, honest readiness and phased reliability delivery per Decision D-90 and D-01. M0 scope is Approved; central business proxy and full collector stacks are explicitly Deferred to post-MVP (REL-01..05). |
+| **Summary (FA)** | تصمیم مصوب حاکمیتی برای مشاهده‌پذیری، استانداردهای لاگ/خطا، بازیابی دامنه‌ای و توقف ایمن (D-90 و D-01). بسته مرحله صفر M0 و پروتکل‌های توقف تمیز در وضعیت Approved تثبیت شدند و استک مانیتورینگ مرکزی به فاز پس از MVP (بسته‌های REL-01 تا REL-05) معوق (Deferred) گردید. |
+| **Tags** | `adr`, `reliability`, `observability`, `mvp`, `recovery`, `approved`, `deferred` |
 
 # ADR-022 — قابلیت اطمینان و مشاهده‌پذیری پلتفرم
 
 ## زمینه و وضعیت تصمیم
 
-تاریخ ثبت: 2026-10-15. وضعیت: **Draft / Proposed**. درخواست مالک محصول برای به‌روزرسانی مستندات و تصمیمات ثبت شده است؛ تأیید مستقل معماری یا تصویب جزئیات فنی به آن نسبت داده نمی‌شود. جهت‌گیری جاری مالک محصول برای تمرکز بر MVP و تعویق باگ‌های پیچیده محفوظ است.
+تاریخ ثبت: 2026-10-15 · **وضعیت تصمیم: Approved (با تفکیک بخش‌های معوق — مصوب D-90، ۲۰۲۶-۱۰-۲۷)**. پیرو تصمیم مصوب **D-90** مالک محصول، بخش‌های دارای تصمیم مصوب (بسته مرحله صفر M0 مطابق D-01، قراردادهای لاگ و ردیابی، و توقف ایمن Graceful Shutdown) به وضعیت **Approved** تثبیت شده و بخش‌های مربوط به استقرار استک‌های مرکزی تله‌متری و بازیابی‌های پیشرفته رسماً به فاز پس از MVP به وضعیت **Deferred** تفکیک شدند.
+
+---
+
+## تفکیک وضعیت بخش‌های تصمیم (Approved vs Deferred)
+
+### بخش‌های مصوب (Approved — مصوب D-01 و D-90):
+- **بسته مرحله صفر M0 (بندهای ۱، ۲، ۳، ۴، ۶ و ۹):**
+  - **لاگ و خطای استاندارد:** لاگ‌های یکنواخت JSON روی stdout، قرارداد کاتالوگ خطا با `reason/domain` و کد پیگیری کاربر تا UI (D-01 و D-11).
+  - **ردیابی مستقل از مسیر تجاری:** عبور کانتکست رهگیری در لایه‌های HTTP، gRPC، SSE و بروکر پیام بدون واسطه مسدودکننده (D-02 و D-85).
+  - **سلامت و توقف تمیز (Graceful Shutdown — بند ۹):** اجرای پروتکل توقف ایمن، تخلیه درخواست‌ها در مهلت ۱۵ ثانیه، فلاش Outbox و بستن سالم اتصالات پایگاه‌داده و صف در پاسخ به SIGTERM/SIGINT.
+  - **ابزارهای تشخیصی محلی:** فرامین `make trace` و `make doctor` (D-01 و D-94).
+
+### بخش‌های معوق (Deferred — موکول به فاز پس از MVP):
+- **استک متمرکز جمع‌آوری تله‌متری و Collector بیرونی (بندهای ۵، ۸ و ۱۰):** راه‌اندازی و نگهداری سرورهای مرکزی تلمتری (OpenTelemetry Collector / Jaeger / Prometheus / Grafana) به بسته‌های REL-01 تا REL-05 پس از بتای بسته موکول می‌گردد (Deferred).
+- **بازیابی‌های پیشرفته، Bulkhead و معماری جامع Disaster Recovery:** به فازهای پس از MVP موکول شده است (Deferred).
 
 بررسی سورس در DOC-OPS-003 نشان می‌دهد پایه‌هایی از log، trace، outbox، idempotency و recovery وجود دارند، اما اتصال کامل و سلامت نسخه مستقر اثبات نشده‌اند. قرارداد مشترک باید این شکاف را روشن کند، بدون اینکه همه مسئولیت‌ها به سرویس مرکزی تازه منتقل شوند.
 

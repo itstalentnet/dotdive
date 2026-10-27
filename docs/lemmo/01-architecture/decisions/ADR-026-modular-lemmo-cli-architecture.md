@@ -4,19 +4,19 @@
 | **Title (FA)** | معماری ماژولار ابزار `lemmo-cli`، تفکیک اجراکننده نازک و استانداردهای استقلال ماژول‌ها |
 | **ID** | ADR-026 |
 | **Category** | `architecture` |
-| **Status** | `Draft` |
+| **Status** | `Approved (مصوب D-21..D-25 و D-90)` |
 | **Owner** | Core Architecture & Platform Tooling Team |
-| **Last Updated** | 2026-10-19 |
-| **Summary (EN)** | Authoritative specification for modular lemmo-cli architecture, establishing a single modular binary with internal independent modules (Owner Decision D-24), thin runner dispatcher (R1), module autonomy (R2), independent release and development verified via Golden tests (R3), versioned contract (R4), and strict file ownership rules (D-23/R5). |
-| **Summary (FA)** | سند رسمی معماری ماژولار ابزار lemmo-cli، تثبیت رویکرد تک‌باینری با ماژول‌های داخلی مستقل (تصمیم حاکمیتی D-24)، اجراکننده نازک (R1)، استقلال ماژول‌ها (R2)، توسعه مستقل با آزمون‌های Golden (R3)، قرارداد نسخه‌دار (R4) و قانون مالکیت فایل‌ها (D-23/R5). |
-| **Tags** | `adr`, `tooling`, `cli`, `lemmo-cli`, `modularity`, `semver`, `file-ownership`, `conformance` |
+| **Last Updated** | 2026-10-27 |
+| **Summary (EN)** | Approved specification for modular lemmo-cli architecture, establishing a single modular binary with internal independent modules (Owner Decision D-24), thin runner dispatcher (R1), module autonomy (R2), independent release and development verified via Golden tests (R3), versioned contract (R4), and strict file ownership rules (D-23/R5) per Decision D-90. |
+| **Summary (FA)** | سند مصوب معماری ماژولار ابزار lemmo-cli، تثبیت رویکرد تک‌باینری با ماژول‌های داخلی مستقل (تصمیم حاکمیتی D-24)، اجراکننده نازک (R1)، استقلال ماژول‌ها (R2)، توسعه مستقل با آزمون‌های Golden (R3)، قرارداد نسخه‌دار (R4) و قانون مالکیت فایل‌ها (D-23/R5) پیرو مصوبه D-90. |
+| **Tags** | `adr`, `tooling`, `cli`, `lemmo-cli`, `modularity`, `semver`, `file-ownership`, `conformance`, `approved` |
 
 ---
 
 # ADR-026: معماری ماژولار ابزار `lemmo-cli`، تفکیک اجراکننده نازک و استانداردهای استقلال ماژول‌ها
 
-> ⚠️ **وضعیت سند: پیش‌نویس حاکمیتی (`Draft`)**  
-> این سند پیش‌نویس معماری رسمی برای ساختار ابزار `lemmo-cli` بر پایه تصمیم‌های مصوب مالک محصول ([D-21، D-22، D-23، D-24، D-25](../../09-governance/decision-register.md#d-21)) و الزامات پنج‌گانه مالک (R1 تا R5) می‌باشد. این سند تا زمان بازبینی کامل و تصویب نهایی در وضعیت `Draft` باقی می‌ماند.
+> **وضعیت سند: تصویب‌شده (Approved — مصوب D-90، ۲۰۲۶-۱۰-۲۷)**  
+> این سند معماری رسمی ماژولار ابزار `lemmo-cli` بر پایه تصمیم‌های مصوب مالک محصول (D-21 تا D-25) و الزامات پنج‌گانه مالک (R1 تا R5) را به عنوان تصمیم قطعی (`Approved`) تثبیت کرده است. ماژولارسازی کامل ابزارها طبق D-33 در فازهای پس از MVP ادامه می‌یابد.
 
 ---
 

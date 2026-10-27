@@ -4,16 +4,20 @@
 | **Title (FA)** | ADR-011: معماری قابلیت‌های کسب‌وکار (پرومو کد، نوتیفیکیشن با Novu، تفکیک افیلیت از رفرال، فید اجتماعی، مدل کاربر و آنبوردینگ) |
 | **ID** | DOC-ARCH-011-ADR |
 | **Category** | `architecture` |
-| **Status** | `Approved` |
+| **Status** | `Deferred` |
 | **Owner** | Core Architecture, Product & Backend Team |
-| **Last Updated** | 2026-10-01 |
-| **Summary (EN)** | Ratified architecture for commercial capabilities: dual promo engine, Novu notification infrastructure, referral vs affiliate separation, community-service social feed, and user onboarding state machine. |
-| **Summary (FA)** | تصمیم مصوب معماری پیرامون قابلیت‌های تجاری: موتور دوگانه پرومو کد، زیرساخت نوتیفیکیشن بر پایه Novu، تفکیک رفرال از افیلیت، سرویس یکپارچه فید اجتماعی (community-service) و مدل کاربر و آنبوردینگ. |
+| **Last Updated** | 2026-10-27 |
+| **Summary (EN)** | Deferred architecture for commercial capabilities (post-beta per D-96): dual promo engine, Novu notification infrastructure, referral vs affiliate separation, community-service social feed, and user onboarding state machine. |
+| **Summary (FA)** | معماری معوق قابلیت‌های تجاری (موکول به پس از بتا طبق مصوب D-96): موتور دوگانه پرومو کد، زیرساخت نوتیفیکیشن بر پایه Novu، تفکیک رفرال از افیلیت، سرویس یکپارچه فید اجتماعی (community-service) و مدل کاربر و آنبوردینگ. |
 | **Tags** | `adr`, `architecture`, `promo-codes`, `notifications`, `novu`, `affiliate`, `referral`, `feed`, `onboarding`, `phase2` |
 
 ---
 
 # ADR-011: معماری قابلیت‌های کسب‌وکار و نقشه توسعه فازهای ۲ و ۳
+
+> [!NOTE]
+> **وضعیت سند: معوق به پس از بتا (Deferred — مصوب D-96)**  
+> قابلیت‌های مطرح‌شده در این سند (شامل زیرساخت اعلان Novu، سیستم افیلیت، فید اجتماعی و قابلیت‌های فاز ۲ و ۳) طبق سند نقشه راه و تصمیم مصوب D-96، به پس از انتشار نسخهٔ بتای عمومی و استقرار موفق MVP_10 موکول شده‌اند. قابلیت پرومو کد بتای دعوت محدود منحصراً در دامنهٔ `access-promo-service` (مصوب D-53 و D-68) فعال است.
 
 ## ۱. زمینه و انگیزه (Context)
 

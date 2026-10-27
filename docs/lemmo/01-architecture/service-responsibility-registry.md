@@ -6,9 +6,9 @@
 | **Category** | `architecture` |
 | **Status** | `Approved` |
 | **Owner** | Senior Architect / Project Management |
-| **Last Updated** | 2026-10-24 |
-| **Summary (EN)** | Single authoritative registry of every Lemmo service and platform component: one owner per responsibility and per data, explicit "does not" lists, inverse responsibility index, six canonical paths, glossary, and change rule. Defines target state, not current code; gaps are referenced only via QF/Ratchet IDs. |
-| **Summary (FA)** | سند مرجع یگانه برای مسئولیت همهٔ سرویس‌ها و اجزای پلتفرم لمو: یک مالک برای هر مسئولیت و هر داده، فهرست صریح «نمی‌کند»، شاخص معکوس، شش مسیر متعارف، واژه‌نامه و قاعدهٔ تغییر. وضعیت هدف را تعریف می‌کند، نه کد فعلی؛ فاصله‌ها فقط با شناسهٔ QF/Ratchet ارجاع می‌شوند. |
+| **Last Updated** | 2026-10-27 |
+| **Summary (EN)** | Single authoritative registry of every Lemmo service and platform component: one owner per responsibility and per data, explicit "does not" lists, inverse responsibility index, six canonical paths, glossary, service fates table (D-96), and change rule. Defines target state, not current code; gaps are referenced only via QF/Ratchet IDs. |
+| **Summary (FA)** | سند مرجع یگانه برای مسئولیت همهٔ سرویس‌ها و اجزای پلتفرم لمو: یک مالک برای هر مسئولیت و هر داده، فهرست صریح «نمی‌کند»، شاخص معکوس، شش مسیر متعارف، جدول سرنوشت سرویس‌ها (D-96)، واژه‌نامه و قاعدهٔ تغییر. وضعیت هدف را تعریف می‌کند، نه کد فعلی؛ فاصله‌ها فقط با شناسهٔ QF/Ratchet ارجاع می‌شوند. |
 | **Tags** | `architecture`, `services`, `responsibility`, `ssot`, `registry`, `ownership` |
 
 ---
@@ -86,6 +86,37 @@ flowchart LR
 
 ---
 
+## ۲.۱. جدول سرنوشت سرویس‌ها و هم‌ترازی با پروفایل Compose (مصوب D-96)
+
+پیرو تصمیم مصوب **D-96** (مورخ ۲۰۲۶-۱۰-۲۷) و نقشهٔ راه واحد پروژه، سرنوشت قطعی کلیه ۲۰ سرویس پلتفرم و وضعیت استقرار آن‌ها در پروفایل‌های Docker Compose به شرح جدول زیر تثبیت گردیده است:
+
+| # | نام سرویس | حکم نقشهٔ راه (Roadmap Fate) | جایگاه در بتا (Compose Profile) | حامل اجرایی |
+|:---:|:---|:---|:---:|:---|
+| ۱ | `ai-gateway` (model-router) | **نگه‌داری + هم‌ترازی در بازنویسی** | فعال در بتا (`beta`) | `AIGW_01` تا `AIGW_04` |
+| ۲ | `quota-service` | **نگه‌داری + هم‌ترازی در بازنویسی** | فعال در بتا (`beta`) | `FIN_01` |
+| ۳ | `usage-service` | **نگه‌داری + هم‌ترازی در بازنویسی** | خارج از بتا (بازسازی در موج ۴) | `AIGW_04` |
+| ۴ | `context-service` | **نگه‌داری + MIG پیش از MVP_10** | فعال در بتا (`beta`) | `MIG_00` (موج ۲) |
+| ۵ | `auth-service` | **نگه‌داری + MIG پیش از MVP_10** | فعال در بتا (`beta`) | `MIG_BETA` (موج ۴) |
+| ۶ | `user-service` | **نگه‌داری + MIG پیش از MVP_10** | فعال در بتا (`beta`) | `MIG_BETA` (موج ۴) |
+| ۷ | `workspace-service` | **نگه‌داری + MIG پیش از MVP_10** | فعال در بتا (`beta`) | `MIG_BETA` (موج ۴) |
+| ۸ | `tools-service` | **نگه‌داری + MIG پیش از MVP_10** | فعال در بتا (`beta`) | `MIG_BETA` (موج ۴) |
+| ۹ | `agent-service` | **نگه‌داری + MIG پیش از MVP_10** | فعال در بتا (`beta`) | `MIG_BETA` (موج ۴) |
+| ۱۰ | `storage-service` | **نگه‌داری + MIG پیش از MVP_10** | فعال در بتا (`beta`) | `MIG_BETA` (موج ۴) |
+| ۱۱ | `ledger-service` | **ساخت با قالب** | فعال در بتا (`beta`) | `FIN_01` (موج ۲) |
+| ۱۲ | `access-promo-service` | **ساخت با قالب** | فعال در بتا (`beta`) | `ACP_01` (موج ۲) |
+| ۱۳ | `reference-data-registry` | **نگه‌داری + MIG در موج ۶** | خارج از مسیر بتا (`full`) | `MIG_REST` (موج ۶) |
+| ۱۴ | `feed-service` | **فریز (معاف در Ratchet، D-97)** | خارج از مسیر بتا (`full`) | فریز تا پس از MVP |
+| ۱۵ | `iam-service` | **فریز (معاف در Ratchet، D-97)** | خارج از مسیر بتا (`full`) | فریز تا پس از MVP |
+| ۱۶ | `job-service` | **فریز (معاف در Ratchet، D-97)** | خارج از مسیر بتا (`full`) | فریز تا پس از MVP |
+| ۱۷ | `project-service` | **فریز (معاف در Ratchet، D-97)** | خارج از مسیر بتا (`full`) | فریز تا پس از MVP |
+| ۱۸ | `orchestrator-service` | **فریز تا پس از MVP (D-78)** | خارج از مسیر بتا (`full`) | فریز تا پس از MVP |
+| ۱۹ | `notification-service` | **فریز (معاف در Ratchet، D-44)** | خارج از مسیر بتا (خارج از Compose) | فریز تا فاز ۳ |
+| ۲۰ | `token-service` | **فریز (معاف در Ratchet، D-44)** | خارج از مسیر بتا (خارج از Compose) | فریز تا پس از MVP |
+| — | `image-service` | **حذف کامل در CLN_002 (بازنشسته)** | خارج از مسیر بتا (`full`) | `CLN_002` (موج ۴) |
+| — | `node-registry-service` | **حذف کد فعلی در CLN_002 و فریز تا بوم** | خارج از مسیر بتا (`full`) | `CLN_002` (موج ۴) |
+
+---
+
 ## ۳. کارت‌های سرویس‌ها
 
 > هر کارت دقیقاً فیلدهای زیر را دارد. فیلدی که مقدار ندارد «ندارد» نوشته شده است، نه خالی.
@@ -98,13 +129,13 @@ flowchart LR
 | وضعیت | فعال در بتا |
 | مسئولیت در یک جمله | مسیریابی بر اساس URL، CORS، محدودیت نرخ |
 | مسئولیت‌ها | مسیرها: `/v1/chat` → agent-service؛ `/v1/workflows` → orchestrator-service؛ خواندن وضعیت اجرا → job-service؛ `/api/v1/promos/claim` و `/api/v1/promos/validate/{code}` → access-promo-service (D-68)؛ ساخت شناسهٔ رهگیری تازه در لبه برای هر درخواست و تزریق به بالادست (D-85)؛ پاک‌سازی هدر x-caller-service از ورودی کلاینت‌های بیرونی (D-83) |
-| نمی‌کند / نمی‌داند | تصمیم هویت؛ اعتماد به هدر `X-User-ID`؛ چک عضویت workspace (در هدف)؛ هیچ مسیر بیرونی به ai-gateway؛ عدم اعتماد به traceparent، tracestate و X-Request-ID ورودی کلاینت (D-85) |
+| نمی‌کند / نمی‌داند | تصمیم هویت؛ اعتماد به هدر `X-User-ID`؛ چک عضویت workspace در وضعیت هدف (موقت تا SEC_06 با سنجش صرف وجود کلید Redis — DEBT-AUTHZ-01 / D-99)؛ هیچ مسیر بیرونی به ai-gateway؛ عدم اعتماد به traceparent، tracestate و X-Request-ID ورودی کلاینت (D-85) |
 | دادهٔ متعلق | ندارد |
 | قراردادها | مسیرهای HTTP (Kong declarative config) |
 | فراخوانی می‌کند / فراخوانده می‌شود از | فراخوانده می‌شود از کلاینت؛ فراخوانی می‌کند سرویس‌های بالادست |
 | لمس پول | ندارد |
-| تصمیم‌های مرجع | ADR-013، D-38، D-68، D-83، D-85، تصمیم مسیرها |
-| بدهی شناخته‌شده | QF-ARCH08-02 (header spoofing) |
+| تصمیم‌های مرجع | ADR-013، D-38، D-68، D-83، D-85، D-99، تصمیم مسیرها |
+| بدهی شناخته‌شده | DEBT-AUTHZ-01 (بررسی موقت عضویت با کلید Redis تا SEC_06) · DEBT-AUTH-01 (پاک‌سازی x-caller-service) · QF-ARCH08-02 |
 
 ### ۳.۲. لایهٔ احراز هویت (Oathkeeper)
 | فیلد | مقدار |
@@ -191,7 +222,7 @@ flowchart LR
 |---|---|
 | شناسه | `iam-service` |
 | دامنه | هویت و دسترسی |
-| وضعیت | Day-1 سرویس (RBAC محلی در بتا؛ ارتقا به ReBAC در نسخه‌های آتی) — تصمیم Q2 |
+| وضعیت | فریز (معاف در Ratchet؛ خارج از مسیر بتا؛ پروفایل compose: full — مصوب D-96 و D-97) |
 | مسئولیت در یک جمله | entitlement امنیتی و سیستمی (RBAC/ABAC) |
 | مسئولیت‌ها | ورود به پنل ادمین، دسترسی به پروژه یا منبع |
 | نمی‌کند / نمی‌داند | entitlement تجاری و پلن (مال quota) |
@@ -271,7 +302,7 @@ flowchart LR
 |---|---|
 | شناسه | `job-service` |
 | دامنه | اجرا |
-| وضعیت | فعال در بتا |
+| وضعیت | فریز تا پس از MVP (معاف در Ratchet؛ خارج از مسیر بتا؛ پروفایل compose: full — مصوب D-78، D-96 و D-97) |
 | مسئولیت در یک جمله | نمای خواندنی (read model) وضعیت اجرا برای کاربر و فرانت، از رویدادهای orchestrator |
 | مسئولیت‌ها | نمای خواندنی وضعیت اجرا |
 | نمی‌کند / نمی‌داند | اجرا؛ مجوز؛ مالکیت وضعیت اجرا |
@@ -287,7 +318,7 @@ flowchart LR
 |---|---|
 | شناسه | `project-service` |
 | دامنه | محتوا و پروژه |
-| وضعیت | فعال (جایگاه در بتا: تأیید تیم) |
+| وضعیت | فریز (معاف در Ratchet؛ خارج از مسیر بتا؛ پروفایل compose: full — مصوب D-96 و D-97) |
 | مسئولیت در یک جمله | فقط متادیتا و سازمان‌دهی پروژه |
 | مسئولیت‌ها | نام، تنظیمات، توضیحات، ارتباط پروژه با کاربران |
 | نمی‌کند / نمی‌داند | دسترسی (iam)؛ پول (ledger)؛ اجرا (orchestrator) |
@@ -321,7 +352,7 @@ flowchart LR
 |---|---|
 | شناسه | `feed-service` |
 | دامنه | محتوا و پروژه |
-| وضعیت | فعال در بتا (غیر اصلی) |
+| وضعیت | فریز (معاف در Ratchet؛ خارج از مسیر بتا؛ پروفایل compose: full — مصوب D-96 و D-97) |
 | مسئولیت در یک جمله | خوراک عمومی |
 | مسئولیت‌ها | خوراک عمومی (نمایش) |
 | نمی‌کند / نمی‌داند | ندارد (جزئیات در Q1 پژوهش) |
@@ -385,7 +416,7 @@ flowchart LR
 |---|---|
 | شناسه | `usage-service` |
 | دامنه | هوش مصنوعی و داده |
-| وضعیت | فعال (Audit Trail — متریک خام مصرف) — تصمیم Q3 |
+| وضعیت | نگه‌داری + هم‌ترازی در بازنویسی (AIGW_04 در موج ۴؛ خارج از مسیر بتا؛ در Compose نیست — مصوب D-96) |
 | مسئولیت در یک جمله | فقط متریک خام مصرف |
 | مسئولیت‌ها | فقط متریک خام مصرف (تعداد درخواست، توکن، تصویر) از رویدادهای ai-gateway |
 | نمی‌کند / نمی‌داند | پول؛ جدول `credit_ledger_entries` حذف یا بازتعریف می‌شود |
@@ -394,14 +425,14 @@ flowchart LR
 | فراخوانی می‌کند / فراخوانده می‌شود از | فراخوانده می‌شود از ai-gateway (رویداد) |
 | لمس پول | ندارد |
 | تصمیم‌های مرجع | تصمیم ۶ دور چهارم |
-| بدهی شناخته‌شده | QF-ARCH07-F? (usage مرده — producer وجود ندارد) |
+| بدهی شناخته‌شده | QF-ARCH07-USAGE / F-4 (تولید رویداد در ai-gateway و کسر در quota در AIGW_04) |
 
 ### ۳.۲۰. reference-data
 | فیلد | مقدار |
 |---|---|
 | شناسه | `reference-data` |
 | دامنه | هوش مصنوعی و داده |
-| وضعیت | فعال در بتا |
+| وضعیت | نگه‌داری + MIG در موج ۶ (خارج از مسیر بتا؛ پروفایل compose: full — مصوب D-96) |
 | مسئولیت در یک جمله | دادهٔ مرجع عمومی، غیرمالی، غیرمحرمانه، کم‌تغییر و مستقل از دامنه |
 | مسئولیت‌ها | دادهٔ مرجع عمومی (کشورها، شهرها، پیش‌شماره، ایمیل موقت، handle رزرو) |
 | نمی‌کند / نمی‌داند | مدل؛ قیمت؛ provider |

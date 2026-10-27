@@ -6,7 +6,7 @@
 | **Category** | `architecture` |
 | **Status** | `Approved` |
 | **Owner** | Platform Architecture, Frontend & Gateway Teams / @behroz |
-| **Last Updated** | 2026-10-03 |
+| **Last Updated** | 2026-10-27 |
 | **Summary (EN)** | Formalizes request context lifecycle and multi-tenancy isolation across Edge Gateway and Studio SDK: amends ADR-013 Section 2.3 by eliminating blanket fallback for workspace-scoped operations, introduces contract-driven policy classification (x-lemmo-workspace-policy: required/optional/none), mandates client transport header sanitization, context freezing across retries, context-service infrastructure error disambiguation (503 vs empty memberships), a 6-state Studio Context Provider machine, tenant-isolated TanStack Query cache management, and cross-boundary live verification tests. |
 | **Summary (FA)** | رسمی‌سازی چرخه حیات کانتکست درخواست و ایزولاسیون چندمستاجری میان درگاه لبه و کلاینت استودیو: اصلاح بند ۲.۳ از ADR-013 با لغو فال‌بک عمومی روی عملیات نیازمند ورک‌اسپیس، معرفی تفکیک سیاست‌های سه‌گانه مبتنی بر قرارداد (x-lemmo-workspace-policy: required/optional/none)، پالایش هدر خام در ترانسپورت کلاینت، تثبیت کانتکست در چرخه ریترای، تفکیک خطای زیرساخت در context-service از عضویت خالی (۵۰۳ در برابر آرایه خالی)، ماشین حالت ۶‌گانه کانتکست استودیو، ایزولاسیون کلیدهای کش کوئری بر اساس مستاجر و آزمون‌های زنده عبور از مرزها. |
 | **Tags** | `gateway`, `sdk`, `multi-tenancy`, `workspace-policy`, `context-service`, `cache-isolation`, `state-machine`, `adr` |
@@ -96,6 +96,10 @@
 5. آزمون مستقل گیت‌وی برای مسدودسازی روت‌های محافظت‌شده دامنه در غیاب کلید نسخه عضویت در Redis با پاسخ ۴۰۳.
 
 ### ۲.۹. رفتار بدون‌اغماض (Fail-Closed) در نبود کلید نسخه عضویت در Redis
+> [!NOTE]
+> **وضعیت موقت در نسخهٔ بتا تحت بدهی معماری `DEBT-AUTHZ-01` (مصوب D-99):**  
+> اعتبارسنجی عضویت در لبه (Kong) با استعلام مستقیم نسخهٔ عضویت از Redis صرفاً یک کنترل جبرانی موقت در نسخهٔ بتا بوده و به عنوان بدهی حاکمیتی تحت شناسهٔ `DEBT-AUTHZ-01` در دفتر بدهی‌های معماری ثبت شده است. در وضعیت هدف پلتفرم، لبه منحصراً ترانسپورت و هویت را مدیریت می‌کند و اعتبارسنجی جامع مجوز و عضویت به سرویس‌های دامنه‌ای و خط مشی متمرکز IAM موکول خواهد شد (بسته شدن در گیت DEP_01 توسط تسک SEC_06).
+
 * پلاگین `lemmo-access-enforcer` در درگاه لبه موظف است کاملاً به صورت Fail-Closed رفتار کند.
 * در صورتی که کلید نسخه عضویت `lemmo:membership:version:{workspace_id}:{user_id}` در Redis وجود نداشته باشد (به دلیل عدم عضویت کاربر، یا فاصله زمانی بین ایجاد ورک‌اسپیس تا ثبت عضویت)، درخواست باید بلافاصله با خطای قطعی `403 Workspace Forbidden` متوقف شود؛ مستقل از اینکه سرویس پایین‌دست چه پاسخی می‌دهد. نبود داده در ردیس هرگز نباید به منزله «مجوز عبور» تفسیر شود.
 

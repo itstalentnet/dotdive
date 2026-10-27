@@ -13,9 +13,9 @@ icon: "sliders"
 | **Category** | `architecture` |
 | **Status** | `Approved` |
 | **Owner** | تیم معماری و پلتفرم بک‌اند / @behroz |
-| **Last Updated** | 2026-10-12 |
-| **Summary (EN)** | Ratifies Dynamic Generation Form Architecture (M1 to M7): Tool-as-Definition governs selectable models (`models[]` array in tool schema with order, default, badges, and `field_overrides`), technical model registry remains confined to model-router-service (`model_ref`), defines Canonical Parameters Vocabulary across capabilities, eliminates presets.ts and client-side model arrays (Zero-Mock per ADR-016), mandates real-time debounced price queries via POST /estimate with expected_cost and PRICE_CHANGED protection (reaffirming D4 in ADR-019), deprecates base_credit_cost in model.proto, formalizes multi-output semantics (single job, N assets with partial settlement in TigerBeetle), derives studio media tabs strictly from active tool output_type, and defines a closed server-driven UI field enum. |
-| **Summary (FA)** | تصویب معماری فرم تولید محتوای داده‌محور (M1 تا M7): تعریف ابزار حاکم بر مدل‌های قابل‌انتخاب در رابط کاربری (`models[]` در اسکیمای ابزار با ترتیب، پیش‌فرض، نشان‌ها و `field_overrides`)، تفکیک رجیستری فنی به model-router-service با ارجاع `model_ref`، واژگان پارامترهای استاندارد برای تمام قابلیت‌ها، حذف کامل presets.ts و آرایه‌های ثابت فرانت‌اند (اصل Zero-Mock پیرو ADR-016)، استعلام زنده و دی‌بانس‌شده قیمت از POST /estimate با سقف محافظ expected_cost و خطای PRICE_CHANGED، منسوخ‌سازی base_credit_cost در model.proto، رسمیت‌بخشی به خروجی چندتایی (یک جاب و N دارایی با تسویه جزئی)، اشتقاق تب‌های استودیو از خروجی ابزارهای فعال، و مجموعه بسته انواع فیلدهای فرم سرور-محور. |
+| **Last Updated** | 2026-10-27 |
+| **Summary (EN)** | Ratifies Dynamic Generation Form Architecture (M1 to M7): Tool-as-Definition governs selectable models (`models[]` array in tool schema with order, default, badges, and `field_overrides`), technical model registry remains confined to ai-gateway (`model_alias` per D-50/D-51, superseding legacy `model_ref`), defines Canonical Parameters Vocabulary across capabilities, eliminates presets.ts and client-side model arrays (Zero-Mock per ADR-016), mandates real-time debounced price queries via POST /estimate with expected_cost and PRICE_CHANGED protection (reaffirming D4 in ADR-019), deprecates base_credit_cost in model.proto, formalizes multi-output semantics (single job, N assets with partial settlement in TigerBeetle), derives studio media tabs strictly from active tool output_type, and defines a closed server-driven UI field enum. |
+| **Summary (FA)** | تصویب معماری فرم تولید محتوای داده‌محور (M1 تا M7): تعریف ابزار حاکم بر مدل‌های قابل‌انتخاب در رابط کاربری (`models[]` در اسکیمای ابزار با ترتیب، پیش‌فرض، نشان‌ها و `field_overrides`)، تفکیک رجیستری فنی به ai-gateway با ارجاع نام مستعار `model_alias` (جایگزین کلید قدیمی `model_ref` طبق مصوب D-50 و D-51 — بخش منسوخ‌شده / Superseded)، واژگان پارامترهای استاندارد برای تمام قابلیت‌ها، حذف کامل presets.ts و آرایه‌های ثابت فرانت‌اند (اصل Zero-Mock پیرو ADR-016)، استعلام زنده و دی‌بانس‌شده قیمت از POST /estimate با سقف محافظ expected_cost و خطای PRICE_CHANGED، منسوخ‌سازی base_credit_cost در model.proto، رسمیت‌بخشی به خروجی چندتایی (یک جاب و N دارایی با تسویه جزئی)، اشتقاق تب‌های استودیو از خروجی ابزارهای فعال، و مجموعه بسته انواع فیلدهای فرم سرور-محور. |
 | **Tags** | `adr`, `adr-021`, `dynamic-form`, `tools-service`, `model-router`, `quota-service`, `zero-mock`, `server-driven-ui` |
 
 ---
@@ -36,8 +36,8 @@ icon: "sliders"
 
 ### ۲.۱. ابزار تعیین‌کننده نمایش، رجیستری مدل تعیین‌کننده وجود فنی (M1)
 1. **تفکیک لایه‌ها:** لیست مدل‌های قابل‌انتخاب، ترتیب نمایش، مدل پیش‌فرض و نشان‌های کاربری (`flagship`, `fast`, `pro`) بخشی از **تعریف داده‌ای ابزار** در `tools-service` است.
-2. **عدم نشت مشخصات فنی:** مشخصات فنی مدل (پراویدر ابری، فالبک، اعتبارسنجی سرتاسری) متعلق به `model-router-service` است. ابزار صرفاً از طریق کلید `model_ref` به مدل ارجاع می‌دهد و اطلاعات فنی را تکرار نمی‌کند (اصل B1.1).
-3. **عدم وابستگی در زمان اجرا (Runtime Decoupling):** کاتالوگ ابزارها مستقیماً از پایگاه‌داده `lemmo_tools` خوانده می‌شود تا در دسترس بودن کاتالوگ ابزارها به پایداری لحظه‌ای `model-router-service` گره نخورد. سازگاری ارجاع `model_ref` در **گیت تست CI** بررسی می‌شود.
+2. **عدم نشت مشخصات فنی:** مشخصات فنی مدل (پراویدر ابری، فالبک، اعتبارسنجی سرتاسری) متعلق به `ai-gateway` (سابقاً model-router) است. ابزار صرفاً از طریق نام مستعار `model_alias` (کلید قدیمی `model_ref` طبق تصمیمات مصوب D-50 و D-51 منسوخ‌شده / Superseded است) به مدل ارجاع می‌دهد و اطلاعات فنی را تکرار نمی‌کند (اصل B1.1).
+3. **عدم وابستگی در زمان اجرا (Runtime Decoupling):** کاتالوگ ابزارها مستقیماً از فایل‌های تعریف یا پایگاه‌داده `lemmo_tools` خوانده می‌شود تا در دسترس بودن کاتالوگ ابزارها به پایداری لحظه‌ای `ai-gateway` گره نخورد. سازگاری ارجاع `model_alias` (جایگزین ارجاع منسوخ‌شدهٔ `model_ref`) در **گیت تست CI** بررسی می‌شود.
 
 ### ۲.۲. واژگان پارامترهای استاندارد (Canonical Parameters) (M2)
 1. برای هر قابلیت (`capability`) یک فهرست واحد و نسخه‌دار از کلیدهای استاندارد پارامترها تعیین می‌شود:
@@ -90,7 +90,7 @@ icon: "sliders"
   ],
   "models": [
     {
-      "model_ref": "gpt-image-2",
+      "model_alias": "gpt-image-2", // قبلاً model_ref در پیش‌نویس اولیه (منسوخ‌شده / Superseded طبق مصوب D-50 و D-51)
       "default": true,
       "order": 1,
       "badge": "live",
@@ -100,7 +100,7 @@ icon: "sliders"
       }
     },
     {
-      "model_ref": "fal-ai/flux-dev",
+      "model_alias": "flux-dev", // جایگزین model_ref قدیمی طبق D-50 و D-51 (Superseded)
       "default": false,
       "order": 2,
       "badge": "flagship",

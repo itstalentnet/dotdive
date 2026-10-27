@@ -6,7 +6,7 @@
 | **Category** | `architecture` |
 | **Status** | `Approved` |
 | **Owner** | Core Architecture & AI Platform Team |
-| **Last Updated** | 2026-10-24 |
+| **Last Updated** | 2026-10-27 |
 | **Summary (EN)** | Authoritative specification for Lemmo AI Gateway quality, safety, evaluation gates, telemetry standards, and declarative provider/model registry: intent output validation (C1), input caps (C2), log contracts (C3), raw-prompt ban (C4), golden set (C7), service-by-model-tier authorization (C8), budget/rate limits (C9), local model readiness (C10), rejected alternatives (C11), exclusive agent access through the `intent-classifier` alias (A3–A4, replacing D-39), registry structure (R1–R6), and the single three-location definition model with a shared CI validator (L1, V1). |
 | **Summary (FA)** | سند رسمی معماری درگاه هوش مصنوعی (AI Gateway) لِمو در حوزه کیفیت، ایمنی، تله‌متری و رجیستری اعلانی provider/مدل: اعتبارسنجی خروجی نیت (C1)، سقف ورودی (C2)، قرارداد لاگ (C3)، ممنوعیت پرامپت خام (C4)، مجموعه طلایی (C7)، مجوز سرویس×دسته مدل (C8)، بودجه/ریت‌لیمیت (C9)، آمادگی مدل محلی (C10)، گزینه‌های ردشده (C11)، دسترسی انحصاری `agent-service` از نام مستعار `intent-classifier` (A3–A4، جایگزین D-39)، ساختار رجیستری (R1–R6) و مدل سه‌محلی تعریف با اعتبارسنج مشترک CI (L1، V1). |
 | **Tags** | `adr`, `ai-gateway`, `llmops`, `quality`, `safety`, `observability`, `model-router`, `intent-classification`, `registry`, `provider`, `alias` |
@@ -220,6 +220,35 @@ aliases:
      خروجی خام در `storage-service` ثبت و شناسه فایل به کلاینت تحویل داده می‌شود. خروجی موفق تسویه شده و شکست فنی منجر به آزادسازی ۱۰۰٪ رزرو می‌شود. نتیجه با `media_part` در پیام چت نمایش می‌یابد.
    - **مسیر workflow:** اجرای زنجیره‌ای، شرطی و بوم متعلق به `orchestrator-service` بوده و تا پس از MVP فریز است.
    - **بازنشستگی image-service:** این سرویس بازنشسته است، هیچ کد تازه‌ای نمی‌پذیرد و در پایان فاز بتا به طور کامل حذف می‌گردد.
+
+### ۲.۱۶. قواعد بنیادین مشاهده‌پذیری و استقلال سرویس‌ها (مصوب D-26 تا D-30)
+
+پیرو تصمیمات رسمی و مصوب دفتر تصمیمات پلتفرم ([D-26 تا D-30](../../09-governance/decision-register.md)):
+
+1. **core فقط ناظر؛ ناظر جدا (مصوب D-26):**
+   در معماری هدف، پکیج `core/` به هیچ وجه نقطهٔ وابستگی ران‌تایم سرویس‌ها نیست. لاگ، trace، health، doctor و اعتبارسنج‌ها را فقط نظارت می‌کند و هیچ سرویسی آن را در زمان اجرا import نمی‌کند. ناظر با نام `observer/` جدا ساخته می‌شود. `core/` نامش را حفظ می‌کند تا آخرین استفاده‌کننده‌اش جدا شود و سپس حذف می‌گردد. تغییر نام `core/` تا وقتی import می‌شود ممنوع است. ابزارهای اجرایی ناظر طبق D-24 ماژول‌های `lemmo-cli` هستند.
+
+2. **ناظر هرگز سرویس را متوقف نمی‌کند (مصوب D-27):**
+   ارسال لاگ و trace هرگز نباید پردازش درخواست کاربر را معطل کند یا منجر به شکست درخواست شود. خرابی ناظر صرفاً به معنای کمبود داده است، نه خرابی سرویس (`Non-blocking & Best-effort`).
+
+3. **مرزهای مجاز وابستگی (مصوب D-28):**
+   - **مجاز:** قراردادهای رسمی (`contracts/`)، کد تولیدی از قرارداد (`internal/genproto`)، و کتابخانه‌های عمومی استاندارد (نظیر `slog` و SDK رسمی OpenTelemetry).
+   - **ممنوع:** هرگونه کتابخانهٔ داخلی مشترک در زمان اجرا (`shared runtime internal libraries`).
+   - **استثنا:** فقط با ADR رسمی و فقط زمانی که ۳ سرویس یا بیشتر به یک منطق حساس واحد نیاز داشته باشند؛ کتابخانه باید مستقل، نسخه‌دار و tagخورده باشد، بدون استفاده از `replace` محلی و بدون عضویت در `go.work`.
+
+4. **استقلال قابل اندازه‌گیری و گیت CI (مصوب D-29):**
+   یک سرویس فقط و فقط زمانی مستقل تلقی می‌شود که این ۴ بررسی خودکار پاس شوند:
+   1. عدم `import` کتابخانه داخلی مشترک؛
+   2. عدم `replace` به مسیر داخلی در `go.mod` (به استثنای کد تولیدی قرارداد `internal/genproto` طبق مصوبهٔ رسمی OQ-093)؛
+   3. عدم `COPY core/` در `Dockerfile`؛
+   4. بیلد موفق کدهای سرویس با متغیر محیطی `GOWORK=off`.  
+   گیت CI این مقادیر را با خط مبنا (Baseline) ارزیابی کرده و مکانیزم Ratchet از پسرفت جلوگیری می‌کند.
+
+5. **لاگ به عنوان قرارداد خروجی رسمی (مصوب D-30):**
+   - **قرارداد:** فایل شمای `log-event.schema.json` نسخه‌دار در `contracts/platform/observability/`.
+   - **پیاده‌سازی:** داخل سرویس‌ها با هدر استاندارد مصوب D-18 توسط `lemmo-cli` تولید می‌شود.
+   - **اعتبارسنجی:** بررسی ساختار لاگ‌ها با دستور `lemmo-cli logs validate`.
+   - **ناظر در MVP:** خروجی `stdout JSON` به همراه ابزارهای `make trace` و `make doctor`.
 
 ---
 

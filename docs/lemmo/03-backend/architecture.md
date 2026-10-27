@@ -6,7 +6,7 @@
 | **Category** | `backend` |
 | **Status** | `Approved` |
 | **Owner** | Backend & Platform Team |
-| **Last Updated** | 2026-09-30 |
+| **Last Updated** | 2026-10-27 |
 | **Summary (EN)** | Canonical architecture of lemmo-api monorepo: directory layout, service independence, service-owned deployment, role-based naming (ADR-009), core libraries, infra, and scaling. |
 | **Summary (FA)** | معماری رسمی مونوریپوی بک‌اند لمو به سبک nons-api: ساختار پوشه‌ها، استقلال سرویس‌ها، استقرار مستقل سرویس‌ها (ADR-009)، نام‌گذاری نقش‌محور، قراردادها و زیرساخت. |
 | **Tags** | `backend`, `architecture`, `monorepo`, `microservices`, `infrastructure`, `adr-009`, `financial-ledger` |
@@ -192,6 +192,10 @@ lemmo-api/                      ← ریشه مونوریپوی بک‌اند (�
    - **لایه احراز هویت (`auth-service` / Kratos):** پالایش دامنه‌های ایمیل موقت و یک‌بارمصرف (Disposable / Burner Email Detection) و الزام به احراز هویت دومرحله‌ای یا چالش امنیتی (Step-Up Authentication / MFA / CAPTCHA) در ورودهای پرخطر.
    - **لایه دامنه کاربر (`user-service`):** نگهداری استیت‌ماشین وضعیت کاربر (`status: ACTIVE | SUSPENDED | BANNED | CHALLENGE_REQUIRED`)، زمان تعلیق موقت (`suspended_until` بر مبنای UTC) و امتیاز تجمیعی رفتارهای ابیوز (`risk_score` از ۰ تا ۱۰۰ بر مبنای نقض مکرر پالیسی محتوا، تلاش‌های نامعتبر یا گزارش‌های امنیتی). در صورت رسیدن امتیاز به ۱۰۰، حساب برای مدت مشخص (مثلاً ۲ ساعت) تعلیق شده و وضعیت در Redis کش می‌شود.
    - **لایه گیت‌وی (`infra/gateway`):** استعلام پرسرعت از کش وضعیت Redis و ریجکت آنی درخواست‌های کاربر معلق با خطای استاندارد `403 Forbidden` (`ACCOUNT_TEMPORARILY_SUSPENDED`) همراه با هدر `Retry-After`.
+15. **نقطهٔ ورود سرویس `cmd/main.go` و انحصار پوشه `cmd/` به باینری تولیدی (مصوب D-34):**  
+   همه سرویس‌های جدید نقطه ورود خود را در `cmd/main.go` قرار می‌دهند. الگوی قدیمی `cmd/server/main.go` برای سرویس‌های جدید اکیداً ممنوع است و سرویس‌های موجود در اولین PR تغییر یا مایگریشن این الگو را می‌پذیرند. پوشه `cmd/` صرفاً برای باینری‌های تولیدی نهایی رزرو است و هیچ‌گونه فایل تست، اسکریپت موقت یا باینری‌های سنجش نباید در آن قرار گیرد؛ آزمون‌ها منحصراً در `tests/live/` یا `tests/e2e/` قرار می‌گیرند.
+16. **حذف کامل `MockAuthMiddleware` و اتکای تام به سیستم هویتی (مصوب D-35):**  
+   میدل‌ور `MockAuthMiddleware` در کدهای بک‌اند به طور کامل ریشه‌کن و حذف شد. احراز هویت و مدیریت کانتکست کاربر در کلیه محیط‌ها (از جمله توسعه محلی) مستقیماً از طریق سرویس هویت اصلی (`auth-service` / Kratos / Oathkeeper) و توکن‌های معتبر انجام می‌شود و هیچ مکانیزم Mocking در مسیر احراز هویت وجود ندارد.
 
 ---
 
