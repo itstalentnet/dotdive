@@ -6,7 +6,7 @@
 | **Category** | `devops` |
 | **Status** | `Approved` |
 | **Owner** | DevOps & Platform Team |
-| **Last Updated** | 2026-09-28 |
+| **Last Updated** | 2026-10-29 |
 | **Summary (EN)** | Authoritative specification for Docker image and container naming, container_name conventions, immutable tagging, prevention of duplicate/stale images, and build provenance logging. |
 | **Summary (FA)** | مشخصات و قواعد الزامی نام‌گذاری ایمیج‌ها و کانتینرها، جلوگیری از ساخت ایمیج‌های تکراری و قدیمی، سیاست‌های برچسب‌گذاری و ثبت مشخصات بیلد در لاگ. |
 | **Tags** | `devops`, `docker`, `naming-conventions`, `containers`, `docker-compose`, `build-hygiene` |
@@ -85,6 +85,17 @@ lemmo-<category>-<name>
 - هر سرویس زیرساخت‌های اختصاصی خود را در `services/<name>/deploy/compose.yaml` و فایل‌های پیکربندی را در `services/<name>/deploy/config/` تعریف می‌کند.
 - فایل `infra/compose/dev.yml` با دستور استاندارد `include:` این مانیفست‌ها را بارگذاری می‌نماید.
 - استفاده از این الگو منوط به **`Docker Compose >= 2.20.0`** است.
+
+### ۳.۴. سیاست مقیدسازی پورت‌ها به Loopback و مدیریت سکرت‌های Compose (مصوب D-41, D-75, D-78)
+پیرو مصوبات امنیتی و استانداردسازی محیط محلی:
+1. **پیش‌فرض انتشار پورت‌ها روی Loopback (`127.0.0.1`):**  
+   تمام پورت‌های منتشرشده در `infra/compose/dev.yml` و مانیفست‌های سرویس‌ها باید به صورت پیش‌فرض مقید به `127.0.0.1` باشند (`127.0.0.1:<host_port>:<container_port>`). پورت ورودی درگاه لبه (`edge-gateway:8000`) از متغیر `${EDGE_BIND_ADDR:-127.0.0.1}:8000:8000` استفاده می‌کند تا اتصال از بیرون تنها با تنظیم صریح `EDGE_BIND_ADDR=0.0.0.0` میسر باشد (D-78).
+2. **منع مقادیر مستقیم (Literals) و پیش‌فرض‌های Fallback سکرت‌ها (D-75):**  
+   هیچ مقدار سکرت، پسورد، یا کلید نباید دارای مقدار مستقیم یا مقدار پیش‌فرض `:-` باشد. سکرت‌های حیاتی باید از الگوی شکست فوری `${VAR:?VAR is required}` استفاده کنند تا در غیاب متغیر محیطی، کامپوز بیلد نشود.
+3. **پوشش کامل متغیرها در `.env.example`:**  
+   تمام متغیرهای Compose باید در `.env.example` با مقادیر غیرواقعی صریح (نظیر `change-me`) فهرست شده باشند.
+4. **کلیدهای امضای توکن و JWKS (D-41):**  
+   کلیدهای امضای توکن نباید در گیت کامیت شوند (`jwks.json` در `.gitignore`) و درگاه لبه کلید عمومی را به صورت پویا از مسیر مانت‌شده یا متغیر محیطی دریافت می‌کند و فقط `active_kid` معتبر (`lemmo-key-2`) را می‌پذیرد.
 
 ---
 
