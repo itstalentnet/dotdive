@@ -116,4 +116,4 @@ flowchart TD
 - [راهنمای جامع عیب‌یابی و مشکلات و راه‌حل‌ها (DOC-OPS-002)](../runbooks/RB-STUDIO-002-context-and-wallet-resolution.md)
 - [نمایه مرکزی کالبدشکافی رخدادها (DOC-OPS-INC-000)](./index.md)
 - [نقشه راه جامع بک‌اند پلتفرم (DOC-BE-005)](../../03-backend/roadmap.md)
-- [گزارش اجرای تسک تاب‌آوری کانتکست (REPORT_CTX_001)](../../../../../.task/review/REPORT_CTX_001_DOWNSTREAM_RESILIENCE_AND_RECONNECT.md)
+- [گزارش اجرای تسک تاب‌آوری کانتکست (REPORT_CTX_001)](../../../../../.task/archive/superseded-2026-10-29/REPORT_CTX_001_DOWNSTREAM_RESILIENCE_AND_RECONNECT.md)
