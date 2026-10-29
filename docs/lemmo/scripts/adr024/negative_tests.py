@@ -160,14 +160,14 @@ def main():
             "heading-miss",
             lambda t: t.replace(
                 "dotdive/docs/lemmo/03-backend/contracts.md §۱",
-                "dotdive/docs/lemmo/03-backend/contracts.md §۶",
+                "dotdive/docs/lemmo/03-backend/contracts.md §۹۹",
             ),
         )
         expect_reject(
-            "doc_refs rejects contracts.md §۶ (no such heading)",
+            "doc_refs rejects contracts.md §۹۹ (no such heading)",
             "check_doc_refs.py",
             ["--doc", pdoc],
-            "heading '6' not found",
+            "heading '99' not found",
         )
 
         # Mutation: doc_refs rejects non-existent anchor in current-path.md

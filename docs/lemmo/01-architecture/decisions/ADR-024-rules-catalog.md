@@ -112,7 +112,7 @@
 - **Applies To:** `[go-service]`
 - **Applies When:** `always`
 - **Automation:** `full`
-- **Implementation Status:** `not_started`
+- **Implementation Status:** `implemented`
 - **Evaluation Mechanism:** `ast`
 - **Roadmap Stage:** `1`
 - **Gate:** `new_service`
@@ -130,7 +130,7 @@
 - **Applies To:** `[go-service]`
 - **Applies When:** `always`
 - **Automation:** `full`
-- **Implementation Status:** `not_started`
+- **Implementation Status:** `implemented`
 - **Evaluation Mechanism:** `filesystem`
 - **Roadmap Stage:** `1`
 - **Gate:** `ratchet`
@@ -166,7 +166,7 @@
 - **Applies To:** `[go-service, packaged-engine, planned-stub]`
 - **Applies When:** `always`
 - **Automation:** `full`
-- **Implementation Status:** `not_started`
+- **Implementation Status:** `implemented`
 - **Evaluation Mechanism:** `frontmatter_parse`
 - **Roadmap Stage:** `1`
 - **Gate:** `ratchet`
@@ -202,7 +202,7 @@
 - **Applies To:** `[go-service]`
 - **Applies When:** `always`
 - **Automation:** `full`
-- **Implementation Status:** `not_started`
+- **Implementation Status:** `implemented`
 - **Evaluation Mechanism:** `filesystem`
 - **Roadmap Stage:** `1`
 - **Gate:** `ratchet`
@@ -220,7 +220,7 @@
 - **Applies To:** `[go-service]`
 - **Applies When:** `always`
 - **Automation:** `full`
-- **Implementation Status:** `not_started`
+- **Implementation Status:** `implemented`
 - **Evaluation Mechanism:** `ast`
 - **Roadmap Stage:** `1`
 - **Gate:** `new_service`
@@ -238,7 +238,7 @@
 - **Applies To:** `[go-service]`
 - **Applies When:** `always`
 - **Automation:** `full`
-- **Implementation Status:** `not_started`
+- **Implementation Status:** `implemented`
 - **Evaluation Mechanism:** `ast`
 - **Roadmap Stage:** `1`
 - **Gate:** `new_service`
@@ -256,7 +256,7 @@
 - **Applies To:** `[go-service]`
 - **Applies When:** `always`
 - **Automation:** `partial`
-- **Implementation Status:** `not_started`
+- **Implementation Status:** `implemented`
 - **Evaluation Mechanism:** `ast_and_manual_review`
 - **Roadmap Stage:** `1`
 - **Gate:** `ratchet`
@@ -274,7 +274,7 @@
 - **Applies To:** `[go-service, packaged-engine]`
 - **Applies When:** `always`
 - **Automation:** `full`
-- **Implementation Status:** `not_started`
+- **Implementation Status:** `implemented`
 - **Evaluation Mechanism:** `filesystem`
 - **Roadmap Stage:** `1`
 - **Gate:** `ratchet`
@@ -292,7 +292,7 @@
 - **Applies To:** `[go-service]`
 - **Applies When:** `always`
 - **Automation:** `full`
-- **Implementation Status:** `not_started`
+- **Implementation Status:** `implemented`
 - **Evaluation Mechanism:** `filesystem`
 - **Roadmap Stage:** `1`
 - **Gate:** `new_service`
@@ -400,7 +400,7 @@
 - **Applies To:** `[go-service]`
 - **Applies When:** `always`
 - **Automation:** `full`
-- **Implementation Status:** `not_started`
+- **Implementation Status:** `implemented`
 - **Evaluation Mechanism:** `content_match`
 - **Roadmap Stage:** `1`
 - **Gate:** `ratchet`
@@ -634,7 +634,7 @@
 - **Applies To:** `[go-service]`
 - **Applies When:** `manifest.networking.inbound_http_port != null || manifest.networking.inbound_grpc_port != null`
 - **Automation:** `full`
-- **Implementation Status:** `not_started`
+- **Implementation Status:** `implemented`
 - **Evaluation Mechanism:** `ast`
 - **Roadmap Stage:** `1`
 - **Gate:** `new_service`
@@ -688,7 +688,7 @@
 - **Applies To:** `[go-service]`
 - **Applies When:** `always`
 - **Automation:** `full`
-- **Implementation Status:** `not_started`
+- **Implementation Status:** `implemented`
 - **Evaluation Mechanism:** `ast`
 - **Roadmap Stage:** `1`
 - **Gate:** `new_service`
@@ -724,7 +724,7 @@
 - **Applies To:** `[go-service]`
 - **Applies When:** `always`
 - **Automation:** `full`
-- **Implementation Status:** `not_started`
+- **Implementation Status:** `implemented`
 - **Evaluation Mechanism:** `ast`
 - **Roadmap Stage:** `1`
 - **Gate:** `new_service`
@@ -983,3 +983,47 @@
 - **Enforced By:** `ci:edge-gateway-probe (proposed)`
 - **Doc Status:** `approved`
 - **Doc Ref:** dotdive/docs/lemmo/01-architecture/decisions/ADR-013-three-tier-edge-gateway-and-bff-architecture.md §۲.۱
+
+---
+
+## ۴. راهنمای ابزار انطباق‌سنجی (`lemmo-cli check`) و مکانیزم Ratchet
+
+ابزار `lemmo-cli check` ماژول رسمی انطباق‌سنجی معماری در مونوریپوی `api/` است (مصوب D-24 و D-29). این ابزار قوانین انطباق کاتالوگ را به صورت خودکار ارزیابی می‌کند.
+
+### ۴.۱. فرمان‌ها و پارامترهای اجرایی
+
+```bash
+# ارزیابی یک سرویس خاص (خروجی جدول)
+go run ./tools/lemmo-cli check <service-name>
+
+# ارزیابی یک سرویس با خروجی JSON ماشین‌خوان
+go run ./tools/lemmo-cli check <service-name> --json
+
+# ارزیابی تمام سرویس‌های موجود در services/
+go run ./tools/lemmo-cli check --all
+
+# ارزیابی همراه با اعمال گیت خط مبنا (Ratchet)
+go run ./tools/lemmo-cli check --all --ratchet
+
+# به‌روزرسانی یا ایجاد فایل خط مبنای Ratchet
+go run ./tools/lemmo-cli check --all --write-baseline
+```
+
+### ۴.۲. مکانیزم خط مبنا و قاعدهٔ Ratchet (عدم پسرفت یکنواخت)
+
+فایل خط مبنا در مسیر `api/conformance/ratchet.yaml` قرار دارد و بدهی‌های فنی موجود در سرویس‌های میراثی را ثبت می‌کند. اجرای فرمان با فلگ `--ratchet` سه شرط را بررسی می‌کند:
+
+1. **شکست تازه در سرویس موجود:** اگر سرویسی قانونی را نقض کند که در فایل خط مبنا ثبت نشده است، اجرا با خطا متوقف می‌شود.
+2. **شکست در سرویس جدید:** هر سرویس جدیدی که در خط مبنا وجود ندارد، موظف به رعایت ۱۰۰٪ قوانین است؛ در صورت بروز هرگونه شکست، خطا صادر می‌شود.
+3. **خط مبنای کهنه (stale baseline):** اگر قانونی که قبلاً برای سرویسی در خط مبنا ثبت شده بود اکنون اصلاح شده و پاس شود، خط مبنا نامعتبر تلقی شده و اجرای `--ratchet` با شکست مواجه می‌شود.
+
+### ۴.۳. روش تنگ کردن خط مبنا (Tightening the Baseline)
+
+هنگامی که یک بدهی فنی در سرویسی برطرف می‌شود، تست انطباق با خطای `stale baseline` متوقف می‌گردد. برای پذیرش این بهبود و جلوگیری از بازگشت دوبارهٔ بدهی (Ratchet Effect)، توسعه‌دهنده موظف است خط مبنا را با دستور زیر تنگ کند:
+
+```bash
+go run ./tools/lemmo-cli check --all --write-baseline
+```
+
+سپس فایل تغییریافتهٔ `conformance/ratchet.yaml` همراه با کد اصلاحی به عنوان یک کامیت ثبت می‌گردد.
+
