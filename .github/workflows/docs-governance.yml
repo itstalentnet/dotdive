@@ -1,0 +1,43 @@
+name: Documentation Governance & Responsibility Drift Guard
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  governance:
+    name: Docs Governance Gates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r docs/lemmo/scripts/requirements.txt
+          pip install jsonschema
+
+      - name: Run ADR-024 Rules Catalog Gate
+        run: |
+          python3 docs/lemmo/scripts/adr024/check_all.py
+
+      - name: Run Link Integrity Gate
+        run: |
+          python3 docs/lemmo/scripts/check_links.py
+
+      - name: Run Service Responsibility Drift Guard (DOC-ARCH-013 / D-54)
+        run: |
+          python3 docs/lemmo/scripts/check_responsibility.py

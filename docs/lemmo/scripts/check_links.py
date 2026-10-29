@@ -17,6 +17,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOC_ROOT = os.path.normpath(os.path.join(HERE, ".."))
+REPO_ROOT = os.path.normpath(os.path.join(HERE, "..", "..", ".."))
 
 LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 SKIP_PREFIXES = ("http://", "https://", "mailto:", "#", "tel:", "file://")
@@ -44,6 +45,11 @@ def main():
                 continue
             resolved = os.path.normpath(os.path.join(os.path.dirname(path), file_part))
             if not os.path.exists(resolved):
+                # In single-repo CI environments (e.g. GitHub Actions), links pointing
+                # outside the dotdive repository to sibling workspace packages (.task/, auth/, RULES.md)
+                # cannot be resolved on disk.
+                if os.environ.get("GITHUB_ACTIONS") == "true" and not resolved.startswith(REPO_ROOT):
+                    continue
                 broken.append((os.path.relpath(path, DOC_ROOT), target))
 
     print("=" * 65)

@@ -1,0 +1,109 @@
+# Configuration for check_responsibility.py (TASK_GOV_07)
+# Conforms to DOC-ARCH-013 §7 and AGENTS.md §8 (D-54)
+
+registry_path: "docs/lemmo/01-architecture/service-responsibility-registry.md"
+decision_register_path: "docs/lemmo/09-governance/decision-register.md"
+api_services_dir: "../api/services"
+api_compose_file: "../api/infra/compose/dev.yml"
+
+card_schema:
+  expected_card_count: 30
+  expected_fields:
+    - "شناسه"
+    - "دامنه"
+    - "وضعیت"
+    - "مسئولیت در یک جمله"
+    - "مسئولیت‌ها"
+    - "نمی‌کند / نمی‌داند"
+    - "دادهٔ متعلق"
+    - "قراردادها"
+    - "فراخوانی می‌کند / فراخوانده می‌شود از"
+    - "لمس پول"
+    - "تصمیم‌های مرجع"
+    - "بدهی شناخته‌شده"
+
+# Known service inventory (used when api repository is not mounted in CI)
+known_api_services:
+  - "agent-service"
+  - "auth-service"
+  - "context-service"
+  - "feed-service"
+  - "iam-service"
+  - "image-service"
+  - "job-service"
+  - "model-router-service"
+  - "node-registry-service"
+  - "notification-service"
+  - "orchestrator-service"
+  - "project-service"
+  - "quota-service"
+  - "reference-data-registry"
+  - "storage-service"
+  - "token-service"
+  - "tools-service"
+  - "usage-service"
+  - "user-service"
+  - "workspace-service"
+
+service_aliases:
+  model-router-service: "ai-gateway"
+  model-router: "ai-gateway"
+  ai-gateway: "ai-gateway"
+  node-registry-service: "node-service"
+  node-registry: "node-service"
+  reference-data-registry: "reference-data"
+  access-promo-service: "Access/Promo"
+  edge-gateway: "Kong"
+  lemmo-edge-gateway: "Kong"
+  identity-proxy: "Oathkeeper"
+  financial-ledger: "ledger-service"
+  postgres: "زیرساخت"
+  redis: "زیرساخت"
+  rabbitmq: "زیرساخت"
+  minio: "زیرساخت"
+  kratos: "auth-service"
+
+ignored_compose_services:
+  - "minio-init"
+  - "lemmo-mock-content"
+  - "lemmo-mock-llm"
+  - "mailpit"
+  - "kratos-migrate"
+
+c4_rules:
+  patterns:
+    - '(?i)(?:سرویس\s+)?{card}\s+(?:به عنوان\s+)?مسئول\s+'
+    - '(?i)مسئولیت\s+(?:سرویس\s+)?{card}\b'
+    - '(?i)مسئولیت\s+.*?برعهدهٔ\s+`?{card}`?'
+    - '(?i)\b{card}\s+is\s+responsible\s+for\b'
+    - '(?i)\b{card}\s+owns\b'
+
+  excluded_documents:
+    - "docs/lemmo/01-architecture/service-responsibility-registry.md"
+    - "docs/lemmo/09-governance/decision-register.md"
+
+  whitelist:
+    - file: "docs/lemmo/01-architecture/decisions/ADR-025-access-promo-service-ownership.md"
+      line_contains: "Establishes a permanent, independent `access-promo-service` in the MVP"
+      reason: "ADR-025 metadata summary describing the architectural creation of access-promo-service before registry ratification"
+    - file: "docs/lemmo/07-devops/runbooks/RB-STUDIO-002-context-and-wallet-resolution.md"
+      line_contains: "DOWNSTREAM_UNAVAILABLE"
+      reason: "Operational troubleshooting table documenting context-service error mappings without redefining responsibilities"
+    - file: "docs/lemmo/08-roadmap/01-phase-0-tooling-and-governance.md"
+      line_contains: "Prettier is responsible for formatting"
+      reason: "Code style tool governance statement referencing Prettier formatting role"
+    - file: "docs/lemmo/09-governance/document-template.md"
+      line_contains: "تیم یا فرد مسئول"
+      reason: "Documentation template metadata placeholder for document ownership"
+    - file: "docs/lemmo/index.md"
+      line_contains: "تیم یا شخص مسئول"
+      reason: "Documentation portal template example placeholder for document ownership"
+    - file: "docs/lemmo/09-governance/task-template-and-review-rules.md"
+      line_contains: "مجری تسک"
+      reason: "Task governance role definition describing executor responsibilities"
+    - file: "docs/lemmo/09-governance/task-template-and-review-rules.md"
+      line_contains: "سرویس مسئول رفع بدهی"
+      reason: "Task governance template metadata placeholder for technical debt owner"
+    - file: "docs/lemmo/03-backend/style-guide.md"
+      line_contains: "Principal owns the requested resource"
+      reason: "Internal Go authorization example comment referencing resource ownership"
