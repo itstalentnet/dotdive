@@ -18,9 +18,9 @@
 
 ## ۱. متادیتای کاتالوگ (Catalog Metadata)
 
-- **نسخه کاتالوگ / Version:** `7.0.0`
+- **نسخه کاتالوگ / Version:** `7.1.0`
 - **سند تصمیم / ADR:** `ADR-024`
-- **تاریخ آخرین بازنگری / Last Updated:** `2026-10-18`
+- **تاریخ آخرین بازنگری / Last Updated:** `2026-10-29`
 - **تعداد کل قواعد / Total Rules:** `50`
 
 ---
@@ -44,8 +44,8 @@
 | 13 | [`SB-DEP-03`](#sb-dep-03-role-based-container-naming) | **Role-Based Container Naming** | `service` | `static` | M1 | `new_service` | `lemmo-cli check` | `approved` |
 | 14 | [`SB-DEP-04`](#sb-dep-04-build-provenance-startup-logging) | **Build Provenance Startup Logging** | `service` | `static` | M1 | `ratchet` | `lemmo-cli check` | `approved` |
 | 15 | [`SB-VER-01`](#sb-ver-01-authoritative-human-changelog) | **Authoritative Human Changelog** | `service` | `static` | M1 | `ratchet` | `lemmo-cli check` | `approved` |
-| 16 | [`SB-VER-02`](#sb-ver-02-semantic-versioning-&-multi-module-git-tag) | **Semantic Versioning & Multi-Module Git Tag** | `service` | `static` | M1 | `ratchet` | `lemmo-cli check` | `draft_source` |
-| 17 | [`SB-IMG-01`](#sb-img-01-version-derived-docker-image-tagging) | **Version-Derived Docker Image Tagging** | `service` | `static` | M1 | `ratchet` | `lemmo-cli check` | `draft_source` |
+| 16 | [`SB-VER-02`](#sb-ver-02-semantic-versioning-&-multi-module-git-tag) | **Semantic Versioning & Multi-Module Git Tag** | `service` | `static` | M1 | `ratchet` | `lemmo-cli check` | `approved` |
+| 17 | [`SB-IMG-01`](#sb-img-01-version-derived-docker-image-tagging) | **Version-Derived Docker Image Tagging** | `service` | `static` | M1 | `ratchet` | `lemmo-cli check` | `approved` |
 | 18 | [`SB-HDR-01`](#sb-hdr-01-generated-file-provenance-header) | **Generated File Provenance Header** | `service` | `static` | M1 | `ratchet` | `lemmo-cli check` | `draft_source` |
 | 19 | [`SB-CTR-01`](#sb-ctr-01-protobuf-contracts-centralization-&-buf-lint) | **Protobuf Contracts Centralization & Buf Lint** | `service` | `static` | M1 | `new_service` | `lemmo-cli check` | `approved` |
 | 20 | [`SB-CTR-02`](#sb-ctr-02-domain-openapi-specification-single-ownership) | **Domain OpenAPI Specification Single Ownership** | `service` | `static` | M1 | `ratchet` | `lemmo-cli check` | `approved` |
@@ -322,13 +322,13 @@
 
 - **ID:** `SB-DEP-04`
 - **Name:** Build Provenance Startup Logging
-- **Requirement:** تزریق آرگومان‌های ARG GIT_COMMIT و ARG BUILD_TIME در زمان بیلد داکر و ثبت الزامی شناسه کامیت و زمان بیلد در اولین خط لاگ خروجی استارت سرویس در main.go.
+- **Requirement:** تزریق آرگومان‌های ARG VERSION، ARG GIT_COMMIT و ARG BUILD_TIME در زمان بیلد داکر (با `-ldflags -X main.Version/GitCommit/BuildTime`) و ثبت الزامی نسخه، شناسه کامیت و زمان بیلد در اولین خط لاگ خروجی استارت سرویس در main.go.
 - **Check:** `static`
 - **Scope:** `service`
 - **Applies To:** `[go-service]`
 - **Applies When:** `always`
 - **Automation:** `full`
-- **Implementation Status:** `not_started`
+- **Implementation Status:** `implemented`
 - **Evaluation Mechanism:** `content_match`
 - **Roadmap Stage:** `1`
 - **Gate:** `ratchet`
@@ -346,7 +346,7 @@
 - **Applies To:** `[go-service]`
 - **Applies When:** `always`
 - **Automation:** `full`
-- **Implementation Status:** `not_started`
+- **Implementation Status:** `implemented`
 - **Evaluation Mechanism:** `filesystem`
 - **Roadmap Stage:** `1`
 - **Gate:** `ratchet`
@@ -358,36 +358,36 @@
 
 - **ID:** `SB-VER-02`
 - **Name:** Semantic Versioning & Multi-Module Git Tag
-- **Requirement:** تبعیت نسخه سرویس از SemVer 2.0.0 و انطباق سیستم تگ‌گذاری گیت با الگوی چندماژوله services/<name>/vX.Y.Z جهت تفکیک چرخه‌های انتشار مستقل در مونوریپو.
+- **Requirement:** تبعیت نسخه سرویس از SemVer 2.0.0 و انطباق سیستم تگ‌گذاری گیت با الگوی چندماژوله services/<name>/vX.Y.Z جهت تفکیک چرخه‌های انتشار مستقل در مونوریپو. نسخهٔ بیلد از همین تگ مشتق می‌شود و سرویس بدون تگ `0.0.0-dev+<sha>` می‌گیرد.
 - **Check:** `static`
 - **Scope:** `service`
 - **Applies To:** `[go-service]`
 - **Applies When:** `always`
 - **Automation:** `full`
-- **Implementation Status:** `not_started`
+- **Implementation Status:** `implemented`
 - **Evaluation Mechanism:** `git_tags`
 - **Roadmap Stage:** `1`
 - **Gate:** `ratchet`
 - **Enforced By:** `lemmo-cli check`
-- **Doc Status:** `draft_source`
+- **Doc Status:** `approved`
 - **Doc Ref:** dotdive/docs/lemmo/01-architecture/decisions/ADR-008-internal-tooling-and-versioning-governance.md §۲.۳, dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md §۲.۱
 
 ### SB-IMG-01: Version-Derived Docker Image Tagging
 
 - **ID:** `SB-IMG-01`
 - **Name:** Version-Derived Docker Image Tagging
-- **Requirement:** استخراج تگ ایمیج داکر از نسخه سرویس با فرمت lemmo/svc-<name>:vX.Y.Z و اعمال سیاست نگه‌داری ۳ نسخه آخر و هرس ایمیج‌های آویزان (Dangling Images Pruning).
+- **Requirement:** استخراج تگ ایمیج داکر از نسخه سرویس با فرمت lemmo/svc-<name>:vX.Y.Z، ممنوعیت مطلق تگ‌های dev/latest، و اعمال سیاست نگه‌داری ۳ نسخه آخر (`DEV_IMAGE_RETENTION_COUNT`) و هرس ایمیج‌های آویزان.
 - **Check:** `static`
 - **Scope:** `service`
 - **Applies To:** `[go-service]`
 - **Applies When:** `always`
 - **Automation:** `full`
-- **Implementation Status:** `not_started`
+- **Implementation Status:** `implemented`
 - **Evaluation Mechanism:** `compose_lint`
 - **Roadmap Stage:** `1`
 - **Gate:** `ratchet`
 - **Enforced By:** `lemmo-cli check`
-- **Doc Status:** `draft_source`
+- **Doc Status:** `approved`
 - **Doc Ref:** dotdive/docs/lemmo/01-architecture/decisions/ADR-023-service-release-versioning-image-hygiene-and-generated-file-provenance.md §۲.۵
 
 ### SB-HDR-01: Generated File Provenance Header
