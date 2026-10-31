@@ -6,7 +6,7 @@
 | **Category** | `governance` |
 | **Status** | `Active` |
 | **Owner** | Senior Architect / Core Platform Team |
-| **Last Updated** | 2026-10-29 |
+| **Last Updated** | 2026-10-31 |
 | **Summary (EN)** | Binding engineering standards for task drafting, unambiguous acceptance criteria, 4-tier lifecycle statuses, launch blocker definitions, debt log templates, and independent observer verification protocols. |
 | **Summary (FA)** | استانداردهای الزام‌آور تدوین تسک‌ها، معیارهای شفاف پذیرش، تعاریف وضعیت‌های اجرایی، معیارهای مانع لانچ، ساختار ثبت بدهی‌های فنی و پروتکل بازبینی مستقل ناظر. |
 | **Tags** | `governance`, `tasks`, `template`, `review`, `verification`, `debt-log`, `rules` |
@@ -34,7 +34,7 @@
 # TASK_[CATEGORY]_[ID] — [عنوان دقیق و عملیاتی تسک]
 
 > **نقش مجری:** [نام ایجنت / نقش مجری] · **بازبین:** ناظر مستقل · **صادرکننده:** مدیر پروژه / ارشد · **تاریخ:** YYYY-MM-DD
-> **قالب انطباق:** `COMPLIANCE_CHECKLIST_TEMPLATE_V2.md` / `TPL-COMPLIANCE-V2` (تسک‌های صادرشده پس از TASK_GOV_05) یا `COMPLIANCE_CHECKLIST_TEMPLATE_V1.md` / `TPL-COMPLIANCE-V1` (تسک‌های قبلی)
+> **قالب انطباق:** `COMPLIANCE_CHECKLIST_TEMPLATE_V3.md` / `TPL-COMPLIANCE-V3` (تسک‌های صادرشده پس از TASK_GOV_05b)، `COMPLIANCE_CHECKLIST_TEMPLATE_V2.md` / `TPL-COMPLIANCE-V2` (تسک‌های بین TASK_GOV_05 و TASK_GOV_05b) یا `COMPLIANCE_CHECKLIST_TEMPLATE_V1.md` / `TPL-COMPLIANCE-V1` (تسک‌های قبلی)
 > **برچسب‌های دامنه منتخب:** [U, D, BE, FE, SEC, OPS و ...]
 
 ## ۱. هدف و اثر کاربری (Goal & User Impact)
@@ -143,10 +143,53 @@
 ## ۸. قواعد پنج‌گانه تعریف انجام‌شده (DoD) مالک پلتفرم (مصوب ۲۰۲۶-۱۰-۲۴)
 
 این قواعد بر کلیه تسک‌های پلتفرم لمو اعمال می‌شوند:
-- **(۱) هر بند S دست‌کم یک E دارد.** نگاشت این تسک پایین آمده است. ردیف‌های تازه، شکاف‌های نگاشت را پر می‌کنند.
+- **(۱) هر بند S دست‌کم یک E دارد.** نگاشت تمام بندهای دامنه (S) به سنجه‌های ارزیابی (E) در جدول تعریف انجام‌شده (DoD) الزامی است و هیچ بند دامنه‌ای بدون سنجه ارزیابی باقی نمی‌ماند.
 - **(۲) هر «ممنوع» یک آزمون منفی دارد.**
 - **(۳) پیش‌فرض‌ها صریحاً سنجیده می‌شوند.**
-- **(۴) چک‌لیست جدای ناظر حذف می‌شود.** بندهایی که ناظر **خودش** اجرا می‌کند در جدول «اجرای ناظر» پایین آمده‌اند. خروجی خام و هش آن‌ها در بخش جدای «اجرای ناظر» گزارش می‌آید.
+- **(۴) چک‌لیست جدای ناظر حذف می‌شود.** بندهایی که ناظر **خودش** اجرا می‌کند در جدول DoD با مجری «ناظر» مشخص می‌شوند و خروجی خام و هش آن‌ها در بخش «شواهد خام» گزارش و بازبینی می‌آید.
 - **(۵) آزمون زنده بدون اجرای زنده PASS نیست.** اگر محیط آماده نباشد، وضعیت «مسدود» است.
+
+---
+
+<a id="evidence-gate-and-role-boundaries"></a>
+## ۹. گیت خودکار شواهد، قالب V3 و مرز فایل نقش‌ها (TASK_GOV_05b)
+
+### ۱. نسخه‌بندی قالب مادر و قاعدهٔ پذیرش
+- چک‌لیست مادر دارای نسخه است: `COMPLIANCE_CHECKLIST_TEMPLATE_V1.md`، `COMPLIANCE_CHECKLIST_TEMPLATE_V2.md` و `COMPLIANCE_CHECKLIST_TEMPLATE_V3.md`.
+- تسک‌های صادرشده پس از پذیرش TASK_GOV_05b از قالب V3 (`COMPLIANCE_CHECKLIST_TEMPLATE_V3.md` / `TPL-COMPLIANCE-V3`) استفاده می‌کنند.
+- تسک‌های بین TASK_GOV_05 و TASK_GOV_05b روی قالب V2 و تسک‌های پیش از آن روی قالب V1 باقی می‌مانند.
+- فرمان‌های اعتبارسنجی گیت شواهد در مخزن `.task`:
+  ```bash
+  # اعتبارسنجی بریف (lint)
+  python3 scripts/check_evidence.py brief active/TASK_<ID>.md
+
+  # اعتبارسنجی گزارش، بازبینی و شواهد خام
+  python3 scripts/check_evidence.py report <TASK_ID>
+  ```
+
+### ۲. سرآیند استاندارد لاگ‌های زنده
+هر لاگ زنده باید با سرآیند ۵ خطی زیر شروع شود:
+```
+# task: <TASK_ID>
+# role: executor | observer | pm
+# head: <short sha of the delivery commit in the target repo>
+# repo: api | dotdive | .task
+# date: <UTC ISO-8601>
+```
+گزارش مجری دارای سطر `**کامیت تحویل:** <repo>@<short sha>` در سرآیند است و مقدار `head` در سرآیند لاگ‌های زنده دقیقاً با همین سطر سنجیده می‌شود.
+
+### ۳. جدول شواهد خام
+در گزارش مجری و بازبینی ناظر، یک بخش مستقل «شواهد خام» با ساختار ستونی زیر درج می‌شود:
+| E | نقش | فایل | sha256 |
+|---|---|---|---|
+| E6 | ناظر | evidence/<TASK_ID>/E6_observer.log | <64 hex> |
+
+### ۴. مرز فایل نقش‌ها و تفکیک ورک‌تری (Role File Boundaries)
+جهت جلوگیری از تداخل و حفظ استقلال نقش‌ها:
+- **مجری** فقط این‌ها را می‌نویسد: `review/REPORT_<TASK>*.md` و `evidence/<TASK>/*_executor*`.
+- **ناظر** فقط این‌ها را می‌نویسد: `review/REVIEW_<TASK>*_OBSERVER*.md` و `evidence/<TASK>/*_observer*`. ناظر روی شاخهٔ مجری در هیچ مخزنی commit نمی‌کند. اصلاح لازم را به‌صورت یافته می‌نویسد.
+- **هیچ‌کدام** این‌ها را ویرایش، stage یا commit نمی‌کنند: `INDEX.md`، `README.md`، `active/`، `completed/`، `governance/`، ROADMAP و فایل نقش دیگر.
+- **ادغام در `main` مخزن `.task`** فقط با مدیر پروژه است.
+
 
 
