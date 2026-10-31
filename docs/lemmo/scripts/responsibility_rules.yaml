@@ -31,7 +31,7 @@ known_api_services:
   - "iam-service"
   - "image-service"
   - "job-service"
-  - "model-router-service"
+  - "ai-gateway"
   - "node-registry-service"
   - "notification-service"
   - "orchestrator-service"
