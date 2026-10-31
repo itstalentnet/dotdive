@@ -46,6 +46,7 @@
 - **MAJOR:** فقط در صورت شکستن سازگاری (Breaking Change) در API عمومی یا قراردادها.
 - **MINOR:** افزودن قابلیت‌های جدید با حفظ سازگاری کامل به عقب.
 - **PATCH:** رفع باگ‌های سازگار.
+- **دامنهٔ سرویس‌ها (D-16):** همین سیاست برای هر میکروسرویس `api/services/<name>/` نیز الزامی است. نسخهٔ هر سرویس صرفاً از تگ `services/<name>/vX.Y.Z` خوانده می‌شود و در `config/default.yaml` هاردکد نمی‌گردد (SB-VER-02).
 
 ### ۲.۴. تگ‌گذاری Git در مونوریپوی چندماژوله Go
 طبق الگوی رسمی Go برای مخازن چندماژوله، تگ‌های گیت پیشونددار به مسیر ماژول صادر می‌شوند:
@@ -62,6 +63,8 @@ tools/errgen/v0.3.1
 ### ۲.۶. استاندارد چنج‌لاگ: Keep a Changelog
 فایل‌های `CHANGELOG.md` باید کاملاً انسان‌نویس و طبق فرمت [Keep a Changelog](https://keepachangelog.com/) نگهداری شوند. دسته‌بندی‌های رسمی مجاز:
 `Added` | `Changed` | `Deprecated` | `Removed` | `Fixed` | `Security`
+
+- **دامنه و منبع تولید:** هر سرویس `api/services/<name>/CHANGELOG.md` دارد. `make changelog SERVICE=<name>` بخش `[Unreleased]` را با `git-cliff` و فیلتر مسیر همان سرویس تولید می‌کند و `make release SERVICE=<name> BUMP=...` نسخه را از آخرین تگ محاسبه، چنج‌لاگ را نهایی و تگ محلی می‌سازد (بدون push).
 
 ---
 
